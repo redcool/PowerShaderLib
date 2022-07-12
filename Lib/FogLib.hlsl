@@ -57,7 +57,7 @@ float2 CalcFogFactor(float3 worldPos){
     return fog;
 }
 
-void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,bool fogNoiseOn){
+void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,bool fogNoiseOn,bool hasDepthFog=true){
     branch_if(!IsFogOn())
         return;
 
@@ -75,6 +75,10 @@ void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHe
         // mainColor = heightFactor;
         // return ;
     }
+
+    branch_if(!hasDepthFog)
+        return;
+    
     float3 fogColor = lerp(_FogNearColor.rgb,unity_FogColor.rgb,fog.x);
     mainColor = lerp(mainColor,fogColor, depthFactor * _GlobalFogIntensity);
     // mainColor = depthFactor;
