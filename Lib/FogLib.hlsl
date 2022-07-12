@@ -3,21 +3,7 @@
 
 #include "NodeLib.hlsl"
 
-float _HeightFogMin,_HeightFogMax;
-float4 _HeightFogMinColor,_HeightFogMaxColor;
-float4 _FogNearColor;
-float2 _FogDistance;
-half4 _FogDirTiling;
-half4 _FogNoiseParams; // composite args
-
-#define _FogNoiseStartRate _FogNoiseParams.x
-#define _FogNoiseIntensity _FogNoiseParams.y
-
-//--- global fog
-float _GlobalFogIntensity;
-half _IsGlobalFogOn;
-
-
+//------------------------------ macros
 #if defined(USE_URP_SHADER)
     #undef branch_if
     #define branch_if UNITY_BRANCH if
@@ -26,6 +12,22 @@ half _IsGlobalFogOn;
 #endif
 
 #define IsFogOn() (_IsGlobalFogOn && _FogOn)
+#define _FogNoiseStartRate _FogNoiseParams.x
+#define _FogNoiseIntensity _FogNoiseParams.y
+
+//------------------------------ sphere fog params
+float _HeightFogMin,_HeightFogMax;
+float4 _HeightFogMinColor,_HeightFogMaxColor;
+float4 _FogNearColor;
+float2 _FogDistance;
+half4 _FogDirTiling;
+half4 _FogNoiseParams; // composite args
+
+//------------------------------  global fog params
+float _GlobalFogIntensity;
+half _IsGlobalFogOn;
+
+
 //----------------------------Sphere Fog
 float CalcDepthFactor(float dist){
     // float fogFactor =  max(((1.0-(dist)/_ProjectionParams.y)*_ProjectionParams.z),0);
