@@ -18,8 +18,13 @@ float _GlobalFogIntensity;
 half _IsGlobalFogOn;
 
 
-#undef branch_if
-#define branch_if UNITY_BRANCH if
+#if defined(USE_URP_SHADER)
+    #undef branch_if
+    #define branch_if UNITY_BRANCH if
+#else
+    #define branch_if if
+#endif
+
 #define IsFogOn() (_IsGlobalFogOn && _FogOn)
 //----------------------------Sphere Fog
 float CalcDepthFactor(float dist){
