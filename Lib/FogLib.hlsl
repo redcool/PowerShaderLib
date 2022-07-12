@@ -1,6 +1,11 @@
 #if !defined(FOG_LIB_HLSL)
 #define FOG_LIB_HLSL
 
+/** Warning 
+    include this file, need define
+    half _FogOn
+*/
+
 #include "NodeLib.hlsl"
 
 //------------------------------ macros
@@ -53,6 +58,9 @@ float2 CalcFogFactor(float3 worldPos){
 }
 
 void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,bool fogNoiseOn){
+    branch_if(!IsFogOn())
+        return;
+
     float depthFactor = fog.x;
     branch_if(fogNoiseOn){
         float gradientNoise = unity_gradientNoise( (worldPos.xz+worldPos.yz) * _FogDirTiling.w+ _FogDirTiling.xz * _Time.y );
