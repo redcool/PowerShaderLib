@@ -130,6 +130,16 @@ float3 ValueNoise33(float3 v){
 }
 */
 
+//================= 
+// perlin noise
+//=================  
+float GradientNoise(float v){
+    float p = frac(v);
 
+    float prevCellInclination = N11(floor(v)) * 2-1;
+    float prevCellPoint = prevCellInclination * p;
+
+    return prevCellPoint;
+}
 
 #endif //NOISE_LIB_HLSL
