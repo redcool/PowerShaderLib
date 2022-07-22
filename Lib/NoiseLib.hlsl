@@ -35,6 +35,10 @@
 #define N32(v) float2(N1(v.xyz,DELTA3_1),N1(v.xyz,DELTA3_2))
 #define N33(v) float3(N1(v.xyz,DELTA3_1),N1(v.xyz,DELTA3_2),N1(v.xyz,DELTA3_3))
 
+//================= 
+// Easing macros
+//================= 
+
 #define EaseIn(v) v*v
 #define EaseOut(v) 1-EaseIn(1-v)
 #define EaseInOut(v) lerp(EaseIn(v),EaseOut(v),v)
