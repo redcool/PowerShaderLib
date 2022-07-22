@@ -110,24 +110,6 @@ float3 ValueNoise33(float3 v){
 // value noise 3d original version
 //=================  
 /**
-float ValueNoise31(float3 v){
-    float3 i = floor(v);
-    float3 p = frac(v);
-    p = p*p*(3-2*p);
-
-    float n[2];
-
-    [unroll]
-    for(int z=0;z<2;z++){
-        float a = N31(i + float3(0,0,z));
-        float b = N31(i + float3(1,0,z));
-        float c = N31(i + float3(0,1,z));
-        float d = N31(i + float3(1,1,z));
-
-        n[z] = lerp(lerp(a,b,p.x),lerp(c,d,p.x),p.y);
-    }
-    return lerp(n[0],n[1],p.z);
-}
 float3 ValueNoise33(float3 v){
     float3 i = floor(v);
     float3 p = frac(v);
