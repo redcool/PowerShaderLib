@@ -139,7 +139,11 @@ float GradientNoise(float v){
     float prevCellInclination = N11(floor(v)) * 2-1;
     float prevCellPoint = prevCellInclination * p;
 
-    return prevCellPoint;
+    float nextCellInclination = N11(ceil(v)) * 2-1;
+    float nextCellPoint = nextCellInclination *(p-1);
+return prevCellPoint;
+    p = p*p*(3-2*p);
+    return lerp(prevCellPoint,nextCellPoint,p);
 }
 
 #endif //NOISE_LIB_HLSL

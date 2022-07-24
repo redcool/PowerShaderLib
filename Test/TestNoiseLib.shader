@@ -49,6 +49,8 @@ Shader "Unlit/TestNoiseLib"
                 // float3 n3 = ValueNoise33(worldPos);
                 // return n3.xyzx;
                 float p = GradientNoise(worldPos);
+float f = frac(worldPos.x);
+                p = (N11(floor(worldPos.x))*2-1)*f;
 
                 float dist = abs(p - i.worldPos.y);
                 float ph = fwidth(i.worldPos.y);
