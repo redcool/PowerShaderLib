@@ -9,8 +9,8 @@
 #include "NodeLib.hlsl"
 
 //------------------------------ macros
+#undef branch_if
 #if defined(USE_URP_SHADER)
-    #undef branch_if
     #define branch_if UNITY_BRANCH if
 #else
     #define branch_if if
