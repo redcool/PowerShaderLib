@@ -21,19 +21,19 @@
 // white noise (1d,2d,3d)
 //================= 
 // N dim to 1d
-#define N1(v,delta) frac(sin(dot(v,delta)) * AMPLIFY)
+#define Nx1(v,delta) frac(sin(dot(v,delta)) * AMPLIFY)
 
-#define N11(v) N1(v.x,0.546)
-#define N12(v) float2(N1(v.x,DELTA1_1),N1(v.x,DELTA1_2))
-#define N13(v) float3(N1(v.x,DELTA1_1),N1(v.x,DELTA1_2),N1(v.x,DELTA1_3))
+#define N11(v) Nx1(v.x,0.546)
+#define N12(v) float2(Nx1(v.x,DELTA1_1),Nx1(v.x,DELTA1_2))
+#define N13(v) float3(Nx1(v.x,DELTA1_1),Nx1(v.x,DELTA1_2),Nx1(v.x,DELTA1_3))
 
-#define N21(v) N1(v.xy,DELTA2_1)
-#define N22(v) float2(N1(v.xy,DELTA2_1),N1(v.xy,DELTA2_2))
-#define N23(v) float3(N1(v.xy,DELTA2_1),N1(v.xy,DELTA2_2),N1(v.xy,DELTA2_3))
+#define N21(v) Nx1(v.xy,DELTA2_1)
+#define N22(v) float2(Nx1(v.xy,DELTA2_1),Nx1(v.xy,DELTA2_2))
+#define N23(v) float3(Nx1(v.xy,DELTA2_1),Nx1(v.xy,DELTA2_2),Nx1(v.xy,DELTA2_3))
 
-#define N31(v) N1(v.xyz,DELTA3_1)
-#define N32(v) float2(N1(v.xyz,DELTA3_1),N1(v.xyz,DELTA3_2))
-#define N33(v) float3(N1(v.xyz,DELTA3_1),N1(v.xyz,DELTA3_2),N1(v.xyz,DELTA3_3))
+#define N31(v) Nx1(v.xyz,DELTA3_1)
+#define N32(v) float2(Nx1(v.xyz,DELTA3_1),Nx1(v.xyz,DELTA3_2))
+#define N33(v) float3(Nx1(v.xyz,DELTA3_1),Nx1(v.xyz,DELTA3_2),Nx1(v.xyz,DELTA3_3))
 
 //================= 
 // Easing macros
@@ -133,17 +133,72 @@ float3 ValueNoise33(float3 v){
 //================= 
 // perlin noise
 //=================  
+
+/**
+    return [-.5,.5]
+testcase:
+
+    float p = GradientNoise(worldPos.x);
+    float dist = abs(p - i.worldPos.y);
+    return smoothstep(0.001,0.002,dist);
+
+*/
 float GradientNoise(float v){
     float p = frac(v);
 
-    float prevCellInclination = N11(floor(v)) * 2-1;
-    float prevCellPoint = prevCellInclination * p;
+    float a = N11(floor(v)) * 2-1;
+    a *= p;
 
-    float nextCellInclination = N11(ceil(v)) * 2-1;
-    float nextCellPoint = nextCellInclination *(p-1);
+    float b = N11(ceil(v)) * 2-1;
+    b *= (p-1);
 
     p = p*p*(3-2*p);
-    return lerp(prevCellPoint,nextCellPoint,p);
+    return lerp(a,b,p);
+}
+/**
+    return : [-.5,.5]
+*/
+float GradientNoise(float2 v){
+    // cells noise ->[-1,1]
+    float2 id = floor(v);
+    float2 a = N21(id) * 2-1;
+    float2 b = N21(id+float2(1,0)) * 2-1;
+    float2 c = N21(id+float2(0,1))*2-1;
+    float2 d = N21(id+float2(1,1))*2-1;
+
+    float2 p = frac(v);
+    
+    a = dot(a,p);
+    b = dot(b,p-float2(1,0));
+    c = dot(c,p-float2(0,1));
+    d = dot(d,p-float2(1,1));
+
+    p = p*p*(3-2*p);
+    return lerp(lerp(a,b,p.x),lerp(c,d,p.x),p.y);
+}
+
+float GradientNoise(float3 v){
+    float3 id = floor(v);
+    float2 n=0;
+    float3 f = frac(v);
+    float3 p = f*f*(3-2*f);
+
+    [unroll]
+    for(int z=0;z<2;z++){
+        float3 id = floor(v);
+        float3 a = N21(id+float3(0,0,z)) * 2-1;
+        float3 b = N21(id+float3(1,0,z)) * 2-1;
+        float3 c = N21(id+float3(0,1,z))*2-1;
+        float3 d = N21(id+float3(1,1,z))*2-1;
+
+        a = dot(a,f-float3(0,0,z));
+        b = dot(b,f-float3(1,0,z));
+        c = dot(c,f-float3(0,1,z));
+        d = dot(d,f-float3(1,1,z));
+
+        n[z]= lerp(lerp(a,b,p.x),lerp(c,d,p.x),p.y);
+    }
+    return lerp(n.x,n.y,p.z);
 }
 
 #endif //NOISE_LIB_HLSL
