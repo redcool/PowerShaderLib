@@ -45,18 +45,19 @@ Shader "Unlit/TestNoiseLib"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float3 worldPos = (i.worldPos * 20);
+                float3 worldPos = (i.worldPos * 5);
                 // float3 n3 = ValueNoise33(worldPos);
                 // return n3.xyzx;
-                float p = GradientNoise(worldPos);
-float f = frac(worldPos.x);
-                p = (N11(floor(worldPos.x))*2-1)*f;
+    float p = GradientNoise(worldPos.x);
+   
+    // float f = frac(worldPos.x);
+    // p = (N11(floor(worldPos.x))*2-1)*f;
 
-                float dist = abs(p - i.worldPos.y);
-                float ph = fwidth(i.worldPos.y);
-                float intensity = smoothstep(ph*2,ph,dist);
-// return intensity;
-                return lerp(1,0,intensity);
+    // float dist = abs(p - i.worldPos.y);
+    // return smoothstep(0.001,0.005,dist);
+
+                float pn = GradientNoise(worldPos.xyz);
+                return pn;
             }
             ENDCG
         }
