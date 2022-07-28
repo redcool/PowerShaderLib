@@ -201,4 +201,10 @@ float GradientNoise(float3 v){
     return lerp(n.x,n.y,p.z);
 }
 
+float VoronoiNoise(float2 uv){
+    float2 id = floor(uv);
+    id += N21(id);
+    return length(id - uv);
+}
+
 #endif //NOISE_LIB_HLSL

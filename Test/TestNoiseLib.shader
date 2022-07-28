@@ -4,6 +4,11 @@ Shader "Unlit/TestNoiseLib"
     {
         _MainTex ("Texture", 2D) = "white" {}
     }
+
+CGINCLUDE
+
+ENDCG
+
     SubShader
     {
         Tags { "RenderType"="Opaque" }
@@ -56,7 +61,8 @@ Shader "Unlit/TestNoiseLib"
     // float dist = abs(p - i.worldPos.y);
     // return smoothstep(0.001,0.005,dist);
 
-                float pn = GradientNoise(worldPos.xyz);
+                // float pn = GradientNoise(worldPos.xyz);
+                float pn = VoronoiNoise(worldPos.xy);
                 return pn;
             }
             ENDCG
