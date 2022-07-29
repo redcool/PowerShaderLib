@@ -84,6 +84,26 @@ float Gray(float3 rgb){
 	return dot(float3(0.07,0.7,0.2),rgb);
 }
 
+float2 PolarUV(float2 mainUV,float2 center,float lenScale,float lenOffset,float rotOffset){
+	float2 uv = mainUV-center;
+
+	float r = sqrt(uv.x*uv.x+uv.y*uv.y)*lenScale+lenOffset;
+	float t = atan2(uv.y,uv.x) + rotOffset;
+	return float2(t,r);
+}
+
+float2 Twirl(float2 uv,float2 center,float scale,float2 offset){
+	float2 dir = uv - center;
+	float len = length(dir) * scale;
+
+	float2 nuv = float2(
+		dot(float2(cos(len),-sin(len)),dir),
+		dot(float2(sin(len),cos(len)),dir)
+	);
+	
+	return nuv + center + offset;
+}
+
 //input
 
 float3 _Camera_Position() { return _WorldSpaceCameraPos; }
@@ -221,5 +241,60 @@ void Unity_SimpleNoise_half(float2 UV, float Scale, out float Out)
 
 	Out = t;
 }
+void Unity_Dither_half4(float4 In, float4 ScreenPosition, out float4 Out)
+{
+    float2 uv = ScreenPosition.xy * _ScreenParams.xy;
+    float DITHER_THRESHOLDS[16] =
+    {
+        1.0 / 17.0,  9.0 / 17.0,  3.0 / 17.0, 11.0 / 17.0,
+        13.0 / 17.0,  5.0 / 17.0, 15.0 / 17.0,  7.0 / 17.0,
+        4.0 / 17.0, 12.0 / 17.0,  2.0 / 17.0, 10.0 / 17.0,
+        16.0 / 17.0,  8.0 / 17.0, 14.0 / 17.0,  6.0 / 17.0
+    };
+    uint index = (uint(uv.x) % 4) * 4 + uint(uv.y) % 4;
+    Out = In - DITHER_THRESHOLDS[index];
+}
 
+void Unity_WhiteBalance_float(float3 In, float Temperature, float Tint, out float3 Out)
+{
+    // Range ~[-1.67;1.67] works best
+    float t1 = Temperature * 10 / 6;
+    float t2 = Tint * 10 / 6;
+
+    // Get the CIE xy chromaticity of the reference white point.
+    // Note: 0.31271 = x value on the D65 white point
+    float x = 0.31271 - t1 * (t1 < 0 ? 0.1 : 0.05);
+    float standardIlluminantY = 2.87 * x - 3 * x * x - 0.27509507;
+    float y = standardIlluminantY + t2 * 0.05;
+
+    // Calculate the coefficients in the LMS space.
+    float3 w1 = float3(0.949237, 1.03542, 1.08728); // D65 white point
+
+    // CIExyToLMS
+    float Y = 1;
+    float X = Y * x / y;
+    float Z = Y * (1 - x - y) / y;
+    float L = 0.7328 * X + 0.4296 * Y - 0.1624 * Z;
+    float M = -0.7036 * X + 1.6975 * Y + 0.0061 * Z;
+    float S = 0.0030 * X + 0.0136 * Y + 0.9834 * Z;
+    float3 w2 = float3(L, M, S);
+
+    float3 balance = float3(w1.x / w2.x, w1.y / w2.y, w1.z / w2.z);
+
+    float3x3 LIN_2_LMS_MAT = {
+        3.90405e-1, 5.49941e-1, 8.92632e-3,
+        7.08416e-2, 9.63172e-1, 1.35775e-3,
+        2.31082e-2, 1.28021e-1, 9.36245e-1
+    };
+
+    float3x3 LMS_2_LIN_MAT = {
+        2.85847e+0, -1.62879e+0, -2.48910e-2,
+        -2.10182e-1,  1.15820e+0,  3.24281e-4,
+        -4.18120e-2, -1.18169e-1,  1.06867e+0
+    };
+
+    float3 lms = mul(LIN_2_LMS_MAT, In);
+    lms *= balance;
+    Out = mul(LMS_2_LIN_MAT, lms);
+}
 #endif
