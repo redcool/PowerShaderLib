@@ -50,4 +50,8 @@ void RotateUV(float rotAngle,float2 center,inout float2 uv){
     uv += center;
 }
 
+half3 SchmidtOrtho(half3 dir,half3 normal){
+	return normalize(dir - dot(dir,normal) * normal);
+}
+
 #endif //MATH_LIB_HLSL
