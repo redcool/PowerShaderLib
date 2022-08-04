@@ -203,7 +203,7 @@ float GradientNoise(float3 v){
 
 float VoronoiNoise(float2 uv){
     float2 id = floor(uv);
-    id += N21(id);
+    id += N22(id);
     return length(id - uv);
 }
 
