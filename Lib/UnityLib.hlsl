@@ -13,7 +13,7 @@
 #define CBUFFER_END };
 
 float4 _MainLightPosition,_WorldSpaceLightPos0;
-half4 _MainLightColor,_LightColor0;
+float4 _MainLightColor,_LightColor0;
 
 #if defined(DRP)
 #define _MainLightPosition _WorldSpaceLightPos0
@@ -86,7 +86,7 @@ float4x4 unity_WorldToCamera;
 float4x4 unity_CameraToWorld;
 #endif
 
-half4 _GlossyEnvironmentCubeMap_HDR;
+float4 _GlossyEnvironmentCubeMap_HDR;
 
 CBUFFER_START(UnityPerDraw)
 // Space block Feature
@@ -101,10 +101,10 @@ float4 unity_RenderingLayer;
 
 // Light Indices block feature
 // These are set internally by the engine upon request by RendererConfiguration.
-half4 unity_LightData;
-half4 unity_LightIndices[2];
+float4 unity_LightData;
+float4 unity_LightIndices[2];
 
-half4 unity_ProbesOcclusion;
+float4 unity_ProbesOcclusion;
 
 // Reflection Probe 0 block feature
 // HDR environment map decode instructions
@@ -258,7 +258,7 @@ float3 SampleSH9(float4 SHCoefficients[7], float3 N)
 
 
 // Samples SH L0, L1 and L2 terms
-half3 SampleSH(half3 normalWS)
+float3 SampleSH(float3 normalWS)
 {
     // LPPV is not supported in Ligthweight Pipeline
     float4 SHCoefficients[7];
@@ -270,7 +270,7 @@ half3 SampleSH(half3 normalWS)
     SHCoefficients[5] = unity_SHBb;
     SHCoefficients[6] = unity_SHC;
 
-    return max(half3(0, 0, 0), SampleSH9(SHCoefficients, normalWS));
+    return max(float3(0, 0, 0), SampleSH9(SHCoefficients, normalWS));
 }
 
 //==============================
@@ -311,22 +311,22 @@ float MinimalistCookTorrance(float nh,float lh,float rough,float rough2){
 //==============================
 //  Unpack from normal map
 //==============================
-half3 UnpackNormalRGB(half4 packedNormal, half scale = 1.0)
+float3 UnpackNormalRGB(float4 packedNormal, float scale = 1.0)
 {
-    half3 normal;
+    float3 normal;
     normal.xyz = packedNormal.rgb * 2.0 - 1.0;
     normal.xy *= scale;
     return normal;
 }
 
-half3 UnpackNormalRGBNoScale(half4 packedNormal)
+float3 UnpackNormalRGBNoScale(float4 packedNormal)
 {
     return packedNormal.rgb * 2.0 - 1.0;
 }
 
-half3 UnpackNormalAG(half4 packedNormal, half scale = 1.0)
+float3 UnpackNormalAG(float4 packedNormal, float scale = 1.0)
 {
-    half3 normal;
+    float3 normal;
     normal.xy = packedNormal.ag * 2.0 - 1.0;
     normal.z = max(1.0e-16, sqrt(1.0 - saturate(dot(normal.xy, normal.xy))));
 
@@ -342,14 +342,14 @@ half3 UnpackNormalAG(half4 packedNormal, half scale = 1.0)
 }
 
 // Unpack normal as DXT5nm (1, y, 0, x) or BC5 (x, y, 0, 1)
-half3 UnpackNormalmapRGorAG(half4 packedNormal, half scale = 1.0)
+float3 UnpackNormalmapRGorAG(float4 packedNormal, float scale = 1.0)
 {
     // Convert to (?, y, 0, x)
     packedNormal.a *= packedNormal.r;
     return UnpackNormalAG(packedNormal, scale);
 }
 
-half3 UnpackNormal(half4 packedNormal)
+float3 UnpackNormal(float4 packedNormal)
 {
 #if defined(UNITY_ASTC_NORMALMAP_ENCODING)
     return UnpackNormalAG(packedNormal, 1.0);
@@ -361,7 +361,7 @@ half3 UnpackNormal(half4 packedNormal)
 #endif
 }
 
-half3 UnpackNormalScale(half4 packedNormal, half bumpScale)
+float3 UnpackNormalScale(float4 packedNormal, float bumpScale)
 {
 #if defined(UNITY_ASTC_NORMALMAP_ENCODING)
     return UnpackNormalAG(packedNormal, bumpScale);

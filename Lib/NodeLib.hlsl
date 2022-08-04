@@ -191,17 +191,17 @@ float Unity_GradientNoise(float2 uv,float scale){
 
 //---------------------------
 
-inline float unity_noise_randomValue(float2 uv)
+float unity_noise_randomValue(float2 uv)
 {
 	return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
 }
 
-inline float unity_noise_interpolate(float a, float b, float t)
+float unity_noise_interpolate(float a, float b, float t)
 {
 	return (1.0 - t)*a + (t*b);
 }
 
-inline float unity_valueNoise(float2 uv)
+float unity_valueNoise(float2 uv)
 {
 	float2 i = floor(uv);
 	float2 f = frac(uv);
