@@ -4,6 +4,8 @@ Shader "Unlit/TestNoiseLib"
     {
         _MainTex ("Texture", 2D) = "white" {}
         _Progress("_Progress",range(0,1))=0
+
+        _Scales("_Scales",vector) = (1,1,1,1)
     }
 
 CGINCLUDE
@@ -40,23 +42,32 @@ ENDCG
             sampler2D _MainTex;
             float4 _MainTex_ST;
             float _Progress;
+            float4 _Scales;
 
             v2f vert (appdata v)
             {
+
+
                 v2f o;
+                o.worldPos = mul(unity_ObjectToWorld,v.vertex);
+float pn = SmoothGradientNoise11(o.worldPos.x,_Scales.x,_Scales.y+o.worldPos.y);
+v.vertex.y += pn*100;
+
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                o.worldPos = mul(unity_ObjectToWorld,v.vertex);
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
                 float3 worldPos = (i.worldPos * 5);
-
+//                 float x = worldPos.x;
+//                 float y = worldPos.y;
+// float d = smoothstep(x-0.2,x,y) - smoothstep(x,x+0.2,y);
+// return d;
                 // float3 n3 = ValueNoise33(worldPos);
                 // return n3.xyzx;
-    float p = GradientNoise(worldPos.x);
+    // float p = GradientNoise(worldPos.x);
    
     // float f = frac(worldPos.x);
     // p = (N11(floor(worldPos.x))*2-1)*f;
@@ -65,10 +76,15 @@ ENDCG
     // return smoothstep(0.001,0.005,dist);
 
                 // float pn = GradientNoise(worldPos.xyz);
-                float3 pn = VoronoiNoise33(worldPos.xyz);
+                // float3 pn = VoronoiNoise33(worldPos.xyz);
                 // pn =lerp(pn, VoronoiNoise1(worldPos.xy),_Progress);
                 // return pn.z;
-                return smoothstep(0.05,0.051,pn.z);
+                float pn = SmoothGradientNoise11(worldPos.x,_Scales.x,_Scales.y+worldPos.y);
+
+
+                float dist = abs(worldPos.y - pn);
+                dist = smoothstep(0.1,.2,dist);
+                return dist;
             }
             ENDCG
         }
