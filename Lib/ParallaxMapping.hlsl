@@ -6,7 +6,12 @@
 //     half3 b = normalize(cross(input.normal,input.tangent.xyz)) * input.tangent.w;\
 //     half3x3 rotation = half3x3(input.tangent.xyz,b,input.normal)
 
-half2 ParallaxMapOffset(half heightScale,half3 viewTS,half height){
+/**
+    heightScale : material parameter
+    viewTS : tangent space view dir
+    height : base height in map
+*/
+float2 ParallaxMapOffset(half heightScale,half3 viewTS,half height){
     return (height-0.5)* heightScale * viewTS.xy * 0.5;
 }
 
