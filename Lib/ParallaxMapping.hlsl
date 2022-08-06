@@ -7,7 +7,7 @@
 //     half3x3 rotation = half3x3(input.tangent.xyz,b,input.normal)
 
 half2 ParallaxMapOffset(half heightScale,half3 viewTS,half height){
-    return (height-0.5)* heightScale * normalize(viewTS).xy * 0.5;
+    return (height-0.5)* heightScale * viewTS.xy * 0.5;
 }
 
 half2 ParallaxOcclusionOffset(half heightScale,half3 viewTS,half sampleRatio,half2 uv,sampler2D heightMap,int minCount,int maxCount){
