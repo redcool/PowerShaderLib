@@ -13,7 +13,7 @@
 #define CBUFFER_END };
 
 float4 _MainLightPosition,_WorldSpaceLightPos0;
-float4 _MainLightColor,_LightColor0;
+half4 _MainLightColor,_LightColor0;
 
 #if defined(DRP)
 #define _MainLightPosition _WorldSpaceLightPos0
@@ -274,18 +274,30 @@ float3 SampleSH(float3 normalWS)
 }
 
 //==============================
+//  lightmap
+//==============================
+// Main lightmap
+TEXTURE2D(unity_Lightmap);
+SAMPLER(samplerunity_Lightmap);
+
+TEXTURE2D(unity_ShadowMask);
+SAMPLER(samplerunity_ShadowMask);
+
+//==============================
 //  ibl
 //==============================
-float3 DecodeHDREnvironment(float4 encodedIrradiance, float4 decodeInstructions)
-{
-    // Take into account texture alpha if decodeInstructions.w is true(the alpha value affects the RGB channels)
-    float alpha = max(decodeInstructions.w * (encodedIrradiance.a - 1.0) + 1.0, 0.0);
+TEXTURECUBE(unity_SpecCube0);SAMPLER(samplerunity_SpecCube0);
+TEXTURECUBE(unity_SpecCube1);SAMPLER(samplerunity_SpecCube1);
+TEXTURECUBE(_GlossyEnvironmentCubeMap);SAMPLER(sampler_GlossyEnvironmentCubeMap);
 
-    // If Linear mode is not supported we can skip exponent part
-    return (decodeInstructions.x * pow(alpha, decodeInstructions.y)) * encodedIrradiance.rgb;
-}
+// float3 DecodeHDREnvironment(float4 encodedIrradiance, float4 decodeInstructions)
+// {
+//     // Take into account texture alpha if decodeInstructions.w is true(the alpha value affects the RGB channels)
+//     float alpha = max(decodeInstructions.w * (encodedIrradiance.a - 1.0) + 1.0, 0.0);
 
-
+//     // If Linear mode is not supported we can skip exponent part
+//     return (decodeInstructions.x * pow(alpha, decodeInstructions.y)) * encodedIrradiance.rgb;
+// }
 
 //==============================
 //  lighting
@@ -372,5 +384,15 @@ float3 UnpackNormalScale(float4 packedNormal, float bumpScale)
 #endif
 }
 
-//============================
+//==============================
+//  env paramaters ,fog
+//==============================
+half4 glstate_lightmodel_ambient;
+half4 unity_AmbientSky;
+half4 unity_AmbientEquator;
+half4 unity_AmbientGround;
+half4 unity_IndirectSpecColor;
+float4 unity_FogParams;
+half4  unity_FogColor;
+
 #endif // UNITY_LIB_HLSL
