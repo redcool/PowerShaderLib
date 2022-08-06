@@ -3,6 +3,7 @@ Shader "Unlit/TestNoiseLib"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _Progress("_Progress",range(0,1))=0
     }
 
 CGINCLUDE
@@ -38,6 +39,7 @@ ENDCG
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+            float _Progress;
 
             v2f vert (appdata v)
             {
@@ -51,6 +53,7 @@ ENDCG
             fixed4 frag (v2f i) : SV_Target
             {
                 float3 worldPos = (i.worldPos * 5);
+
                 // float3 n3 = ValueNoise33(worldPos);
                 // return n3.xyzx;
     float p = GradientNoise(worldPos.x);
@@ -62,8 +65,10 @@ ENDCG
     // return smoothstep(0.001,0.005,dist);
 
                 // float pn = GradientNoise(worldPos.xyz);
-                float pn = VoronoiNoise(worldPos.xy);
-                return pn;
+                float3 pn = VoronoiNoise33(worldPos.xyz);
+                // pn =lerp(pn, VoronoiNoise1(worldPos.xy),_Progress);
+                // return pn.z;
+                return smoothstep(0.05,0.051,pn.z);
             }
             ENDCG
         }
