@@ -241,6 +241,13 @@ void Unity_SimpleNoise_half(float2 UV, float Scale, out float Out)
 
 	Out = t;
 }
+
+float Unity_SimpleNoise_half(float2 uv,float scale){
+	float result = 0;
+	Unity_SimpleNoise_half(uv,scale,result/**/);
+	return result;
+}
+
 void Unity_Dither_half4(float4 In, float4 ScreenPosition, out float4 Out)
 {
     float2 uv = ScreenPosition.xy * _ScreenParams.xy;
