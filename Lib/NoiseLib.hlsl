@@ -177,7 +177,10 @@ float GradientNoise(float2 v){
     p = p*p*(3-2*p);
     return lerp(lerp(a,b,p.x),lerp(c,d,p.x),p.y);
 }
-
+/**
+    float pn = GradientNoise(worldPos.xyz)+0.5;
+    return frac(pn*3);
+*/
 float GradientNoise(float3 v){
     float3 id = floor(v);
     float2 n=0;
@@ -187,10 +190,10 @@ float GradientNoise(float3 v){
     [unroll]
     for(int z=0;z<2;z++){
         float3 id = floor(v);
-        float3 a = N21(id+float3(0,0,z)) * 2-1;
-        float3 b = N21(id+float3(1,0,z)) * 2-1;
-        float3 c = N21(id+float3(0,1,z))*2-1;
-        float3 d = N21(id+float3(1,1,z))*2-1;
+        float3 a = N31(id+float3(0,0,z)) * 2-1;
+        float3 b = N31(id+float3(1,0,z)) * 2-1;
+        float3 c = N31(id+float3(0,1,z))*2-1;
+        float3 d = N31(id+float3(1,1,z))*2-1;
 
         a = dot(a,f-float3(0,0,z));
         b = dot(b,f-float3(1,0,z));
@@ -206,10 +209,9 @@ float GradientNoise(float3 v){
 // SmoothGradientNoise perlin noise
 //=================  
 #define SmoothGradirentNoiseX1(v,frequencyScale,factorScale,result)\
-    float frequency = 1;\
-    float factor = 1;\
+    float frequency = 1,factor = 1;\
     [unroll]for(int x=1;x<=4;x++){\
-        result += GradientNoise(v * frequency ) * factor;\
+        result += GradientNoise(v * frequency +x*.456) * factor;\
         frequency *= frequencyScale;\
         factor *= factorScale;\
     }
