@@ -66,6 +66,7 @@ float SmoothValueNoise(float2 uv){
         ValueNoise(uv * 32) * 0.0625)*0.5;
 }
 
+
 #define ValueNoise2(uv,n_out) \
     float2 id = floor(uv);\
     float2 p = frac(uv);\
@@ -201,18 +202,37 @@ float GradientNoise(float3 v){
     return lerp(n.x,n.y,p.z);
 }
 
-float SmoothGradientNoise11(float v,half frequencyScale=3,half factorScale=0.4){
-    float n=0;
-    float frequency = 1;
-    float factor = 1;
-    [unroll]for(int x=1;x<=4;x++){
-        n += GradientNoise(v * frequency ) * factor;
-        frequency *= frequencyScale;
-        factor *= factorScale;
+//================= 
+// SmoothGradientNoise perlin noise
+//=================  
+#define SmoothGradirentNoiseX1(v,frequencyScale,factorScale,result)\
+    float frequency = 1;\
+    float factor = 1;\
+    [unroll]for(int x=1;x<=4;x++){\
+        result += GradientNoise(v * frequency ) * factor;\
+        frequency *= frequencyScale;\
+        factor *= factorScale;\
     }
+
+float SmoothGradientNoise(float v,half frequencyScale=3,half factorScale=0.4){
+    float n=0;
+    SmoothGradirentNoiseX1(v,frequencyScale,factorScale,n/**/);
+    return n;
+}
+float SmoothGradientNoise(float2 v,half frequencyScale=3,half factorScale=0.4){
+    float n=0;
+    SmoothGradirentNoiseX1(v,frequencyScale,factorScale,n/**/);
+    return n;
+}
+float SmoothGradientNoise(float3 v,half frequencyScale=3,half factorScale=0.4){
+    float n=0;
+    SmoothGradirentNoiseX1(v,frequencyScale,factorScale,n/**/);
     return n;
 }
 
+//================= 
+// VoronoiNoise
+//=================  
 float VoronoiNoise21(float2 uv){
     float2 id = floor(uv);
     id += N22(id);

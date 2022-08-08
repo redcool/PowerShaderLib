@@ -50,8 +50,8 @@ ENDCG
 
                 v2f o;
                 o.worldPos = mul(unity_ObjectToWorld,v.vertex);
-float pn = SmoothGradientNoise11(o.worldPos.x,_Scales.x,_Scales.y+o.worldPos.y);
-v.vertex.y += pn*100;
+float pn = SmoothGradientNoise(o.worldPos.xyz*10,_Scales.x,_Scales.y+o.worldPos.y)+0.5;
+v.vertex.y += pn*10;
 
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
@@ -79,7 +79,7 @@ v.vertex.y += pn*100;
                 // float3 pn = VoronoiNoise33(worldPos.xyz);
                 // pn =lerp(pn, VoronoiNoise1(worldPos.xy),_Progress);
                 // return pn.z;
-                float pn = SmoothGradientNoise11(worldPos.x,_Scales.x,_Scales.y+worldPos.y);
+                float pn = SmoothGradientNoise(worldPos.x,_Scales.x,_Scales.y+worldPos.y);
 
 
                 float dist = abs(worldPos.y - pn);
