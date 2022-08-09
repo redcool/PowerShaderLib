@@ -18,7 +18,17 @@ float ShowLine(float x,float y){
 }
 
 float Line(float x,float y){
-    return abs(y - x);
+    return smoothstep(.02,.01,abs(y - x));
+}
+
+/**
+    n : gradient Noise
+*/
+float HeightLine(float n){
+    float delta = fwidth(n);
+    float a= smoothstep(1-delta,1,n);
+    float b= smoothstep(delta,0,n);
+    return (a+b);
 }
 
 #endif //SDF_LIB_HLSL
