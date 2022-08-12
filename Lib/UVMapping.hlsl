@@ -4,15 +4,24 @@
 /**
     Remap uv to rect uv
 
-    sheet[x:number of row,y:number of column]
+    id : 1d serial num
+    uv : [0,1]
+    sheet : [x:number of row,y:number of column]
+    invertY : top to down
+    playOnce : stop at end
 
     Testcase:
         float2 uv = i.uv;
         uv = RectUV(_Id * _Time.y,uv,_Sheet,true);
         half4 col = tex2D(_MainTex, uv);
 */
-float2 RectUV(float id,float2 uv,half2 sheet,bool invertY){
-    id %= (sheet.x*sheet.y);
+float2 RectUV(float id,float2 uv,half2 sheet,bool invertY,bool playOnce){
+    int count = sheet.x*sheet.y;
+    id = id % (count); // play loop
+    /*
+        id = min(count-0.1,id) // play once
+    */
+    // id = playOnce ? min(count-0.1,id) : id % (count); // play mode
 
     int x = (id % sheet.x);
     int y = (id / sheet.x);
