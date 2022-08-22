@@ -56,6 +56,10 @@ float ComputeCascadeIndex(float3 positionWS)
     return 4 - dot(weights, float4(4, 3, 2, 1));
 }
 
+/*
+    call TransformWorldToShadowCoord in vs will be see artifact
+    can call in ps
+*/
 float4 TransformWorldToShadowCoord(float3 positionWS)
 {
 #ifdef _MAIN_LIGHT_SHADOWS_CASCADE
