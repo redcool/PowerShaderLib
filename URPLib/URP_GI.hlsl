@@ -125,6 +125,8 @@ float CalculateProbeVolumeSqrMagnitude(float4 probeBoxMin, float4 probeBoxMax)
     return dot(maxToMin, maxToMin);
 }
 
+#undef PerceptualRoughnessToMipmapLevel
+#define PerceptualRoughnessToMipmapLevel(roughness) roughness * (1.7 - roughness * 0.7) * 6
 float3 CalculateIrradianceFromReflectionProbes(float3 reflectVector, float3 positionWS, float perceptualRoughness)
 {
     float probe0Volume = CalculateProbeVolumeSqrMagnitude(unity_SpecCube0_BoxMin, unity_SpecCube0_BoxMax);
