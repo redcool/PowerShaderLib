@@ -4,8 +4,22 @@
 #if !defined(MAIN_LIGHT_SHADOW_HLSL)
 #define MAIN_LIGHT_SHADOW_HLSL
 
+#if defined(_RECEIVE_SHADOWS_ON)
+    #if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN)
+        #define MAIN_LIGHT_CALCULATE_SHADOWS
+
+        #if defined(_MAIN_LIGHT_SHADOWS) || (defined(_MAIN_LIGHT_SHADOWS_SCREEN) && !defined(_SURFACE_TYPE_TRANSPARENT))
+            #define REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR
+        #endif
+    #endif
+
+    #if defined(_ADDITIONAL_LIGHT_SHADOWS)
+        #define ADDITIONAL_LIGHT_CALCULATE_SHADOWS
+    #endif
+#endif
+
 #if defined(LIGHTMAP_ON) || defined(LIGHTMAP_SHADOW_MIXING) || defined(SHADOWS_SHADOWMASK)
-#define CALCULATE_BAKED_SHADOWS
+    #define CALCULATE_BAKED_SHADOWS
 #endif
 
 
@@ -158,8 +172,8 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
     {
         float shadow = 1;
         
-        #if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE)
-            if(receiveShadow){
+        #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+            // if(receiveShadow){
                 //shadow = SAMPLE_TEXTURE2D_SHADOW(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture, shadowCoord.xyz);
                 shadow = SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture),shadowCoord,softScale);
                 shadow = lerp(1,shadow,_MainLightShadowParams.x); // shadow intensity
@@ -177,7 +191,7 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
                 // shadowFade = shadowCoord.w == 4 ? 1.0 : shadowFade;
                 // mix 
                 shadow = MixRealtimeAndBakedShadows(shadow,bakedShadow,shadowFade);
-            }
+            // }
         #endif 
         return shadow;
     }
