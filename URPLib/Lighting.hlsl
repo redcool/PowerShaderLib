@@ -26,8 +26,7 @@
 		float3 c = 0;
         for(uint i=0;i<count;i++){
 			Light l = GetAdditionalLight(i,worldPos,receiveShadow,softShadow,shadowMask);
-            if(l.distanceAttenuation)
-			    c += CalcLight(l,diffColor,specColor,n,v,a,a2);
+			c += CalcLight(l,diffColor,specColor,n,v,a,a2);
         }
 		return c;
     }
