@@ -90,6 +90,7 @@ float3 DecodeHDREnvironment(float4 encodedIrradiance, float4 decodeInstructions)
     // If Linear mode is not supported we can skip exponent part
     return (decodeInstructions.x * PositivePow(alpha, decodeInstructions.y)) * encodedIrradiance.rgb;
 }
+#define DecodeHDR(encodedIrradiance,decodeInstructions) DecodeHDREnvironment(encodedIrradiance,decodeInstructions) 
 
 float3 BoxProjectedCubemapDirection(float3 reflectionWS, float3 positionWS, float4 cubemapPositionWS, float4 boxMin, float4 boxMax)
 {

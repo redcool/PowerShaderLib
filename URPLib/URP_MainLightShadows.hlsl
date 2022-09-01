@@ -76,7 +76,7 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
     float4 _ShadowBias; // x: depth bias, y: normal bias
     float _MainLightShadowOn; //send  from PowerUrpLitFeature
 
-    float3 ApplyShadowBias(float3 positionWS, float3 normalWS, float3 lightDirection,float matShadowNormalBias,float matShadowDepthBias)
+    float3 ApplyShadowBias(float3 positionWS, float3 normalWS, float3 lightDirection,float matShadowNormalBias=0,float matShadowDepthBias=0)
     {
         float invNdotL = 1.0 - saturate(dot(lightDirection, normalWS));
         float scale = invNdotL * (_ShadowBias.y + matShadowNormalBias);
@@ -135,6 +135,25 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
         return bakedShadow;
     }
 
+    float CalcShadow (float4 shadowCoord,float3 worldPos)
+    {
+        float shadow = 1;
+        #if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE)
+        {
+            //shadow = SAMPLE_TEXTURE2D_SHADOW(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture, shadowCoord.xyz);
+            shadow = SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture),shadowCoord,_MainLightShadowSoftScale);
+            shadow = lerp(1,shadow,_MainLightShadowParams.x); // shadow intensity
+            shadow = BEYOND_SHADOW_FAR(shadowCoord) ? 1 : shadow; // shadow range
+
+            float shadowFade = GetShadowFade(worldPos); 
+            shadowFade = shadowCoord.w == 4 ? 1.0 : shadowFade;
+            
+            shadow = lerp(shadow,1,shadowFade);
+        }
+        #endif
+        return shadow;
+    }
+
     float CalcShadow (float4 shadowCoord,float3 worldPos,float4 shadowMask,bool receiveShadow,float softScale)
     {
         float shadow = 1;
@@ -162,6 +181,7 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
         #endif 
         return shadow;
     }
+
     #define MainLightShadow(shadowCoord,worldPos,shadowMask,receiveShadow,softScale) CalcShadow(shadowCoord,worldPos,shadowMask,receiveShadow,softScale) 
 
 #endif //MAIN_LIGHT_SHADOW_HLSL

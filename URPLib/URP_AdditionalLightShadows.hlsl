@@ -98,7 +98,7 @@ float SampleShadowmapFiltered(ShadowSamplingData samplingData,float4 shadowCoord
 
 // returns 0.0 if position is in light's shadow
 // returns 1.0 if position is in light
-float AdditionalLightRealtimeShadow(int lightIndex, float3 positionWS,bool isSoftShadow)
+float AdditionalLightRealtimeShadow(int lightIndex, float3 positionWS)
 {
     float4 shadowCoord = mul(_AdditionalLightsWorldToShadow[lightIndex], float4(positionWS, 1.0));
     // perspective 
@@ -108,13 +108,13 @@ float AdditionalLightRealtimeShadow(int lightIndex, float3 positionWS,bool isSof
     float shadowStrength = shadowParams.x;
 
     float attenuation = 1;
-    if(isSoftShadow){
+    #if defined(_SHADOWS_SOFT)
         ShadowSamplingData samplingData = GetAdditionalLightShadowSamplingData();
         attenuation = SampleShadowmapFiltered(samplingData,shadowCoord);
-    }else{
+    #else
     // 1-tap hardware comparison
         attenuation = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz);
-    }
+    #endif
 
     // attenuation = LerpWhiteTo(attenuation, shadowStrength);
     attenuation = lerp(1,attenuation,shadowStrength);
@@ -130,9 +130,9 @@ float GetAdditionalLightShadowFade(float3 positionWS)
     return float(fade);
 }
 
-float AdditionalLightShadow(int lightIndex, float3 positionWS, bool isSoftShadow,float4 shadowMask,float4 occlusionProbeChannels)
+float AdditionalLightShadow(int lightIndex, float3 positionWS,float4 shadowMask,float4 occlusionProbeChannels)
 {
-    float realtimeShadow = AdditionalLightRealtimeShadow(lightIndex, positionWS, isSoftShadow);
+    float realtimeShadow = AdditionalLightRealtimeShadow(lightIndex, positionWS);
     
     #ifdef CALCULATE_BAKED_SHADOWS
         float bakedShadow = BakedShadow(shadowMask, occlusionProbeChannels);

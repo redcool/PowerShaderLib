@@ -2,6 +2,7 @@
 #define UNITY_LIB_HLSL
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
 
 #define TRANSFORM_TEX(tex, name) ((tex.xy) * name##_ST.xy + name##_ST.zw)
 
@@ -204,6 +205,8 @@ float3 GetWorldSpaceLightDir(float3 worldPos){
 #define UnityWorldToClipPos(worldPos) TransformWorldToHClip(worldPos)
 #define UnityObjectToWorldDir(worldDir) TransformObjectToWorldDir(worldDir)
 #define UnityObjectToWorldNormal(normal) TransformObjectToWorldNormal(normal)
+#define UnityWorldSpaceViewDir(worldPos) GetWorldSpaceViewDir(worldPos)
+#define UnityObjectToClipPos(objectPos) TransformObjectToHClip(objectPos)
 //==============================
 //  sh
 //==============================

@@ -21,11 +21,11 @@
         return (diffColor + specColor * specTerm) * radiance  * light.color;
     }
 
-    float3 CalcAdditionalLights(float3 worldPos,float3 diffColor,float3 specColor,float3 n,float3 v,float a,float a2,float receiveShadow,float softShadow,float4 shadowMask ){
+    float3 CalcAdditionalLights(float3 worldPos,float3 diffColor,float3 specColor,float3 n,float3 v,float a,float a2,float4 shadowMask ){
         uint count = GetAdditionalLightsCount();
 		float3 c = 0;
         for(uint i=0;i<count;i++){
-			Light l = GetAdditionalLight(i,worldPos,receiveShadow,softShadow,shadowMask);
+			Light l = GetAdditionalLight(i,worldPos,shadowMask);
 			c += CalcLight(l,diffColor,specColor,n,v,a,a2);
         }
 		return c;
