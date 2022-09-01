@@ -108,7 +108,7 @@ float AdditionalLightRealtimeShadow(int lightIndex, float3 positionWS)
     float shadowStrength = shadowParams.x;
 
     float attenuation = 1;
-    #if defined(_SHADOWS_SOFT)
+    #if defined(_ADDITIONAL_LIGHT_SHADOWS_SOFT)
         ShadowSamplingData samplingData = GetAdditionalLightShadowSamplingData();
         attenuation = SampleShadowmapFiltered(samplingData,shadowCoord);
     #else
