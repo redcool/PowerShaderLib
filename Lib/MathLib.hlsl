@@ -54,4 +54,13 @@ half3 SchmidtOrtho(half3 dir,half3 normal){
 	return normalize(dir - dot(dir,normal) * normal);
 }
 
+/**
+    uv_t : uv translation part,like _MainTex_ST.zw
+    autoStop : a switch
+    return : uv_t or uv_t + _Time.xx
+*/
+float2 UVOffset(float2 uv_t,float autoStop){
+    return uv_t * ( 1+ _Time.xx *( 1 - autoStop) );
+}
+
 #endif //MATH_LIB_HLSL

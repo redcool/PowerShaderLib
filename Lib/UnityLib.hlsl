@@ -1,7 +1,7 @@
 #if !defined(UNITY_LIB_HLSL)
 #define UNITY_LIB_HLSL
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
-
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
 
 #define TRANSFORM_TEX(tex, name) ((tex.xy) * name##_ST.xy + name##_ST.zw)
 
@@ -12,10 +12,12 @@
 #define CBUFFER_START(name) cbuffer name {
 #define CBUFFER_END };
 
-float4 _MainLightPosition,_WorldSpaceLightPos0;
-half4 _MainLightColor,_LightColor0;
+float4 _MainLightPosition;
+half4 _MainLightColor;
 
 #if defined(DRP)
+float4 _WorldSpaceLightPos0;
+half4 _LightColor0;
 #define _MainLightPosition _WorldSpaceLightPos0
 #define _MainLightColor _LightColor0
 #endif
@@ -198,9 +200,10 @@ float3 GetWorldSpaceViewDir(float3 worldPos){
 float3 GetWorldSpaceLightDir(float3 worldPos){
     return _MainLightPosition.xyz;// - worldPos;
 }
-
-
-
+// macros UnityCG.cginc
+#define UnityWorldToClipPos(worldPos) TransformWorldToHClip(worldPos)
+#define UnityObjectToWorldDir(worldDir) TransformObjectToWorldDir(worldDir)
+#define UnityObjectToWorldNormal(normal) TransformObjectToWorldNormal(normal)
 //==============================
 //  sh
 //==============================
