@@ -100,27 +100,20 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
         float shadow = SAMPLE_TEXTURE2D_SHADOW(shadowMap,sampler_ShadowMap, shadowCoord.xyz);
 
         // return shadow;
-        shadow *= SOFT_SHADOW_WEIGHTS[0];
+        #if defined(_SHADOWS_SOFT)
+            shadow *= SOFT_SHADOW_WEIGHTS[0];
 
-        float2 psize = _MainLightShadowmapSize.xy * shadowSoftScale;
-        const float2 uvs[] = { float2(-psize.x,0),float2(0,psize.y),float2(psize.x,0),float2(0,-psize.y) };
+            float2 psize = _MainLightShadowmapSize.xy * shadowSoftScale;
+            const float2 uvs[] = { float2(-psize.x,0),float2(0,psize.y),float2(psize.x,0),float2(0,-psize.y) };
 
-        float2 offset = 0;
-        for(int x=0;x< SOFT_SHADOW_COUNT;x++){
-            offset = uvs[x] ;
-            shadow +=SAMPLE_TEXTURE2D_SHADOW(shadowMap,sampler_ShadowMap, float3(shadowCoord.xy + offset,shadowCoord.z)) * SOFT_SHADOW_WEIGHTS[x+1];
-        }
+            float2 offset = 0;
+            for(int x=0;x< SOFT_SHADOW_COUNT;x++){
+                offset = uvs[x] ;
+                shadow +=SAMPLE_TEXTURE2D_SHADOW(shadowMap,sampler_ShadowMap, float3(shadowCoord.xy + offset,shadowCoord.z)) * SOFT_SHADOW_WEIGHTS[x+1];
+            }
+        #endif 
         
         return shadow;
-    }
-
-    bool MainLightEnabled(){
-        #if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE)
-            return 1;
-        #else
-            return 0;
-        #endif
-        // return _MainLightShadowOn;
     }
 
     float MixRealtimeAndBakedShadows(float realtimeShadow, float bakedShadow, float shadowFade)
@@ -145,27 +138,30 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
     float CalcShadow (float4 shadowCoord,float3 worldPos,float4 shadowMask,bool receiveShadow,float softScale)
     {
         float shadow = 1;
+        
+        #if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE)
+            if(receiveShadow){
+                //shadow = SAMPLE_TEXTURE2D_SHADOW(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture, shadowCoord.xyz);
+                shadow = SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture),shadowCoord,softScale);
+                shadow = lerp(1,shadow,_MainLightShadowParams.x); // shadow intensity
+                shadow = BEYOND_SHADOW_FAR(shadowCoord) ? 1 : shadow; // shadow range
 
-        if(MainLightEnabled() && receiveShadow){
-            //shadow = SAMPLE_TEXTURE2D_SHADOW(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture, shadowCoord.xyz);
-            shadow = SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture),shadowCoord,softScale);
-            shadow = lerp(1,shadow,_MainLightShadowParams.x); // shadow intensity
-            shadow = BEYOND_SHADOW_FAR(shadowCoord) ? 1 : shadow; // shadow range
+                // baked shadow
+                #if defined(CALCULATE_BAKED_SHADOWS)
+                    float bakedShadow = BakedShadow(shadowMask,_MainLightOcclusionProbes);
+                #else
+                    float bakedShadow = 1;
+                #endif
 
-            // baked shadow
-            #if defined(CALCULATE_BAKED_SHADOWS)
-                float bakedShadow = BakedShadow(shadowMask,_MainLightOcclusionProbes);
-            #else
-                float bakedShadow = 1;
-            #endif
-
-            // shadow fade
-            float shadowFade = GetShadowFade(worldPos); 
-            // shadowFade = shadowCoord.w == 4 ? 1.0 : shadowFade;
-            // mix 
-            shadow = MixRealtimeAndBakedShadows(shadow,bakedShadow,shadowFade);
-        }
+                // shadow fade
+                float shadowFade = GetShadowFade(worldPos); 
+                // shadowFade = shadowCoord.w == 4 ? 1.0 : shadowFade;
+                // mix 
+                shadow = MixRealtimeAndBakedShadows(shadow,bakedShadow,shadowFade);
+            }
+        #endif 
         return shadow;
     }
+    #define MainLightShadow(shadowCoord,worldPos,shadowMask,receiveShadow,softScale) CalcShadow(shadowCoord,worldPos,shadowMask,receiveShadow,softScale) 
 
 #endif //MAIN_LIGHT_SHADOW_HLSL

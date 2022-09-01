@@ -38,7 +38,7 @@
 	}
 
 	float3 CalcGISpec(TEXTURECUBE_PARAM(_ReflectionCubemap,sampler_ReflectionCubemap),float4 cubeMapHdr,float3 specColor,float3 n,float3 v,
-		float3 reflectDirOffset,float reflectionIndentity,float nv,float roughness,float a2,
+		float3 reflectDirOffset,float reflectIntensity,float nv,float roughness,float a2,
 		float smoothness,float metallic)
 	{
 
@@ -51,7 +51,7 @@
 
         // _GlossyEnvironmentCubeMap
         envColor = SAMPLE_TEXTURECUBE_LOD(_ReflectionCubemap,sampler_ReflectionCubemap,reflectDir,mip);
-        envColor.xyz = DecodeHDREnvironment(envColor,cubeMapHdr) * reflectionIndentity;
+        envColor.xyz = DecodeHDREnvironment(envColor,cubeMapHdr) * reflectIntensity;
 
         float surfaceReduction = 1/(a2+1);
         float grazingTerm = saturate(smoothness + metallic);

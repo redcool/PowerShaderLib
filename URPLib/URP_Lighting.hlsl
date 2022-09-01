@@ -82,7 +82,7 @@ float AngleAttenuation(float3 spotDirection, float3 lightDirection, float2 spotA
 Light GetMainLight()
 {
     Light light;
-    light.direction = half3(_MainLightPosition.xyz);
+    light.direction = _MainLightPosition.xyz;
 #if USE_CLUSTERED_LIGHTING
     light.distanceAttenuation = 1.0;
 #else
@@ -96,6 +96,19 @@ Light GetMainLight()
 #else
     light.layerMask = DEFAULT_LIGHT_LAYERS;
 #endif
+
+    return light;
+}
+
+Light GetMainLight(float4 shadowCoord, float3 positionWS, half4 shadowMask,bool receiveShadow,half softScale=1)
+{
+    Light light = GetMainLight();
+    light.shadowAttenuation = MainLightShadow(shadowCoord, positionWS, shadowMask, receiveShadow,softScale);
+
+    #if defined(_LIGHT_COOKIES)
+        real3 cookieColor = SampleMainLightCookie(positionWS);
+        light.color *= cookieColor;
+    #endif
 
     return light;
 }
