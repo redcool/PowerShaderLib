@@ -18,7 +18,7 @@
         float d = nh*nh*(a2 - 1) +1;
         float specTerm = a2/(d*d * max(0.001,lh*lh) * (4*a+2));
         float radiance = nl * light.shadowAttenuation * light.distanceAttenuation;
-        return (diffColor + specColor * specTerm) * radiance  * light.color;
+        return (diffColor + specColor * specTerm) * light.color * radiance;
     }
 
     float3 CalcAdditionalLights(float3 worldPos,float3 diffColor,float3 specColor,float3 n,float3 v,float a,float a2,float4 shadowMask ){
