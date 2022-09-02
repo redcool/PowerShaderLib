@@ -7,6 +7,7 @@
 #else
     #define MAX_VISIBLE_LIGHTS 256
 #endif
+
 #include "URP_Input.hlsl"
 #include "URP_AdditionalLightShadows.hlsl"
 
@@ -97,6 +98,12 @@ Light GetMainLight()
     light.layerMask = DEFAULT_LIGHT_LAYERS;
 #endif
 
+    return light;
+}
+
+Light GetMainLight(float4 shadowCoord,float3 positionWS,half softScale=1){
+    Light light = GetMainLight();
+    light.shadowAttenuation = CalcShadow(shadowCoord,positionWS,softScale);
     return light;
 }
 

@@ -149,13 +149,13 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
         return bakedShadow;
     }
 
-    float CalcShadow (float4 shadowCoord,float3 worldPos)
+    float CalcShadow (float4 shadowCoord,float3 worldPos,half mainLightShadowSoftScale)
     {
         float shadow = 1;
         #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
         {
             //shadow = SAMPLE_TEXTURE2D_SHADOW(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture, shadowCoord.xyz);
-            shadow = SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture),shadowCoord,_MainLightShadowSoftScale);
+            shadow = SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture),shadowCoord,mainLightShadowSoftScale);
             shadow = lerp(1,shadow,_MainLightShadowParams.x); // shadow intensity
             shadow = BEYOND_SHADOW_FAR(shadowCoord) ? 1 : shadow; // shadow range
 
