@@ -100,10 +100,10 @@ Light GetMainLight()
     return light;
 }
 
-Light GetMainLight(float4 shadowCoord, float3 positionWS, half4 shadowMask,bool receiveShadow,half softScale=1)
+Light GetMainLight(float4 shadowCoord, float3 positionWS, half4 shadowMask,half softScale=1)
 {
     Light light = GetMainLight();
-    light.shadowAttenuation = MainLightShadow(shadowCoord, positionWS, shadowMask, receiveShadow,softScale);
+    light.shadowAttenuation = MainLightShadow(shadowCoord, positionWS, shadowMask,softScale);
 
     #if defined(_LIGHT_COOKIES)
         real3 cookieColor = SampleMainLightCookie(positionWS);

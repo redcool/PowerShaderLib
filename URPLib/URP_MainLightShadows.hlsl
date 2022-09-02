@@ -152,7 +152,7 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
     float CalcShadow (float4 shadowCoord,float3 worldPos)
     {
         float shadow = 1;
-        #if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE)
+        #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
         {
             //shadow = SAMPLE_TEXTURE2D_SHADOW(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture, shadowCoord.xyz);
             shadow = SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture),shadowCoord,_MainLightShadowSoftScale);
@@ -168,7 +168,7 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
         return shadow;
     }
 
-    float CalcShadow (float4 shadowCoord,float3 worldPos,float4 shadowMask,bool receiveShadow,float softScale)
+    float CalcShadow (float4 shadowCoord,float3 worldPos,float4 shadowMask,float softScale)
     {
         float shadow = 1;
         
@@ -196,6 +196,6 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
         return shadow;
     }
 
-    #define MainLightShadow(shadowCoord,worldPos,shadowMask,receiveShadow,softScale) CalcShadow(shadowCoord,worldPos,shadowMask,receiveShadow,softScale) 
+    #define MainLightShadow(shadowCoord,worldPos,shadowMask,softScale) CalcShadow(shadowCoord,worldPos,shadowMask,softScale) 
 
 #endif //MAIN_LIGHT_SHADOW_HLSL
