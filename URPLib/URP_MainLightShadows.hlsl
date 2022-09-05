@@ -195,6 +195,9 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
         #endif 
         return shadow;
     }
+    float CalcShadow (float4 shadowCoord,float3 worldPos,float4 shadowMask,bool isReceiveShadow,float softScale){
+        return CalcShadow(shadowCoord,worldPos,shadowMask,softScale);
+    }
 
     #define MainLightShadow(shadowCoord,worldPos,shadowMask,softScale) CalcShadow(shadowCoord,worldPos,shadowMask,softScale) 
 
