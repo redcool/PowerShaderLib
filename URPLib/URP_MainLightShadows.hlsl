@@ -149,7 +149,7 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
         return bakedShadow;
     }
 
-    float CalcShadow (float4 shadowCoord,float3 worldPos,half mainLightShadowSoftScale)
+    float CalcShadow (float4 shadowCoord,float3 worldPos,half mainLightShadowSoftScale=1)
     {
         float shadow = 1;
         #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
