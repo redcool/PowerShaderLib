@@ -1,3 +1,9 @@
+/*
+    keywords:
+    
+    _ADDITIONAL_LIGHT_SHADOWS_SOFT 
+*/
+
 #if !defined(URP_ADDITIONAL_LIGHT_SHADOWS_HLSL)
 #define URP_ADDITIONAL_LIGHT_SHADOWS_HLSL
 #include "URP_MainLightShadows.hlsl"
