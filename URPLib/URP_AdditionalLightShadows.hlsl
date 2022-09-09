@@ -1,6 +1,6 @@
 /*
     keywords:
-    
+
     _ADDITIONAL_LIGHT_SHADOWS_SOFT 
 */
 
@@ -93,18 +93,18 @@ float4 GetAdditionalLightShadowParams(int lightIndex)
 #endif
 }
 
-float SampleShadowmapFiltered(ShadowSamplingData samplingData,float4 shadowCoord){
+float SampleShadowmapFiltered(ShadowSamplingData samplingData,float4 shadowCoord,float softScale=1){
     float4 atten4 = 0;
-    atten4.x = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + samplingData.shadowOffset0.xyz);
-    atten4.y = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + samplingData.shadowOffset1.xyz);
-    atten4.z = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + samplingData.shadowOffset2.xyz);
-    atten4.w = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + samplingData.shadowOffset3.xyz);
+    atten4.x = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + samplingData.shadowOffset0.xyz * softScale);
+    atten4.y = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + samplingData.shadowOffset1.xyz * softScale);
+    atten4.z = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + samplingData.shadowOffset2.xyz * softScale);
+    atten4.w = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + samplingData.shadowOffset3.xyz * softScale);
     return dot(atten4,0.25);
 }
 
 // returns 0.0 if position is in light's shadow
 // returns 1.0 if position is in light
-float AdditionalLightRealtimeShadow(int lightIndex, float3 positionWS)
+float AdditionalLightRealtimeShadow(int lightIndex, float3 positionWS,float softScale=1)
 {
     float4 shadowCoord = mul(_AdditionalLightsWorldToShadow[lightIndex], float4(positionWS, 1.0));
     // perspective 
@@ -116,7 +116,7 @@ float AdditionalLightRealtimeShadow(int lightIndex, float3 positionWS)
     float attenuation = 1;
     #if defined(_ADDITIONAL_LIGHT_SHADOWS_SOFT)
         ShadowSamplingData samplingData = GetAdditionalLightShadowSamplingData();
-        attenuation = SampleShadowmapFiltered(samplingData,shadowCoord);
+        attenuation = SampleShadowmapFiltered(samplingData,shadowCoord,softScale);
     #else
     // 1-tap hardware comparison
         attenuation = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz);
@@ -136,9 +136,9 @@ float GetAdditionalLightShadowFade(float3 positionWS)
     return float(fade);
 }
 
-float AdditionalLightShadow(int lightIndex, float3 positionWS,float4 shadowMask,float4 occlusionProbeChannels)
+float AdditionalLightShadow(int lightIndex, float3 positionWS,float4 shadowMask,float4 occlusionProbeChannels,float softScale=1)
 {
-    float realtimeShadow = AdditionalLightRealtimeShadow(lightIndex, positionWS);
+    float realtimeShadow = AdditionalLightRealtimeShadow(lightIndex, positionWS,softScale);
     
     #ifdef CALCULATE_BAKED_SHADOWS
         float bakedShadow = BakedShadow(shadowMask, occlusionProbeChannels);
