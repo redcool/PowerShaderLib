@@ -182,4 +182,12 @@ half3 PreScattering(sampler2D scatterMap,half3 normal,half3 lightDir,half3 light
     return scattering * lightColor * mainTex.xyz * atten * scatterIntensity * scatterMask;
 }
 
+/**
+    物体表面的光泽层亮度
+    diffColor *= SheenLayer(nh,wrappedNV,0.8,1,1);
+*/
+half SheenLayer(float snh,float wnv,half2 range,half minLuminance=0.5,half scale=1){
+    return  max(minLuminance,smoothstep(range.x,range.y,wnv) + snh) * scale;
+}
+
 #endif //BSDF_HLSL
