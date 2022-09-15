@@ -1,5 +1,11 @@
 /**
     MainLight Shadow
+    keywords
+
+    #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE //_MAIN_LIGHT_SHADOWS_SCREEN
+    LIGHTMAP_ON
+    _SHADOWS_SOFT 
+    _RECEIVE_SHADOWS_ON // material keyword
 */
 #if !defined(MAIN_LIGHT_SHADOW_HLSL)
 #define MAIN_LIGHT_SHADOW_HLSL
