@@ -40,7 +40,13 @@ float3 ScreenToWorldPos(float2 uv,float rawDepth,float4x4 invVP){
 
 #define GetWorldSpaceViewDir(worldPos) (_WorldSpaceCameraPos - worldPos)
 #define GetWorldSpaceLightDir(worldPos) _MainLightPosition.xyz
-#define BlendNormal(n1,n2) normalize(float3(n1.xy*n2.z+n2.xy*n1.z,n1.z+n2.z))
+#define BlendNormal(n1,n2) normalize(float3(n1.xy*n2.z + n2.xy*n1.z,n1.z * n2.z))
 #define PerceptualRoughnessToMipmapLevel(roughness) roughness * (1.7 - roughness * 0.7) * 6
+
+float3 BlendVertexNormal(float3 tn,float3 worldPos,float3 t,float3 b,float3 n){
+    float3 vn = cross(ddy(worldPos),ddx(worldPos));
+    vn = float3(dot(t,vn),dot(b,vn),dot(n,vn));
+    return BlendNormal(tn,vn);
+}
 
 #endif //POWER_UTILS_HLSL
