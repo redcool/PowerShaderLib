@@ -10,7 +10,7 @@
 #if !defined(MAIN_LIGHT_SHADOW_HLSL)
 #define MAIN_LIGHT_SHADOW_HLSL
 
-#if defined(_RECEIVE_SHADOWS_ON)
+#if defined(_RECEIVE_SHADOWS_ON) || ! defined(_RECEIVE_SHADOWS_OFF)
     #if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN)
         #define MAIN_LIGHT_CALCULATE_SHADOWS
 
