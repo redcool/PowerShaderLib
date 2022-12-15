@@ -1,52 +1,8 @@
 #if !defined(COLORS_HLSL)
 #define COLORS_HLSL
 
-// Converts linear RGB to LMS
-// Full float precision to avoid precision artefact when using ACES tonemapping
-float3 LinearToLMS(float3 x)
-{
-    const half3x3 LIN_2_LMS_MAT = {
-        3.90405e-1, 5.49941e-1, 8.92632e-3,
-        7.08416e-2, 9.63172e-1, 1.35775e-3,
-        2.31082e-2, 1.28021e-1, 9.36245e-1
-    };
-
-    return mul(LIN_2_LMS_MAT, x);
-}
-
-// Full float precision to avoid precision artefact when using ACES tonemapping
-float3 LMSToLinear(float3 x)
-{
-    const half3x3 LMS_2_LIN_MAT = {
-        2.85847e+0, -1.62879e+0, -2.48910e-2,
-        -2.10182e-1,  1.15820e+0,  3.24281e-4,
-        -4.18120e-2, -1.18169e-1,  1.06867e+0
-    };
-
-    return mul(LMS_2_LIN_MAT, x);
-}
-
-// Hue, Saturation, Value
-// Ranges:
-//  Hue [0.0, 1.0]
-//  Sat [0.0, 1.0]
-//  Lum [0.0, HALF_MAX]
-half3 RgbToHsv(half3 c)
-{
-    const half4 K = half4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-    half4 p = lerp(half4(c.bg, K.wz), half4(c.gb, K.xy), step(c.b, c.g));
-    half4 q = lerp(half4(p.xyw, c.r), half4(c.r, p.yzx), step(p.x, c.r));
-    half d = q.x - min(q.w, q.y);
-    const half e = 1.0e-4;
-    return half3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-}
-
-half3 HsvToRgb(half3 c)
-{
-    const half4 K = half4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-    half3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);
-    return c.z * lerp(K.xxx, saturate(p - K.xxx), c.y);
-}
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Filtering.hlsl"
 
 half3 ThinFilm(half invertNV,half scale,half offset,half saturate,half brightness){
     half h = invertNV * scale + offset;
@@ -54,4 +10,46 @@ half3 ThinFilm(half invertNV,half scale,half offset,half saturate,half brightnes
     half v = brightness;
     return HsvToRgb(half3(h,s,v));
 }
+
+float3 ColorGradingExposure(float3 c,float m){
+    return c*m;
+}
+float3 ColorGradingContrast(float3 c,float m){
+    c = LinearToLogC(c);
+    c = (c - ACEScc_MIDGRAY) * m + ACEScc_MIDGRAY;
+    c = LogCToLinear(c);
+    return max(0,c);
+}
+float3 ColorGradingFilter(float3 c,float3 filter){
+    return c * filter.xyz;
+}
+
+float3 ColorGradingHSV(float3 c,float2 hueScaleOffset,float saturateScale,float brightScale){
+    c = RgbToHsv(c);
+    c.x = c.x * hueScaleOffset.x + hueScaleOffset.y;
+    c.y *= saturateScale;
+    c.z *= brightScale;
+    return HsvToRgb(c);
+}
+
+float3 ColorGradingWhiteBalance(float3 c,float3 whiteBalanceColor){
+    c = LinearToLMS(c);
+    c *= whiteBalanceColor;
+    return LMSToLinear(c);
+}
+
+float4 _ColorAdjustments; // {x:exposure,y:constrast}
+float4 _ColorFilter; //{xyz:rgb}
+float4 _ColorAdjustHSV; //{xy:hue scale,offset,z:saturate,w:value}
+float4 _WhiteBalanceFactors;
+float3 ColorGrading(float3 c){
+    c = min(60,c);
+    c = ColorGradingExposure(c,_ColorAdjustments.x);
+    c = ColorGradingWhiteBalance(c,_WhiteBalanceFactors.xyz);
+    c = ColorGradingContrast(c,_ColorAdjustments.y);
+    c = ColorGradingFilter(c,_ColorFilter);
+    c = ColorGradingHSV(c,_ColorAdjustHSV.xy,_ColorAdjustHSV.z,_ColorAdjustHSV.w);
+    return max(0,c);
+}
+
 #endif //COLORS_HLSL
