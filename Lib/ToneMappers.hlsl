@@ -173,7 +173,7 @@ float3 GTTone(float3 x){
     float3 w2 = step(m+l0,x);
     float3 w1 = 1.0-w0-w2;
 
-    float3 T = m* pow(x/m,c) + b;
+    float3 T = m* pow(abs(x/m),c) + b;
     float3 S = P-(P-S1)* exp(CP * (x-S0));
     float3 L = m+a*(x-m);
 

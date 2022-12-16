@@ -11,7 +11,7 @@ half3 ThinFilm(half invertNV,half scale,half offset,half saturate,half brightnes
     return HsvToRgb(half3(h,s,v));
 }
 
-float3 Luminance(float3 c,bool useACES){
+float Luminance(float3 c,bool useACES){
     return useACES ? AcesLuminance(c) : Luminance(c);
 }
 
@@ -70,6 +70,8 @@ float3 ColorGradingShadowsMidtonesHighlights(float3 c,float3 shadowColor,float3 
         c * highlightColor * highlightsWeight;
 }
 
+
+
 float4 _ColorAdjustments; // {x:exposure,y:constrast}
 float4 _ColorFilter; //{xyz:rgb}
 float4 _ColorAdjustHSV; //{xy:hue scale,offset,z:saturate,w:value}
@@ -78,22 +80,46 @@ float4 _SplitToningHighlights,_SplitToningShadows;//{xyz:rgb,w:balance}
 float4 _ChannelMixerRed,_ChannelMixerGreen,_ChannelMixerBlue;
 
 float4 _SMHShadows,_SMHMidtones,_SMHHighlights,_SMHRange;
+float4 _ColorGradingLUTParams; //{x:height,y:1/width,z:1/height,w: height/(height-1)}
+bool _ColorGradingUseLogC;
+
+
+
 float3 ColorGrading(float3 c,bool useACES=false){
-    c = min(60,c);
+    // c = min(60,c);
     c = ColorGradingExposure(c,_ColorAdjustments.x);
     c = ColorGradingWhiteBalance(c,_WhiteBalanceFactors.xyz);
     c = ColorGradingContrast(c,_ColorAdjustments.y,useACES);
-    c = ColorGradingFilter(c,_ColorFilter);
+    c = ColorGradingFilter(c,_ColorFilter.xyz);
     c = max(c,0);
 
     c = ColorGradingSplitToning(c,_SplitToningShadows.xyz,_SplitToningHighlights.xyz,_SplitToningShadows.w,useACES);
     c = ColorGradingChannelMixer(c,_ChannelMixerRed.xyz,_ChannelMixerGreen.xyz,_ChannelMixerBlue.xyz);
     c = max(c,0);
 
-    c = ColorGradingShadowsMidtonesHighlights(c,_SMHShadows,_SMHMidtones,_SMHHighlights,_SMHRange,useACES);
+    c = ColorGradingShadowsMidtonesHighlights(c,_SMHShadows.xyz,_SMHMidtones.xyz,_SMHHighlights.xyz,_SMHRange,useACES);
 
     c = ColorGradingHSV(c,_ColorAdjustHSV.xy,_ColorAdjustHSV.z,_ColorAdjustHSV.w);
     return max(useACES ? ACEScg_to_ACES(c) : c,0);
+}
+
+// generat color grading lut
+float3 ColorGradingLUT(float2 uv,bool useACES = false){
+    float3 c = GetLutStripValue(uv,_ColorGradingLUTParams);
+    return ColorGrading(_ColorGradingUseLogC ? LogCToLinear(c) : c,useACES);
+}
+
+// apply color grading lut
+SAMPLER(sampler_linear_clamp);
+TEXTURE2D(_ColorGradingLUT);
+// float4 _ColorGradingLUTParams; //{x:1/width,y:1/height,z:height/(height-1)} 
+
+float3 ApplyColorGradingLUT(float3 c){
+    return ApplyLut2D(
+        TEXTURE2D_ARGS(_ColorGradingLUT,sampler_linear_clamp),
+        saturate(_ColorGradingUseLogC ? LinearToLogC(c) : c),
+        _ColorGradingLUTParams.xyz
+    );
 }
 
 #endif //COLORS_HLSL
