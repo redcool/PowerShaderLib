@@ -112,7 +112,25 @@ float3 ColorGradingLUT(float2 uv,bool useACES = false){
 // apply color grading lut
 SAMPLER(sampler_linear_clamp);
 TEXTURE2D(_ColorGradingLUT);
-// float4 _ColorGradingLUTParams; //{x:1/width,y:1/height,z:height/(height-1)} 
+// float4 _ColorGradingLUTParams; //{x:1/width,y:1/height,z:height-1} 
+
+real3 _ApplyLut2D(TEXTURE2D_PARAM(tex, samplerTex), float3 uvw, float3 scaleOffset)
+{
+    float w = 1/1024.0;
+    float h = 1/32.0;
+    float z = 31;
+
+    uvw.z *= z;
+    float s = floor(uvw.z);
+    uvw.xy = (uvw.xy * z + 0.5) * float2(w,h);
+    uvw.x += s * h;
+    uvw.xyz = lerp(
+        SAMPLE_TEXTURE2D_LOD(tex, samplerTex, uvw.xy, 0.0).rgb,
+        SAMPLE_TEXTURE2D_LOD(tex, samplerTex, uvw.xy + float2(h, 0.0), 0.0).rgb,
+        uvw.z - s
+    );
+    return uvw;
+}
 
 float3 ApplyColorGradingLUT(float3 c){
     return ApplyLut2D(
