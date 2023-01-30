@@ -1,7 +1,3 @@
-/**
-    like UnityCG.cginc
-*/
-
 #if !defined(POWER_UTILS_HLSL)
 #define POWER_UTILS_HLSL
 // #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
@@ -47,6 +43,18 @@ float3 BlendVertexNormal(float3 tn,float3 worldPos,float3 t,float3 b,float3 n){
     float3 vn = cross(ddy(worldPos),ddx(worldPos));
     vn = float3(dot(t,vn),dot(b,vn),dot(n,vn));
     return BlendNormal(tn,vn);
+}
+
+bool IsOrthographicCamera(){return unity_OrthoParams.w;}
+
+/**
+    distance to camera's position(xy plane)
+*/
+float OrthographicDepthBufferToLinear(float rawDepth/*depth buffer [0,1]*/){
+    #if UNITY_REVERSED_Z
+        rawDepth = 1 - rawDepth;
+    #endif
+    return (_ProjectionParams.z - _ProjectionParams.y) * rawDepth + _ProjectionParams.y;
 }
 
 #endif //POWER_UTILS_HLSL

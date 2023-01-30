@@ -5,8 +5,8 @@
     #include "URP_Lighting.hlsl"
     
     float3 CalcLight(Light light,float3 diffColor,float3 specColor,float3 n,float3 v,float a,float a2){
-        if(!light.distanceAttenuation)
-            return 0;
+        // if(!light.distanceAttenuation)
+        //     return 0;
             
         float3 l = light.direction;
         float3 h = normalize(l+v);
