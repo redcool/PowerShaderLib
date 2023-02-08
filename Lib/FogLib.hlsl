@@ -91,8 +91,8 @@ void BlendFogSphereKeyword(inout half3 mainColor,float3 worldPos,float2 fog,bool
     branch_if(!IsFogOn())
         return;
 
-    #if defined(_HEIGHT_FOG_ON)
-    // branch_if(hasHeightFog)
+    // #if defined(_HEIGHT_FOG_ON)
+    branch_if(hasHeightFog)
     {
         half3 heightFogColor = lerp(_HeightFogMinColor,_HeightFogMaxColor,fog.y).xyz;
         float heightFactor = smoothstep(0,0.1,fog.x)* (1-fog.y);
@@ -101,22 +101,25 @@ void BlendFogSphereKeyword(inout half3 mainColor,float3 worldPos,float2 fog,bool
         // mainColor = heightFactor;
         // return ;
     }
-    #endif
+    // #endif
 
-    #if defined(_DEPTH_FOG_ON)
-    // calc depth noise
-    half depthFactor = fog.x;
-    #if defined(_DEPTH_FOG_NOISE_ON)
-    // branch_if(fogNoiseOn)
+    // #if defined(_DEPTH_FOG_ON)
+    branch_if(hasDepthFog)
     {
-        float gradientNoise = unity_gradientNoise( (worldPos.xz+worldPos.yz) * _FogDirTiling.w+ _FogDirTiling.xz * _Time.y );
-        depthFactor = fog.x + gradientNoise * _FogNoiseIntensity * (fog.x > _FogNoiseStartRate);
-    }
-    #endif
+        // calc depth noise
+        half depthFactor = fog.x;
+        #if defined(_DEPTH_FOG_NOISE_ON)
+        // branch_if(fogNoiseOn)
+        {
+            float gradientNoise = unity_gradientNoise( (worldPos.xz+worldPos.yz) * _FogDirTiling.w+ _FogDirTiling.xz * _Time.y );
+            depthFactor = fog.x + gradientNoise * _FogNoiseIntensity * (fog.x > _FogNoiseStartRate);
+        }
+        #endif
 
-    half3 fogColor = lerp(_FogNearColor.rgb,unity_FogColor.rgb,fog.x);
-    mainColor = lerp(mainColor,fogColor, depthFactor * _GlobalFogIntensity);
-    #endif
+        half3 fogColor = lerp(_FogNearColor.rgb,unity_FogColor.rgb,fog.x);
+        mainColor = lerp(mainColor,fogColor, depthFactor * _GlobalFogIntensity);
+    }
+    // #endif
     // mainColor = depthFactor;
 }
 #endif //FOG_LIB_HLSL
