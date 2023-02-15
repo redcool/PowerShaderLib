@@ -20,6 +20,9 @@ float ShowLine(float x,float y){
 float Line(float x,float y){
     return smoothstep(.02,.01,abs(y - x));
 }
+float2 ScanLine(float2 uv,float tiling,float width){
+    return (frac(uv*tiling + _Time.y)<width);
+}
 
 /**
     n : gradient Noise
