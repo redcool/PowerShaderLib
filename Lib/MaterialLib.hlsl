@@ -1,12 +1,12 @@
 #if !defined(MATERIAL_LIB_HLSL)
 #define MATERIAL_LIB_HLSL
 
-float4 SplitPbrMaskTexture(float4 pbrMaskTex,int3 pbrChannels,float3 pbrMaskRatios,bool isSmoothnessReversed=false){
-    float m = pbrMaskTex[pbrChannels.x];
-    float s = pbrMaskTex[pbrChannels.y];
-    float o = pbrMaskTex[pbrChannels.z];
+void SplitPbrMaskTexture(float4 pbrMaskTex,int3 pbrMaskChannels,float3 pbrMaskRatios,out float m,out float s,out float o,bool isSmoothnessReversed=false){
+    m = pbrMaskTex[pbrMaskChannels.x] * pbrMaskRatios.x;
+    s = pbrMaskTex[pbrMaskChannels.y] * pbrMaskRatios.y;
     s = lerp(s,1-s,isSmoothnessReversed);
-    return float4(float3(m,s,o)*pbrMaskRatios,pbrMaskTex.w);
+    
+    o = lerp(1,pbrMaskTex[pbrMaskChannels.z],pbrMaskRatios.z);
 }
 
 #endif //MATERIAL_LIB_HLSL
