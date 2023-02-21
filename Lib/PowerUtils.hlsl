@@ -36,8 +36,13 @@ float3 ScreenToWorldPos(float2 uv,float rawDepth,float4x4 invVP){
 
 #define GetWorldSpaceViewDir(worldPos) (_WorldSpaceCameraPos - worldPos)
 #define GetWorldSpaceLightDir(worldPos) _MainLightPosition.xyz
-#define BlendNormal(n1,n2) normalize(float3(n1.xy*n2.z + n2.xy*n1.z,n1.z * n2.z))
+// #define BlendNormal(n1,n2) normalize(float3(n1.xy*n2.z + n2.xy*n1.z,n1.z * n2.z))
 #define PerceptualRoughnessToMipmapLevel(roughness) roughness * (1.7 - roughness * 0.7) * 6
+
+#undef Pow4
+float Pow4(float a){return a*a*a*a;}
+
+float3 BlendNormal(float3 n1,float3 n2){return  normalize(float3(n1.xy*n2.z + n2.xy*n1.z,n1.z * n2.z));}
 
 float3 BlendVertexNormal(float3 tn,float3 worldPos,float3 t,float3 b,float3 n){
     float3 vn = cross(ddy(worldPos),ddx(worldPos));
@@ -56,5 +61,6 @@ float OrthographicDepthBufferToLinear(float rawDepth/*depth buffer [0,1]*/){
     #endif
     return (_ProjectionParams.z - _ProjectionParams.y) * rawDepth + _ProjectionParams.y;
 }
+
 
 #endif //POWER_UTILS_HLSL
