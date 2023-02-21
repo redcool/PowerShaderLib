@@ -55,4 +55,5 @@ float OrthographicDepthBufferToLinear(float rawDepth/*depth buffer [0,1]*/){
     return (_ProjectionParams.z - _ProjectionParams.y) * rawDepth + _ProjectionParams.y;
 }
 
+
 #endif //POWER_UTILS_HLSL
