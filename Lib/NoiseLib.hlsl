@@ -355,14 +355,16 @@ float3 VoronoiNoise33(float3 uv){
     return float3(minDist,N31(closestId),minEdgeDist);
 }
 
-
+/**
+    ScreenDoor1(i.vertex,0.1);
+*/
 float ScreenDoor1(float2 screenPos,float size=1){
     float2 uv = floor(screenPos.xy * 0.25*size) * .5;
     float n = frac(uv.x + uv.y);
     return n;
 }
 
-float ScreenDoor2(float2 screenPos,float size=0.1){
+float ScreenDoor2(float2 screenPos,float size=1){
     const float4x4 thresholdMatrix =  
     {  
     1,   9,  3, 11,  
@@ -370,7 +372,7 @@ float ScreenDoor2(float2 screenPos,float size=0.1){
     4,  12,  2, 10,  
     16,  8, 14,  6  
     };
-    float2 uv = screenPos.xy * (size*0.05);
+    float2 uv = screenPos.xy * (size*0.5);
     float a = thresholdMatrix[uv.x%4][uv.y%4]/17;
     return a;
 }
