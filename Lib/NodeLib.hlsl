@@ -6,6 +6,8 @@
 #undef PI
 #define PI 3.14159
 
+#include "NoiseLib.hlsl"
+
 /**
 	计算太阳斑点的衰减
 	sunSize : 太阳亮斑,大小
@@ -70,15 +72,15 @@ float SchlickFresnal(float3 v, float3 n, float f0) {
 	return f0 + (1 - f0) * pow(1 - dot(v, n), 5);
 }
 
-float N11(float a){
-    return frac(sin(a*123.1234) * 123456);
-}
-float N21(float2 a){
-	return frac(sin(dot(a,float2(12.789,78.234))) * 123456);
-}
-float N31(float3 pos){
-    return frac( sin(dot(pos,float3(12.789,78.123,45.678))) * 123456);
-}
+// float N11(float a){
+//     return frac(sin(a*123.1234) * 123456);
+// }
+// float N21(float2 a){
+// 	return frac(sin(dot(a,float2(12.789,78.234))) * 123456);
+// }
+// float N31(float3 pos){
+//     return frac( sin(dot(pos,float3(12.789,78.123,45.678))) * 123456);
+// }
 
 float Gray(float3 rgb){
 	return dot(float3(0.07,0.7,0.2),rgb);
@@ -151,12 +153,12 @@ float3 Checkerboard(float2 uv,float3 color1,float3 color2,float2 frequency){
 
 // Interleaved gradient function from Jimenez 2014
 // http://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare
-float GradientNoise(float2 uv)
-{
-    uv = floor(uv * _ScreenParams.xy);
-    float f = dot(float2(0.06711056, 0.00583715), uv);
-    return frac(52.9829189 * frac(f));
-}
+// float InterleavedGradientNoise(float2 uv)
+// {
+//     uv = floor(uv * _ScreenParams.xy);
+//     float f = dot(float2(0.06711056, 0.00583715), uv);
+//     return frac(52.9829189 * frac(f));
+// }
 
 //------------- ShaderGraph
 float2 unity_gradientNoise_dir(float2 p)

@@ -1,6 +1,9 @@
 #if !defined(NOISE_LIB_HLSL)
 #define NOISE_LIB_HLSL
 
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Random.hlsl"
+
 //================= 
 // white noise macros
 //================= 
@@ -21,19 +24,22 @@
 // white noise (1d,2d,3d)
 //================= 
 // N dim to 1d
-#define Nx1(v,delta) frac(sin(dot(v,delta)) * AMPLIFY)
+#define Nx1(v,delta) frac(sin(dot((v),delta)) * AMPLIFY)
+// float Nx1(float v,float delta){
+//     return frac(sin(dot(v,delta)) * AMPLIFY);
+// }
 
-#define N11(v) Nx1(v.x,0.546)
-#define N12(v) float2(Nx1(v.x,DELTA1_1),Nx1(v.x,DELTA1_2))
-#define N13(v) float3(Nx1(v.x,DELTA1_1),Nx1(v.x,DELTA1_2),Nx1(v.x,DELTA1_3))
+#define N11(v) Nx1((v).x,0.546)
+#define N12(v) float2(Nx1((v).x,DELTA1_1),Nx1((v).x,DELTA1_2))
+#define N13(v) float3(Nx1((v).x,DELTA1_1),Nx1((v).x,DELTA1_2),Nx1((v).x,DELTA1_3))
 
-#define N21(v) Nx1(v.xy,DELTA2_1)
-#define N22(v) float2(Nx1(v.xy,DELTA2_1),Nx1(v.xy,DELTA2_2))
-#define N23(v) float3(Nx1(v.xy,DELTA2_1),Nx1(v.xy,DELTA2_2),Nx1(v.xy,DELTA2_3))
+#define N21(v) Nx1((v).xy,DELTA2_1)
+#define N22(v) float2(Nx1((v).xy,DELTA2_1),Nx1((v).xy,DELTA2_2))
+#define N23(v) float3(Nx1((v).xy,DELTA2_1),Nx1((v).xy,DELTA2_2),Nx1((v).xy,DELTA2_3))
 
-#define N31(v) Nx1(v.xyz,DELTA3_1)
-#define N32(v) float2(Nx1(v.xyz,DELTA3_1),Nx1(v.xyz,DELTA3_2))
-#define N33(v) float3(Nx1(v.xyz,DELTA3_1),Nx1(v.xyz,DELTA3_2),Nx1(v.xyz,DELTA3_3))
+#define N31(v) Nx1((v).xyz,DELTA3_1)
+#define N32(v) float2(Nx1((v).xyz,DELTA3_1),Nx1((v).xyz,DELTA3_2))
+#define N33(v) float3(Nx1((v).xyz,DELTA3_1),Nx1((v).xyz,DELTA3_2),Nx1((v).xyz,DELTA3_3))
 
 //================= 
 // Easing macros
