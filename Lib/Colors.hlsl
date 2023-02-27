@@ -145,8 +145,9 @@ float3 ApplyColorGradingLUT(float3 c){
 /**
 
 */
-float4 Glitch(
-    TEXTURE2D_PARAM(tex,sampler_tex),
+
+
+float4 GlitchUV(    
     float2 uv,
     float _SnowFlakeIntensity=1,
     float _JitterBlockSize=0.5, // [0,1]
@@ -155,7 +156,7 @@ float4 Glitch(
     float _HorizontalShake=0.5,
     float _ColorDriftSpeed=0.1,float _ColorDriftIntensity=1,
     float _HorizontalIntensity=0.1
-){
+    ){
     float u = uv.x;
     float v = uv.y;
 
@@ -164,7 +165,7 @@ float4 Glitch(
     float2 snowFlake = (N21(uv * snowFlackPeriod)) * _SnowFlakeIntensity;
 
     float jitterThreshold = 0.002+pow(_JitterIntensity,3)*0.05;
-    float jitterBlockSize = lerp(0.001,0.1,_JitterBlockSize);
+    float jitterBlockSize = lerp(0.0001,0.1,_JitterBlockSize);
     float jitter = N21(float2(v * jitterBlockSize,_Time.x)) *2-1;
     jitter *= step(jitterThreshold,abs(jitter)) * _JitterIntensity;
 
@@ -178,8 +179,26 @@ float4 Glitch(
 
     float u1 = (jitter + snowFlake.x + hshake) * _HorizontalIntensity;
     float u2 = (jitter + snowFlake.x + hshake + drift ) * _HorizontalIntensity;
-    float4 c1 = SAMPLE_TEXTURE2D(tex,sampler_tex,frac(float2(u + u1,jump)));
-    float4 c2 = SAMPLE_TEXTURE2D(tex,sampler_tex,frac(float2(u + u2 ,jump)));
+    return float4(frac(float2(u + u1,jump)) , frac(float2(u + u2 ,jump)));
+}
+
+float4 Glitch(
+    TEXTURE2D_PARAM(tex,sampler_tex),
+    float2 uv,
+    float _SnowFlakeIntensity=1,
+    float _JitterBlockSize=0.5, // [0,1]
+    float _JitterIntensity=0.5,
+    float _VerticalJumpIntensity=0.15,
+    float _HorizontalShake=0.5,
+    float _ColorDriftSpeed=0.1,float _ColorDriftIntensity=1,
+    float _HorizontalIntensity=0.1
+){
+    float4 glitchUV = GlitchUV(uv,_SnowFlakeIntensity,_JitterBlockSize,_JitterIntensity,_VerticalJumpIntensity,
+        _HorizontalShake,_ColorDriftSpeed,_ColorDriftIntensity,_HorizontalIntensity);
+
+    float4 c1 = SAMPLE_TEXTURE2D(tex,sampler_tex,glitchUV.xy);
+    float4 c2 = SAMPLE_TEXTURE2D(tex,sampler_tex,glitchUV.zw);
     return float4(c1.r,c2.g,c1.b,1);
 }
+
 #endif //COLORS_HLSL
