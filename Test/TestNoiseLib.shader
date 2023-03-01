@@ -23,7 +23,7 @@ ENDCG
             #pragma vertex vert
             #pragma fragment frag
 
-            #include "UnityCG.cginc"
+            // #include "UnityCG.cginc"
             #include "../Lib/NoiseLib.hlsl"
 
             struct appdata
