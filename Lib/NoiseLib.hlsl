@@ -168,10 +168,10 @@ float GradientNoise(float v){
 float GradientNoise(float2 v){
     // cells noise ->[-1,1]
     float2 id = floor(v);
-    float2 a = N21(id) * 2-1;
-    float2 b = N21(id+float2(1,0)) * 2-1;
-    float2 c = N21(id+float2(0,1))*2-1;
-    float2 d = N21(id+float2(1,1))*2-1;
+    float a = N21(id) * 2-1;
+    float b = N21(id+float2(1,0)) * 2-1;
+    float c = N21(id+float2(0,1))*2-1;
+    float d = N21(id+float2(1,1))*2-1;
 
     float2 p = frac(v);
     
@@ -196,10 +196,10 @@ float GradientNoise(float3 v){
     [unroll]
     for(int z=0;z<2;z++){
         float3 id = floor(v);
-        float3 a = N31(id+float3(0,0,z)) * 2-1;
-        float3 b = N31(id+float3(1,0,z)) * 2-1;
-        float3 c = N31(id+float3(0,1,z))*2-1;
-        float3 d = N31(id+float3(1,1,z))*2-1;
+        float a = N31(id+float3(0,0,z)) * 2-1;
+        float b = N31(id+float3(1,0,z)) * 2-1;
+        float c = N31(id+float3(0,1,z))*2-1;
+        float d = N31(id+float3(1,1,z))*2-1;
 
         a = dot(a,f-float3(0,0,z));
         b = dot(b,f-float3(1,0,z));
@@ -273,10 +273,11 @@ float3 VoronoiNoise23(float2 uv){
     float2 closestId=0;
     float2 toClosestCell=0;
 
+    int x = 0,y;
     [unroll]
-    for(int x=-1;x<=1;x++){
+    for(x=-1;x<=1;x++){
         [unroll]
-        for(int y=-1;y<=1;y++){
+        for(y=-1;y<=1;y++){
             float2 cellId = id + float2(x,y);
             float2 cellPos = cellId + N22(cellId);
             float2 toCell = cellPos - uv;
@@ -291,9 +292,9 @@ float3 VoronoiNoise23(float2 uv){
     // 
     float minEdgeDist=10;
     [unroll]
-    for(int x=-1;x<=1;x++){
+    for(x=-1;x<=1;x++){
         [unroll]
-        for(int y=-1;y<=1;y++){
+        for(y=-1;y<=1;y++){
             float2 cellId = id + float2(x,y);
             float2 cellPos = cellId + N22(cellId);
             float2 toCell = (cellPos - uv);
@@ -317,9 +318,10 @@ float3 VoronoiNoise33(float3 uv){
     float3 closestId=0;
     float3 toClosestCell=0;
 
-    [unroll]for(int x=-1;x<=1;x++){
-        [unroll]for(int y=-1;y<=1;y++){
-            [unroll]for(int z=-1;z<=1;z++){
+    int x=0,y=0,z=0;
+    [unroll]for(x=-1;x<=1;x++){
+        [unroll]for(y=-1;y<=1;y++){
+            [unroll]for(z=-1;z<=1;z++){
                 float3 cellId = id + float3(x,y,z);
                 float3 cellPos = cellId + N33(cellId);
                 float3 toCell = cellPos - uv;
@@ -334,9 +336,9 @@ float3 VoronoiNoise33(float3 uv){
 
     // 
     float minEdgeDist=10;
-    [unroll]for(int x=-1;x<=1;x++){
-        [unroll]for(int y=-1;y<=1;y++){
-            [unroll]for(int z=-1;z<=1;z++){
+    [unroll]for(x=-1;x<=1;x++){
+        [unroll]for(y=-1;y<=1;y++){
+            [unroll]for(z=-1;z<=1;z++){
                 float3 cellId = id + float3(x,y,z);
                 float3 cellPos = cellId + N33(cellId);
                 float3 toCell = (cellPos - uv);

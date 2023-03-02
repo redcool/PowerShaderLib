@@ -21,8 +21,8 @@ void SplitPbrMaskTexture(float4 pbrMaskTex,int3 pbrMaskChannels,float3 pbrMaskRa
 }
 
 void SplitDiffuseSpecularColor(float4 albedo,float metallic,out float3 diffColor,out float3 specColor){
-    diffColor = albedo * (1- metallic);
-    specColor = lerp(0.04,albedo,metallic);
+    diffColor = albedo.xyz * (1- metallic);
+    specColor = lerp(0.04,albedo.xyz,metallic);
 }
 
 #endif //MATERIAL_LIB_HLSL
