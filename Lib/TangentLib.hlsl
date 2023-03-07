@@ -39,6 +39,6 @@
     float3 normal = normalize(float3(input.tSpace0.z,input.tSpace1.z,input.tSpace2.z));\
     float3 worldPos = (float3(input.tSpace0.w,input.tSpace1.w,input.tSpace2.w))
 
-#define TangentToWorld(tn,tSpace0,tSpace1,tSpace) normalize(float3(dot(tSpace0.xyz,tn),dot(tSpace1.xyz,tn),dot(tSpace2.xyz,tn)))
+#define TangentToWorld(tn,tSpace0,tSpace1,tSpace2) normalize(float3(dot(tSpace0.xyz,tn),dot(tSpace1.xyz,tn),dot(tSpace2.xyz,tn)))
 
 #endif //TANGENT_LIB_HLSL
