@@ -26,7 +26,7 @@ void SplitDiffuseSpecularColor(float4 albedo,float metallic,out float3 diffColor
 }
 
 float4 TriplanarSample(TEXTURE2D_PARAM(tex,sampler_tex),float3 worldPos,float3 normal,float4 tilingOffset=float4(1,1,0,0)){
-    float3 weights = normal/dot(normal,1);
+    float3 weights = abs(normal)/dot(normal,1);
     float4 c = SAMPLE_TEXTURE2D(tex,sampler_tex,worldPos.yz * tilingOffset.xy + tilingOffset.zw) * weights.x;
     c += SAMPLE_TEXTURE2D(tex,sampler_tex,worldPos.xz * tilingOffset.xy + tilingOffset.zw) * weights.y;
     c += SAMPLE_TEXTURE2D(tex,sampler_tex,worldPos.xy * tilingOffset.xy + tilingOffset.zw) * weights.z;
