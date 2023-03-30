@@ -20,12 +20,12 @@ float N31(float3 pos){
 #endif
 // Interleaved gradient function from Jimenez 2014
 // http://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare
-// float InterleavedGradientNoise(float2 uv)
-// {
-//     uv = floor(uv * _ScreenParams.xy);
-//     float f = dot(float2(0.06711056, 0.00583715), uv);
-//     return frac(52.9829189 * frac(f));
-// }
+float InterleavedGradientNoise(float2 uv)
+{
+    uv = floor(uv * _ScreenParams.xy);
+    float f = dot(float2(0.06711056, 0.00583715), uv);
+    return frac(52.9829189 * frac(f));
+}
 
 /**
 	计算太阳斑点的衰减

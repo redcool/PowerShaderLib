@@ -57,7 +57,7 @@ float2 CalcFogFactor(float3 worldPos){
     return fog;
 }
 
-void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,bool fogNoiseOn,bool hasDepthFog=true){
+void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,float fogNoise,bool hasDepthFog=true){
     branch_if(!IsFogOn())
         return;
 
@@ -74,9 +74,9 @@ void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHe
         return;
     
     float depthFactor = fog.x;
-    branch_if(fogNoiseOn){
-        float gradientNoise = unity_gradientNoise( (worldPos.xz+worldPos.yz) * _FogDirTiling.w+ _FogDirTiling.xz * _Time.y );
-        depthFactor = fog.x + gradientNoise * _FogNoiseIntensity * (fog.x > _FogNoiseStartRate);
+    branch_if(fogNoise){
+        // float gradientNoise = unity_gradientNoise( (worldPos.xz+worldPos.yz) * _FogDirTiling.w+ _FogDirTiling.xz * _Time.y );
+        depthFactor = fog.x + fogNoise * _FogNoiseIntensity * (fog.x > _FogNoiseStartRate);
     }
 
     float3 fogColor = lerp(_FogNearColor.rgb,unity_FogColor.rgb,fog.x);
@@ -84,7 +84,7 @@ void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHe
     // mainColor = depthFactor;
 }
 
-void BlendFogSphereKeyword(inout half3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,bool fogNoiseOn,bool hasDepthFog=true){
+void BlendFogSphereKeyword(inout half3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,float fogNoise,bool hasDepthFog=true){
     // #if ! defined(FOG_LINEAR)
     //     return;
     // #endif
@@ -111,8 +111,8 @@ void BlendFogSphereKeyword(inout half3 mainColor,float3 worldPos,float2 fog,bool
         #if defined(_DEPTH_FOG_NOISE_ON)
         // branch_if(fogNoiseOn)
         {
-            float gradientNoise = unity_gradientNoise( (worldPos.xz+worldPos.yz) * _FogDirTiling.w+ _FogDirTiling.xz * _Time.y );
-            depthFactor = fog.x + gradientNoise * _FogNoiseIntensity * (fog.x > _FogNoiseStartRate);
+            // float fogNoise = unity_gradientNoise( (worldPos.xz+worldPos.yz) * _FogDirTiling.w+ _FogDirTiling.xz * _Time.y );
+            depthFactor = fog.x + fogNoise * _FogNoiseIntensity * (fog.x > _FogNoiseStartRate);
         }
         #endif
 
