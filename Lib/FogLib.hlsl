@@ -20,9 +20,11 @@
 #define _FogNoiseStartRate _FogNoiseParams.x
 #define _FogNoiseIntensity _FogNoiseParams.y
 
-//------------------------------ sphere fog params
+//------------------------------ sphere fog global params
 float _HeightFogMin,_HeightFogMax;
 float4 _HeightFogMinColor,_HeightFogMaxColor;
+half _HeightFogFilterUpFace;
+
 float4 _FogNearColor;
 float2 _FogDistance;
 half4 _FogDirTiling;
@@ -57,7 +59,7 @@ float2 CalcFogFactor(float3 worldPos){
     return fog;
 }
 
-void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,float fogNoise,bool hasDepthFog=true){
+void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,float fogNoise,bool hasDepthFog=true,half fogAtten=1){
     branch_if(!IsFogOn())
         return;
 
@@ -79,12 +81,14 @@ void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHe
         depthFactor = fog.x + fogNoise * _FogNoiseIntensity * (fog.x > _FogNoiseStartRate);
     }
 
+    fogAtten = _HeightFogFilterUpFace? fogAtten : 1;
+
     float3 fogColor = lerp(_FogNearColor.rgb,unity_FogColor.rgb,fog.x);
-    mainColor = lerp(mainColor,fogColor, depthFactor * _GlobalFogIntensity);
+    mainColor = lerp(mainColor,fogColor, depthFactor * fogAtten * _GlobalFogIntensity);
     // mainColor = depthFactor;
 }
 
-void BlendFogSphereKeyword(inout half3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,float fogNoise,bool hasDepthFog=true){
+void BlendFogSphereKeyword(inout half3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,float fogNoise,bool hasDepthFog=true,half fogAtten=1){
     // #if ! defined(FOG_LINEAR)
     //     return;
     // #endif
@@ -116,8 +120,10 @@ void BlendFogSphereKeyword(inout half3 mainColor,float3 worldPos,float2 fog,bool
         }
         #endif
 
+        fogAtten = _HeightFogFilterUpFace? fogAtten : 1;
+        
         half3 fogColor = lerp(_FogNearColor.rgb,unity_FogColor.rgb,fog.x);
-        mainColor = lerp(mainColor,fogColor, depthFactor * _GlobalFogIntensity);
+        mainColor = lerp(mainColor,fogColor, depthFactor * fogAtten * _GlobalFogIntensity);
     }
     // #endif
     // mainColor = depthFactor;
