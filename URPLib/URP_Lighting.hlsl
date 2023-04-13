@@ -235,7 +235,7 @@ Light GetAdditionalLight(uint i, float3 positionWS,float4 shadowMask,float softS
 
     light.shadowAttenuation = 1;
     #if defined(ADDITIONAL_LIGHT_CALCULATE_SHADOWS)
-        light.shadowAttenuation = AdditionalLightShadow(perObjectLightIndex, positionWS,shadowMask,occlusionProbeChannels,softScale);
+        light.shadowAttenuation = AdditionalLightShadow(perObjectLightIndex, positionWS,shadowMask,occlusionProbeChannels,softScale,light.direction);
     #endif
 
     return light;

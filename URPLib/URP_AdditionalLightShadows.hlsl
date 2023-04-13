@@ -1,6 +1,6 @@
 /*
-    keywords:
-
+    need keywords:
+    _ADDITIONAL_LIGHT_SHADOWS
     _ADDITIONAL_LIGHT_SHADOWS_SOFT 
 */
 
@@ -84,6 +84,11 @@ ShadowSamplingData GetAdditionalLightShadowSamplingData()
     return shadowSamplingData;
 }
 
+// ShadowParams
+// x: ShadowStrength
+// y: 1.0 if shadow is soft, 0.0 otherwise
+// z: 1.0 if cast by a point light (6 shadow slices), 0.0 if cast by a spot light (1 shadow slice)
+// w: first shadow slice index for this light, there can be 6 in case of point lights. (-1 for non-shadow-casting-lights)
 float4 GetAdditionalLightShadowParams(int lightIndex)
 {
 #if USE_STRUCTURED_BUFFER_FOR_LIGHT_DATA
@@ -104,14 +109,31 @@ float SampleShadowmapFiltered(ShadowSamplingData samplingData,float4 shadowCoord
 
 // returns 0.0 if position is in light's shadow
 // returns 1.0 if position is in light
-float AdditionalLightRealtimeShadow(int lightIndex, float3 positionWS,float softScale=1)
+float AdditionalLightRealtimeShadow(int lightIndex, float3 positionWS,float softScale=1,float3 lightDirection=0)
 {
-    float4 shadowCoord = mul(_AdditionalLightsWorldToShadow[lightIndex], float4(positionWS, 1.0));
-    // perspective 
-    shadowCoord.xyz /= shadowCoord.w;
-
     float4 shadowParams = GetAdditionalLightShadowParams(lightIndex);
     float shadowStrength = shadowParams.x;
+    half isPoint = shadowParams.z;
+    int shadowSliceIndex = shadowParams.w;
+
+    if(shadowSliceIndex < 0)
+        return 1;
+
+    UNITY_BRANCH
+    if(isPoint)
+    {
+        float cubemapFaceId = CubeMapFaceID(-lightDirection);
+        shadowSliceIndex += cubemapFaceId;
+    }
+
+    #if USE_STRUCTURED_BUFFER_FOR_LIGHT_DATA
+        float4 shadowCoord = mul(_AdditionalLightsWorldToShadow_SSBO[shadowSliceIndex], float4(positionWS, 1.0));
+    #else
+        float4 shadowCoord = mul(_AdditionalLightsWorldToShadow[shadowSliceIndex], float4(positionWS, 1.0));
+    #endif
+
+    // perspective 
+    shadowCoord.xyz /= shadowCoord.w;
 
     float attenuation = 1;
     #if defined(_ADDITIONAL_LIGHT_SHADOWS_SOFT)
@@ -136,9 +158,9 @@ float GetAdditionalLightShadowFade(float3 positionWS)
     return float(fade);
 }
 
-float AdditionalLightShadow(int lightIndex, float3 positionWS,float4 shadowMask,float4 occlusionProbeChannels,float softScale=1)
+float AdditionalLightShadow(int lightIndex, float3 positionWS,float4 shadowMask,float4 occlusionProbeChannels,float softScale=1,float3 lightDirection=0)
 {
-    float realtimeShadow = AdditionalLightRealtimeShadow(lightIndex, positionWS,softScale);
+    float realtimeShadow = AdditionalLightRealtimeShadow(lightIndex, positionWS,softScale,lightDirection);
     
     #ifdef CALCULATE_BAKED_SHADOWS
         float bakedShadow = BakedShadow(shadowMask, occlusionProbeChannels);
