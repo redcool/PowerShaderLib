@@ -4,7 +4,17 @@
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 //----------------
 // Box blur
+// demo : BoxBlur(_MainTex,sampler_MainTex,i.texcoord,_MainTex_TexelSize.xy * _BlurSize* float2(1,0),_StepCount);
 //----------------
+half4 BoxBlur(TEXTURE2D_PARAM(tex,state),float2 uv,float2 uvOffset,int stepCount=10){
+    half4 c = 0;
+    half halfStepCount = stepCount*0.5;
+    for(int i=0;i<stepCount;i++){
+        c += SAMPLE_TEXTURE2D(tex,state,uv + uvOffset * (i-halfStepCount));
+    }
+    return c * rcp(stepCount);
+}
+
 float4 SampleBox(TEXTURE2D_PARAM(tex,state), float4 texel, float2 uv, float delta) {
 	float2 p = texel.xy * delta;
 	float4 c = SAMPLE_TEXTURE2D(tex, state, uv + float2(-1, -1) * p);
@@ -13,6 +23,7 @@ float4 SampleBox(TEXTURE2D_PARAM(tex,state), float4 texel, float2 uv, float delt
 	c += SAMPLE_TEXTURE2D(tex, state, uv + float2(1, 1) * p);
 
 	return c * 0.25;
+    // return BoxBlur(tex,state,uv,texel.xy * delta);
 }
 
 float4 SampleBox(TEXTURE2D_PARAM(tex,state),float4 texel,float2 uv, float delta,float sideWeight,float centerWeight=0) {
