@@ -1,7 +1,7 @@
 #if !defined(BLUR_LIB_HLSL)
 #define BLUR_LIB_HLSL
 
-#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+// #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 //----------------
 // Box blur
 // demo : BoxBlur(_MainTex,sampler_MainTex,i.texcoord,_MainTex_TexelSize.xy * _BlurSize* float2(1,0),_StepCount);
