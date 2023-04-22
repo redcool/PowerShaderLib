@@ -8,7 +8,7 @@
     #define MAX_VISIBLE_LIGHTS 256
 #endif
 
-#include "URP_Input.hlsl"
+// #include "URP_Input.hlsl"
 #include "URP_AdditionalLightShadows.hlsl"
 
 

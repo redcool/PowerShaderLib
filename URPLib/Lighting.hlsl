@@ -2,6 +2,7 @@
 #define LIGHTING_HLSL
 
     #include "URP_GI.hlsl"
+    #include "URP_Input.hlsl"
     #include "URP_Lighting.hlsl"
     
     float3 CalcLight(Light light,float3 diffColor,float3 specColor,float3 n,float3 v,float a,float a2){

@@ -1,11 +1,14 @@
 #if !defined(SCREEN_TEXTURES_HLSL)
 #define SCREEN_TEXTURES_HLSL
 
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareOpaqueTexture.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+TEXTURE2D(_CameraDepthTexture);
+SAMPLER(sampler_CameraDepthTexture);
+
+TEXTURE2D(_CameraOpaqueTexture);
+SAMPLER(sampler_CameraOpaqueTexture);
 
 float GetScreenDepth(float2 suv){
-    float depth = SAMPLE_TEXTURE2D(_CameraDepthTexture,sampler_CameraDepthTexture,UnityStereoTransformScreenSpaceTex(suv)).x;
+    float depth = SAMPLE_TEXTURE2D(_CameraDepthTexture,sampler_CameraDepthTexture,(suv)).x;
 
     #if !defined(UNITY_REVERSED_Z)
         depth = depth *2-1;
@@ -18,7 +21,7 @@ float3 CalcWorldNormal(float3 worldPos){
 }
 
 float3 GetScreenColor(float2 suv){
-    return  SAMPLE_TEXTURE2D_X(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, UnityStereoTransformScreenSpaceTex(suv)).xyz;
+    return  SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, (suv)).xyz;
 }
 
 #endif //SCREEN_TEXTURES_HLSL
