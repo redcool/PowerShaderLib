@@ -1,4 +1,4 @@
-Shader "Hidden/Utils/DeferredShading"
+Shader "Hidden/Utils/GBufferComposite"
 {
     Properties
     {
@@ -23,43 +23,56 @@ Shader "Hidden/Utils/DeferredShading"
         float2 uv : TEXCOORD;
     };
 
-    sampler2D _GBuffer0;
-    sampler2D _GBuffer1;
+    sampler2D _ColorBuffer0;
+    sampler2D _ColorBuffer1;
     
 
     v2f vert (appdata i)
     {
         v2f o;
         // FullScreenTriangleVert(vid,o.vertex/**/,o.uv/**/);
-        o.vertex = (i.vertex.xy*2,0);
+        o.vertex = float4(i.vertex.xy*2,0,1);
         o.uv = i.uv;
+        o.uv = 1- o.uv; // cube's uv
         return o;
     }
 
     float4 frag (v2f i) : SV_Target
     {
-        float4 gbuffer0 = tex2D(_GBuffer0,i.uv);// color
-        float4 gbuffer1 = tex2D(_GBuffer1,i.uv); // normal
+        float4 gbuffer0 = tex2D(_ColorBuffer0,i.uv);// color
+        float4 gbuffer1 = tex2D(_ColorBuffer1,i.uv); // normal
 
         float3 albedo = gbuffer0.xyz;
 
         float3 normal = gbuffer1.xyz;
         normal.z = sqrt(1-gbuffer1.x*gbuffer1.x-gbuffer1.y*gbuffer1.y);
 
-        float depth = GetScreenDepth(i.uv);
+        float depth = GetScreenDepth(i.uv);    
         float3 worldPos = ComputeWorldSpacePosition(i.uv,depth,UNITY_MATRIX_I_VP);
         Light mainLight = GetMainLight();
 
-        float3 v = _WorldSpaceCameraPos.xyz;
+        float3 v = normalize(_WorldSpaceCameraPos.xyz - worldPos);
         float3 l = mainLight.direction;
         float3 h = normalize(l+v);
-
         float nv = saturate(dot(normal,v));
         float nl = saturate(dot(normal,l));
         float nh = saturate(dot(normal,h));
+        float lh = saturate(dot(l,h));
 
         float4 col = 0;
-        col.xyz = nh;
+
+        float m = 0.5;
+        float3 diffCol = albedo * (1-m);
+        float3 specCol = lerp(0.04,albedo,m);
+        
+        float r = 0.5;
+        float r2 = r*r;
+        float d = nh*nh*(r2-1)+1;
+        float specTerm = r2/(d*d* max(0.001,lh*lh) * (4*r+2));
+        float3 diffuse = diffCol;
+
+        float radiance = nl;
+        col.xyz = (diffuse + specTerm * specCol) * radiance;
 
         return col;
     }
@@ -67,13 +80,10 @@ Shader "Hidden/Utils/DeferredShading"
 
     SubShader
     {
-        Cull off
-        zwrite off
-        ztest always
 
         Pass
         {
-            Tags{"LightMode"="DeferredShading"}
+            Tags{"LightMode"="GBufferComposite"}
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
