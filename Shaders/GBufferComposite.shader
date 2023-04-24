@@ -33,7 +33,9 @@ Shader "Hidden/Utils/GBufferComposite"
         // FullScreenTriangleVert(vid,o.vertex/**/,o.uv/**/);
         o.vertex = float4(i.vertex.xy*2,0,1);
         o.uv = i.uv;
+        #if !defined(UNITY_REVERSED_Z)
         o.uv = 1- o.uv; // cube's uv
+        #endif
         return o;
     }
 
@@ -47,7 +49,7 @@ Shader "Hidden/Utils/GBufferComposite"
         float3 normal = gbuffer1.xyz;
         normal.z = sqrt(1-gbuffer1.x*gbuffer1.x-gbuffer1.y*gbuffer1.y);
 
-        float depth = GetScreenDepth(i.uv);    
+        float depth = GetScreenDepth(i.uv);
         float3 worldPos = ComputeWorldSpacePosition(i.uv,depth,UNITY_MATRIX_I_VP);
         Light mainLight = GetMainLight();
 
@@ -71,7 +73,7 @@ Shader "Hidden/Utils/GBufferComposite"
         float specTerm = r2/(d*d* max(0.001,lh*lh) * (4*r+2));
         float3 diffuse = diffCol;
 
-        float radiance = nl;
+        float3 radiance = nl * mainLight.color;
         col.xyz = (diffuse + specTerm * specCol) * radiance;
 
         return col;
@@ -83,6 +85,8 @@ Shader "Hidden/Utils/GBufferComposite"
 
         Pass
         {
+            cull off
+            ztest always
             Tags{"LightMode"="GBufferComposite"}
             HLSLPROGRAM
             #pragma vertex vert
