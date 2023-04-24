@@ -1,11 +1,14 @@
-#if !defined(SCREEN_TEXTURES_HLSL)
+#if !defined(SCREEN_TEXTURES_HLSL) 
 #define SCREEN_TEXTURES_HLSL
 
+#if !defined(SKIP_DEPTH)
 TEXTURE2D(_CameraDepthTexture);
 SAMPLER(sampler_CameraDepthTexture);
-
+#endif
+#if !defined(SKIP_OPAQUE)
 TEXTURE2D(_CameraOpaqueTexture);
 SAMPLER(sampler_CameraOpaqueTexture);
+#endif
 
 float GetScreenDepth(float2 suv){
     float depth = SAMPLE_TEXTURE2D(_CameraDepthTexture,sampler_CameraDepthTexture,(suv)).x;
