@@ -74,16 +74,13 @@ half3 CalcDebugColor(
     {
         case DEBUGMATERIALVALIDATIONMODE_ALBEDO:
             CalculateValidationAlbedo(albedo,debugColor/**/);
-            break;
+            return debugColor;
         case DEBUGMATERIALVALIDATIONMODE_METALLIC:
             CalculateValidationMetallic(albedo,metallic,debugColor/**/);
-            break;
+            return debugColor;
     }
     
-    if(_DebugMaterialValidationMode == 0)
-        debugColor = TryGetDebugColorInvalidMode(debugColor);
-    
-    return debugColor.xyz;
+    return TryGetDebugColorInvalidMode(debugColor);
 }
 
 #endif //URP_DEBUG_DISPLAY_HLSL
