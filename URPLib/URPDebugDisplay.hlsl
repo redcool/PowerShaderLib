@@ -79,7 +79,10 @@ half3 CalcDebugColor(
             CalculateValidationMetallic(albedo,metallic,debugColor/**/);
             break;
     }
-
+    
+    if(_DebugMaterialValidationMode == 0)
+        debugColor = TryGetDebugColorInvalidMode(debugColor);
+    
     return debugColor.xyz;
 }
 
