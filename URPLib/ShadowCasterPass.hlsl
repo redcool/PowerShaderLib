@@ -1,18 +1,33 @@
-#if !defined(SHADOW_CASTER_PASS_HLSL)
-#define SHADOW_CASTER_PASS_HLSL
-
+#if !defined(URP_SHADOW_CASTER_PASS_HLSL)
+#define URP_SHADOW_CASTER_PASS_HLSL
+#include "../../PowerShaderLib/UrpLib/URP_MainLightShadows.hlsl"
 /**
-    variables:
-    _MainTex
+    variables(can override):
+    _MainTex,sampler_MainTex
+    _MainTexChannel
     _Cutoff
 
     keywords:
-    _ALPHA_TEST or _ALPHATEST_ON : alpha test
-    SHADOW_PASS or null : shadowCasterPass or depthpass
+    ALPHA_TEST or _ALPHATEST_ON : alpha test
+    SHADOW_PASS : shadowCasterPass or depthpass
+    USE_SAMPLER2D : use tex2D or SAMPLE_TEXTURE2D
 
+    //============================
+    Demo(PowerVFX ShadowCasterPass):
+    #define SHADOW_PASS
+    #define USE_SAMPLER2D
+    #define _MainTex _DissolveTex
+    #define _MainTexChannel _DissolveTexChannel
 */
 
-#include "../../PowerShaderLib/UrpLib/URP_MainLightShadows.hlsl"
+// default values
+#if !defined(_MainTexChannel)
+#define _MainTexChannel 3
+#endif
+
+// #if !defined(_Cutoff)
+// #define _Cutoff 0.5
+// #endif
 
 struct appdata
 {
@@ -55,12 +70,17 @@ v2f vert(appdata input){
 }
 
 float4 frag(v2f input):SV_Target{
-    #if defined(_ALPHA_TEST)
+    #if defined(ALPHA_TEST) || defined(_ALPHATEST_ON)
+        #if defined(USE_SAMPLER2D)
+        float4 tex = tex2D(_MainTex,input.uv);
+        #else
         float4 tex = SAMPLE_TEXTURE2D(_MainTex,sampler_MainTex,input.uv);
-        clip(tex.a - _Cutoff);
+        #endif
+        
+        clip(tex[_MainTexChannel] - _Cutoff -0.000001);
     #endif
     return 0;
 }
 
 
-#endif //SHADOW_CASTER_PASS_HLSL
+#endif //URP_SHADOW_CASTER_PASS_HLSL

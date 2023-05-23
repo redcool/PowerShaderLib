@@ -3,7 +3,6 @@
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
-
 #define TRANSFORM_TEX(tex, name) ((tex.xy) * name##_ST.xy + name##_ST.zw)
 
 
@@ -23,6 +22,7 @@ half4 _LightColor0;
 #define _MainLightColor _LightColor0
 #endif
 
+#define branch_if UNITY_BRANCH if
 
 //////////// #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityInput.hlsl"
 // Time (t = time since current level load) values from Unity
