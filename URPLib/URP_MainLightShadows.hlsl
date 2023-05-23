@@ -95,118 +95,104 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
     return float4(shadowCoord.xyz, cascadeIndex);
 }
 
-    float4 _ShadowBias; // x: depth bias, y: normal bias
-    float _MainLightShadowOn; //send  from PowerUrpLitFeature
+float4 _ShadowBias; // x: depth bias, y: normal bias
+float _MainLightShadowOn; //send  from PowerUrpLitFeature
 
-    float3 ApplyShadowBias(float3 positionWS, float3 normalWS, float3 lightDirection,float matShadowNormalBias=0,float matShadowDepthBias=0)
-    {
-        float invNdotL = 1.0 - saturate(dot(lightDirection, normalWS));
-        float scale = invNdotL * (_ShadowBias.y + matShadowNormalBias);
+float3 ApplyShadowBias(float3 positionWS, float3 normalWS, float3 lightDirection,float matShadowNormalBias=0,float matShadowDepthBias=0)
+{
+    float invNdotL = 1.0 - saturate(dot(lightDirection, normalWS));
+    float scale = invNdotL * (_ShadowBias.y + matShadowNormalBias);
 
-        // normal bias is negative since we want to apply an inset normal offset
-        positionWS = lightDirection * (_ShadowBias.xxx + matShadowDepthBias) + positionWS;
-        positionWS = normalWS * scale.xxx + positionWS;
-        return positionWS;
-    }
-    
-    float GetShadowFade(float3 positionWS)
-    {
-        float3 camToPixel = positionWS - _WorldSpaceCameraPos;
-        float distanceCamToPixel2 = dot(camToPixel, camToPixel);
+    // normal bias is negative since we want to apply an inset normal offset
+    positionWS = lightDirection * (_ShadowBias.xxx + matShadowDepthBias) + positionWS;
+    positionWS = normalWS * scale.xxx + positionWS;
+    return positionWS;
+}
 
-        float fade = saturate(distanceCamToPixel2 * _MainLightShadowParams.z + _MainLightShadowParams.w);
-        return fade;
-    }
+float GetShadowFade(float3 positionWS)
+{
+    float3 camToPixel = positionWS - _WorldSpaceCameraPos;
+    float distanceCamToPixel2 = dot(camToPixel, camToPixel);
 
-    float SampleShadowmap(TEXTURE2D_SHADOW_PARAM(shadowMap,sampler_ShadowMap),float4 shadowCoord,float shadowSoftScale){
-        float shadow = SAMPLE_TEXTURE2D_SHADOW(shadowMap,sampler_ShadowMap, shadowCoord.xyz);
+    float fade = saturate(distanceCamToPixel2 * _MainLightShadowParams.z + _MainLightShadowParams.w);
+    return fade;
+}
 
-        // return shadow;
-        #if defined(_SHADOWS_SOFT)
-            shadow *= SOFT_SHADOW_WEIGHTS[0];
+float SampleShadowmap(TEXTURE2D_SHADOW_PARAM(shadowMap,sampler_ShadowMap),float4 shadowCoord,float shadowSoftScale){
+    float shadow = SAMPLE_TEXTURE2D_SHADOW(shadowMap,sampler_ShadowMap, shadowCoord.xyz);
 
-            float2 psize = _MainLightShadowmapSize.xy * shadowSoftScale;
-            const float2 uvs[] = { float2(-psize.x,0),float2(0,psize.y),float2(psize.x,0),float2(0,-psize.y) };
+    // return shadow;
+    #if defined(_SHADOWS_SOFT)
+        shadow *= SOFT_SHADOW_WEIGHTS[0];
 
-            float2 offset = 0;
-            for(int x=0;x< SOFT_SHADOW_COUNT;x++){
-                offset = uvs[x] ;
-                shadow +=SAMPLE_TEXTURE2D_SHADOW(shadowMap,sampler_ShadowMap, float3(shadowCoord.xy + offset,shadowCoord.z)) * SOFT_SHADOW_WEIGHTS[x+1];
-            }
-        #endif 
-        
-        return shadow;
-    }
+        float2 psize = _MainLightShadowmapSize.xy * shadowSoftScale;
+        const float2 uvs[] = { float2(-psize.x,0),float2(0,psize.y),float2(psize.x,0),float2(0,-psize.y) };
 
-    float MixRealtimeAndBakedShadows(float realtimeShadow, float bakedShadow, float shadowFade)
-    {
-    #if defined(LIGHTMAP_SHADOW_MIXING)
-        return min(lerp(realtimeShadow, 1, shadowFade), bakedShadow);
-    #else
-        return lerp(realtimeShadow, bakedShadow, shadowFade);
-    #endif
-    }
-
-    float BakedShadow(float4 shadowMask, float4 occlusionProbeChannels)
-    {
-        // Here occlusionProbeChannels used as mask selector to select shadows in shadowMask
-        // If occlusionProbeChannels all components are zero we use default baked shadow value 1.0
-        // This code is optimized for mobile platforms:
-        // float bakedShadow = any(occlusionProbeChannels) ? dot(shadowMask, occlusionProbeChannels) : 1.0h;
-        float bakedShadow = float(1.0) + dot(shadowMask - float(1.0), occlusionProbeChannels);
-        return bakedShadow;
-    }
-
-    float CalcShadow (float4 shadowCoord,float3 worldPos,half mainLightShadowSoftScale=1)
-    {
-        float shadow = 1;
-        #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
-        {
-            //shadow = SAMPLE_TEXTURE2D_SHADOW(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture, shadowCoord.xyz);
-            shadow = SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture),shadowCoord,mainLightShadowSoftScale);
-            shadow = lerp(1,shadow,_MainLightShadowParams.x); // shadow intensity
-            shadow = BEYOND_SHADOW_FAR(shadowCoord) ? 1 : shadow; // shadow range
-
-            float shadowFade = GetShadowFade(worldPos); 
-            shadowFade = shadowCoord.w == 4 ? 1.0 : shadowFade;
-            
-            shadow = lerp(shadow,1,shadowFade);
+        float2 offset = 0;
+        for(int x=0;x< SOFT_SHADOW_COUNT;x++){
+            offset = uvs[x] ;
+            shadow +=SAMPLE_TEXTURE2D_SHADOW(shadowMap,sampler_ShadowMap, float3(shadowCoord.xy + offset,shadowCoord.z)) * SOFT_SHADOW_WEIGHTS[x+1];
         }
+    #endif 
+    
+    return shadow;
+}
+
+float MixRealtimeAndBakedShadows(float realtimeShadow, float bakedShadow, float shadowFade)
+{
+#if defined(LIGHTMAP_SHADOW_MIXING)
+    return min(lerp(realtimeShadow, 1, shadowFade), bakedShadow);
+#else
+    return lerp(realtimeShadow, bakedShadow, shadowFade);
+#endif
+}
+
+float BakedShadow(float4 shadowMask, float4 occlusionProbeChannels)
+{
+    // Here occlusionProbeChannels used as mask selector to select shadows in shadowMask
+    // If occlusionProbeChannels all components are zero we use default baked shadow value 1.0
+    // This code is optimized for mobile platforms:
+    // float bakedShadow = any(occlusionProbeChannels) ? dot(shadowMask, occlusionProbeChannels) : 1.0h;
+    float bakedShadow = float(1.0) + dot(shadowMask - float(1.0), occlusionProbeChannels);
+    return bakedShadow;
+}
+
+float CalcShadow(float4 shadowCoord,float3 worldPos,float4 shadowMask,float softScale)
+{
+    float shadow = 1;
+    #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+    // if(receiveShadow){
+        //shadow = SAMPLE_TEXTURE2D_SHADOW(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture, shadowCoord.xyz);
+        shadow = SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture),shadowCoord,softScale);
+        shadow = lerp(1,shadow,_MainLightShadowParams.x); // shadow intensity
+        shadow = BEYOND_SHADOW_FAR(shadowCoord) ? 1 : shadow; // shadow range
+
+        // baked shadow
+        #if defined(CALCULATE_BAKED_SHADOWS)
+            float bakedShadow = BakedShadow(shadowMask,_MainLightOcclusionProbes);
+        #else
+            float bakedShadow = 1;
         #endif
-        return shadow;
-    }
 
-    float CalcShadow (float4 shadowCoord,float3 worldPos,float4 shadowMask,float softScale)
-    {
-        float shadow = 1;
-        
-        #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
-            // if(receiveShadow){
-                //shadow = SAMPLE_TEXTURE2D_SHADOW(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture, shadowCoord.xyz);
-                shadow = SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture,sampler_MainLightShadowmapTexture),shadowCoord,softScale);
-                shadow = lerp(1,shadow,_MainLightShadowParams.x); // shadow intensity
-                shadow = BEYOND_SHADOW_FAR(shadowCoord) ? 1 : shadow; // shadow range
+        // shadow fade
+        float shadowFade = GetShadowFade(worldPos); 
+        // shadowFade = shadowCoord.w == 4 ? 1.0 : shadowFade;
+        // mix 
+        shadow = MixRealtimeAndBakedShadows(shadow,bakedShadow,shadowFade);
+    // }
+    #endif 
+    return shadow;
+}
+float CalcShadow (float4 shadowCoord,float3 worldPos,half mainLightShadowSoftScale=1)
+{
+    return CalcShadow(shadowCoord,worldPos,1,mainLightShadowSoftScale);
+}
 
-                // baked shadow
-                #if defined(CALCULATE_BAKED_SHADOWS)
-                    float bakedShadow = BakedShadow(shadowMask,_MainLightOcclusionProbes);
-                #else
-                    float bakedShadow = 1;
-                #endif
+// obsolete (for compatible)
+float CalcShadow (float4 shadowCoord,float3 worldPos,float4 shadowMask,bool isReceiveShadow,float softScale){
+    return CalcShadow(shadowCoord,worldPos,shadowMask,softScale);
+}
 
-                // shadow fade
-                float shadowFade = GetShadowFade(worldPos); 
-                // shadowFade = shadowCoord.w == 4 ? 1.0 : shadowFade;
-                // mix 
-                shadow = MixRealtimeAndBakedShadows(shadow,bakedShadow,shadowFade);
-            // }
-        #endif 
-        return shadow;
-    }
-    float CalcShadow (float4 shadowCoord,float3 worldPos,float4 shadowMask,bool isReceiveShadow,float softScale){
-        return CalcShadow(shadowCoord,worldPos,shadowMask,softScale);
-    }
-
-    #define MainLightShadow(shadowCoord,worldPos,shadowMask,softScale) CalcShadow(shadowCoord,worldPos,shadowMask,softScale) 
+#define MainLightShadow(shadowCoord,worldPos,shadowMask,softScale) CalcShadow(shadowCoord,worldPos,shadowMask,softScale)
 
 #endif //MAIN_LIGHT_SHADOW_HLSL
