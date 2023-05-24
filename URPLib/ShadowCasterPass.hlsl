@@ -29,9 +29,9 @@
 #define _MainTexChannel 3
 #endif
 
-#if !defined(_Cutoff)
-#define _Cutoff 0.5
-#endif
+// #if !defined(_Cutoff)
+// #define _Cutoff 0.5
+// #endif
 
 struct appdata
 {
