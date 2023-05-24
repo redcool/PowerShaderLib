@@ -1,16 +1,15 @@
-#if !defined(URP_SHADOW_CASTER_PASS_HLSL)
-#define URP_SHADOW_CASTER_PASS_HLSL
-#include "../../PowerShaderLib/UrpLib/URP_MainLightShadows.hlsl"
-/**
+/** 
     variables(can override):
     _MainTex,sampler_MainTex
     _MainTexChannel
     _Cutoff
+    _CustomShadowNormalBias,_CustomShadowDepthBias
 
     keywords:
     ALPHA_TEST or _ALPHATEST_ON : alpha test
     SHADOW_PASS : shadowCasterPass or depthpass
     USE_SAMPLER2D : use tex2D or SAMPLE_TEXTURE2D
+    _CASTING_PUNCTUAL_LIGHT_SHADOW : point,spot light shadow
 
     //============================
     Demo(PowerVFX ShadowCasterPass):
@@ -23,10 +22,20 @@
     // replace texture channel
     #define _MainTexChannel _DissolveTexChannel
 */
+#if !defined(URP_SHADOW_CASTER_PASS_HLSL)
+#define URP_SHADOW_CASTER_PASS_HLSL
+#include "../../PowerShaderLib/UrpLib/URP_MainLightShadows.hlsl"
 
 // default values
 #if !defined(_MainTexChannel)
 #define _MainTexChannel 3
+#endif
+
+#if !defined(_CustomShadowNormalBias)
+    #define _CustomShadowNormalBias 0
+#endif
+#if !defined(_CustomShadowDepthBias)
+    #define _CustomShadowDepthBias 0
 #endif
 
 // #if !defined(_Cutoff)
@@ -47,12 +56,20 @@ struct v2f{
 };
 
 float3 _LightDirection;
+float3 _LightPosition;
 
 //--------- shadow helpers
 float4 GetShadowPositionHClip(appdata input){
     float3 worldPos = mul(unity_ObjectToWorld,input.vertex).xyz;
     float3 worldNormal = UnityObjectToWorldNormal(input.normal);
-    float4 positionCS = UnityWorldToClipPos(ApplyShadowBias(worldPos,worldNormal,_LightDirection));
+
+    #if _CASTING_PUNCTUAL_LIGHT_SHADOW
+        float3 lightDirectionWS = normalize(_LightPosition - worldPos);
+    #else
+        float3 lightDirectionWS = _LightDirection;
+    #endif
+
+    float4 positionCS = UnityWorldToClipPos(ApplyShadowBias(worldPos,worldNormal,lightDirectionWS,_CustomShadowNormalBias,_CustomShadowDepthBias));
     #if UNITY_REVERSED_Z
         positionCS.z = min(positionCS.z, positionCS.w * UNITY_NEAR_CLIP_VALUE);
     #else
@@ -67,7 +84,7 @@ v2f vert(appdata input){
     #if defined(SHADOW_PASS)
         output.pos = GetShadowPositionHClip(input);
     #else
-        output.pos = mul(unity_ObjectToWorld,input.vertex);
+        output.pos = TransformObjectToHClip(input.vertex);
     #endif
     output.uv = TRANSFORM_TEX(input.texcoord,_MainTex);
     return output;
