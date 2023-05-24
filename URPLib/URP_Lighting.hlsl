@@ -1,3 +1,7 @@
+/*
+    keywords:
+    ADDITIONAL_LIGHT_CALCULATE_SHADOWS
+*/
 #if !defined(URP_LIGHTING_HLSL)
 #define URP_LIGHTING_HLSL
 #if defined(SHADER_API_MOBILE) && (defined(SHADER_API_GLES) || defined(SHADER_API_GLES30))

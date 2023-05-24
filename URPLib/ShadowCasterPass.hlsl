@@ -16,7 +16,11 @@
     Demo(PowerVFX ShadowCasterPass):
     #define SHADOW_PASS
     #define USE_SAMPLER2D
+
+    // replace texture
     #define _MainTex _DissolveTex
+    
+    // replace texture channel
     #define _MainTexChannel _DissolveTexChannel
 */
 
@@ -25,9 +29,9 @@
 #define _MainTexChannel 3
 #endif
 
-// #if !defined(_Cutoff)
-// #define _Cutoff 0.5
-// #endif
+#if !defined(_Cutoff)
+#define _Cutoff 0.5
+#endif
 
 struct appdata
 {

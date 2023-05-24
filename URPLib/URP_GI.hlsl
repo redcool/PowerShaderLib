@@ -232,4 +232,60 @@ float3 GlossyEnvironmentReflection(float3 reflectVector, float3 positionWS, floa
 #endif // _ENVIRONMENTREFLECTIONS_OFF
 }
 
+
+float3 CalcGIDiff(float3 normal,float3 diffColor,float2 lightmapUV=0){
+    float3 giDiff = 0;
+    #if defined(LIGHTMAP_ON)
+        giDiff = SampleLightmap(lightmapUV) * diffColor;
+    #else
+        giDiff = SampleSH(float4(normal,1)) * diffColor;
+    #endif
+    return giDiff;
+}
+
+float CalcFresnelTerm(float nv,half2 fresnelRange=half2(0,1)){
+    float fresnelTerm = Pow4(1 - nv);
+    fresnelTerm = smoothstep(fresnelRange.x,fresnelRange.y,fresnelTerm);
+    return fresnelTerm;
+}
+
+
+float3 CalcIBL(float3 reflectDir,TEXTURECUBE_PARAM(cube,sampler_cube),float rough,float4 hdrEncode){
+    float mip = (1.7 - 0.7*rough)*6*rough;
+    float4 cubeColor = SAMPLE_TEXTURECUBE_LOD(cube,sampler_cube,reflectDir,mip);
+    #if defined(UNITY_USE_NATIVE_HDR) || defined(UNITY_DOTS_INSTANTING_ENABLED)
+        float3 iblColor = cubeColor.rgb;
+    #else // mobile
+        float3 iblColor = DecodeHDREnvironment(cubeColor,hdrEncode);//_IBLCube_HDR,unity_SpecCube0_HDR
+    #endif
+    return iblColor;
+}
+
+float3 CalcReflectDir(float3 worldPos,float3 normal,float3 viewDir,float3 reflectDirOffset=0){
+    float3 reflectDir = reflect(-viewDir,normal);
+    reflectDir = (reflectDir + reflectDirOffset);
+
+    #if (SHADER_LIBRARY_VERSION_MAJOR >= 12) && defined(_REFLECTION_PROBE_BOX_PROJECTION)
+    reflectDir = BoxProjectedCubemapDirection(reflectDir,worldPos,unity_SpecCube0_ProbePosition,unity_SpecCube0_BoxMin,unity_SpecCube0_BoxMax);
+    #endif
+    return reflectDir;
+}
+
+half3 CalcGISpec(float a2,float smoothness,float metallic,float fresnelTerm,half3 specColor,half3 iblColor,half3 grazingTermColor=1){
+    float surfaceReduction = 1/(a2+1);
+    float grazingTerm = saturate(smoothness+metallic);
+    float3 giSpec = iblColor * surfaceReduction * lerp(specColor,grazingTermColor * grazingTerm,fresnelTerm);
+    return giSpec;
+}
+
+half3 CalcGISpec(TEXTURECUBE_PARAM(cube,sampler_cube),float4 cubeHDR,float3 specColor,
+    float3 worldPos,float3 normal,float3 viewDir,float3 reflectDirOffset,float reflectIntensity,
+    float nv,float roughness,float a2,float smoothness,float metallic,half2 fresnelRange=half2(0,1),half3 grazingTermColor=1)
+{
+    float3 reflectDir = CalcReflectDir(worldPos,normal,viewDir);
+    float3 iblColor = CalcIBL(reflectDir,cube,sampler_cube,roughness,cubeHDR) * reflectIntensity;
+    float fresnelTerm = CalcFresnelTerm(nv,fresnelRange);
+    float3 giSpec = CalcGISpec(a2,smoothness,metallic,fresnelTerm,specColor,iblColor,grazingTermColor);
+    return giSpec;
+}
 #endif // URP_GI_HLSL
