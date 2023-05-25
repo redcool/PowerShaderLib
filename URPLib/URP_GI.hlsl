@@ -271,6 +271,21 @@ float3 CalcReflectDir(float3 worldPos,float3 normal,float3 viewDir,float3 reflec
     return reflectDir;
 }
 
+float3 CalcInteriorMapReflectDir(float3 viewDirTS,float2 uv){
+    // calc 
+    uv = frac(uv)*2-1;
+    float3 a = float3(uv,-1);
+
+    viewDirTS.z *= -1;
+    // calc min
+    float3 rcpViewDir = rcp(viewDirTS);
+    rcpViewDir = abs(rcpViewDir) - rcpViewDir * a;
+    float minValue = min(min(rcpViewDir.x,rcpViewDir.y),rcpViewDir.z);
+
+    viewDirTS = viewDirTS * minValue + a;
+    return viewDirTS;
+}
+
 half3 CalcGISpec(float a2,float smoothness,float metallic,float fresnelTerm,half3 specColor,half3 iblColor,half3 grazingTermColor=1){
     float surfaceReduction = 1/(a2+1);
     float grazingTerm = saturate(smoothness+metallic);
@@ -282,7 +297,7 @@ half3 CalcGISpec(TEXTURECUBE_PARAM(cube,sampler_cube),float4 cubeHDR,float3 spec
     float3 worldPos,float3 normal,float3 viewDir,float3 reflectDirOffset,float reflectIntensity,
     float nv,float roughness,float a2,float smoothness,float metallic,half2 fresnelRange=half2(0,1),half3 grazingTermColor=1)
 {
-    float3 reflectDir = CalcReflectDir(worldPos,normal,viewDir);
+    float3 reflectDir = CalcReflectDir(worldPos,normal,viewDir,reflectDirOffset);
     float3 iblColor = CalcIBL(reflectDir,cube,sampler_cube,roughness,cubeHDR) * reflectIntensity;
     float fresnelTerm = CalcFresnelTerm(nv,fresnelRange);
     float3 giSpec = CalcGISpec(a2,smoothness,metallic,fresnelTerm,specColor,iblColor,grazingTermColor);

@@ -41,4 +41,9 @@
 
 #define TangentToWorld(tn,tSpace0,tSpace1,tSpace2) normalize(float3(dot(tSpace0.xyz,tn),dot(tSpace1.xyz,tn),dot(tSpace2.xyz,tn)))
 
+float3 WorldToTangent(float3 dir,float4 tSpace0,float4 tSpace1,float4 tSpace2){
+    float3x3 rot = float3x3(tSpace0.xyz,tSpace1.xyz,tSpace2.xyz);
+    return mul(dir,rot);
+}
+
 #endif //TANGENT_LIB_HLSL
