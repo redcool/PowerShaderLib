@@ -17,7 +17,7 @@
         _InvertSmoothnessOn
     );
 */
-void SplitPbrMaskTexture(float4 pbrMaskTex,int3 pbrMaskChannels,float3 pbrMaskRatios,out float m,out float s,out float o,bool isSmoothnessReversed=false){
+void SplitPbrMaskTexture(out float m,out float s,out float o,float4 pbrMaskTex,int3 pbrMaskChannels,float3 pbrMaskRatios,bool isSmoothnessReversed=false){
     m = pbrMaskTex[pbrMaskChannels.x] * pbrMaskRatios.x;
     s = pbrMaskTex[pbrMaskChannels.y] * pbrMaskRatios.y;
     s = lerp(s,1-s,isSmoothnessReversed);
@@ -25,13 +25,13 @@ void SplitPbrMaskTexture(float4 pbrMaskTex,int3 pbrMaskChannels,float3 pbrMaskRa
     o = lerp(1,pbrMaskTex[pbrMaskChannels.z],pbrMaskRatios.z);
 }
 
-void CalcRoughness(float smoothness,inout float rough,inout float a,inout float a2){
+void CalcRoughness(inout float rough,inout float a,inout float a2,float smoothness){
     rough = 1 - smoothness;
     a = max(rough * rough , HALF_MIN_SQRT);
     a2 = max(a*a,HALF_MIN);
 }
 
-void SplitDiffuseSpecularColor(float4 albedo,float metallic,out float3 diffColor,out float3 specColor){
+void CalcDiffuseSpecularColor(out float3 diffColor,out float3 specColor,float4 albedo,float metallic){
     diffColor = albedo.xyz * (1- metallic);
     specColor = lerp(0.04,albedo.xyz,metallic);
 }
@@ -44,20 +44,20 @@ float4 TriplanarSample(TEXTURE2D_PARAM(tex,sampler_tex),float3 worldPos,float3 n
     return c;
 }
 
-void ApplyAlphaPremultiply(float metallic,inout float3 albedo,inout float alpha){
+void ApplyAlphaPremultiply(inout float3 albedo,inout float alpha,float metallic){
     albedo *= alpha;
     alpha = lerp(alpha + 0.04,1,metallic);
 }
 
-void CalcSurfaceColor(half4 mainTex,half4 color,half cutoff,float metallic,bool isAlphaPremultiply,out half3 albedo,out half alpha){
+void CalcSurfaceColor(out half3 albedo,out half alpha,half4 mainTex,half4 color,half cutoff,float metallic,bool isAlphaPremultiply,half alphaChanel=3){
     mainTex *= color;
     albedo = mainTex.xyz;
-    alpha = mainTex.w;
+    alpha = mainTex[alphaChanel];
     #if defined(ALPHA_TEST)
         clip(alpha - cutoff);
     #endif
     if(isAlphaPremultiply){
-        ApplyAlphaPremultiply(metallic,albedo,alpha);
+        ApplyAlphaPremultiply(albedo/**/,alpha/**/,metallic);
     }
 }
 
