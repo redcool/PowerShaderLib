@@ -1,6 +1,7 @@
 #if !defined(URP_GI_HLSL)
 #define URP_GI_HLSL
 
+#include "../Lib/ReflectionLib.hlsl"
 
 // #define SampleSH(n) ShadeSH9(float4(n,1)) 
 // #define PerceptualRoughnessToMipmapLevel(roughness) roughness * (1.7 - roughness * 0.7) * 6
@@ -259,31 +260,6 @@ float3 CalcIBL(float3 reflectDir,TEXTURECUBE_PARAM(cube,sampler_cube),float roug
         float3 iblColor = DecodeHDREnvironment(cubeColor,hdrEncode);//_IBLCube_HDR,unity_SpecCube0_HDR
     #endif
     return iblColor;
-}
-
-float3 CalcReflectDir(float3 worldPos,float3 normal,float3 viewDir,float3 reflectDirOffset=0){
-    float3 reflectDir = reflect(-viewDir,normal);
-    reflectDir = (reflectDir + reflectDirOffset);
-
-    #if (SHADER_LIBRARY_VERSION_MAJOR >= 12) && defined(_REFLECTION_PROBE_BOX_PROJECTION)
-    reflectDir = BoxProjectedCubemapDirection(reflectDir,worldPos,unity_SpecCube0_ProbePosition,unity_SpecCube0_BoxMin,unity_SpecCube0_BoxMax);
-    #endif
-    return reflectDir;
-}
-
-float3 CalcInteriorMapReflectDir(float3 viewDirTS,float2 uv){
-    // calc 
-    uv = frac(uv)*2-1;
-    float3 a = float3(uv,-1);
-
-    viewDirTS.z *= -1;
-    // calc min
-    float3 rcpViewDir = rcp(viewDirTS);
-    rcpViewDir = abs(rcpViewDir) - rcpViewDir * a;
-    float minValue = min(min(rcpViewDir.x,rcpViewDir.y),rcpViewDir.z);
-
-    viewDirTS = viewDirTS * minValue + a;
-    return viewDirTS;
 }
 
 half3 CalcGISpec(float a2,float smoothness,float metallic,float fresnelTerm,half3 specColor,half3 iblColor,half3 grazingTermColor=1){
