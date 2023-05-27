@@ -9,9 +9,11 @@
     return float4(iblCol,1);
 */
 
-float3 CalcInteriorMapReflectDir(float3 viewDirTS,float2 uv){
+float3 CalcInteriorMapReflectDir(float3 viewDirTS,float2 uv,float2 uvRange=float2(0,1)){
     // calc uvBounds
-    uv = frac(uv)*2-1;
+    uv = frac(uv);
+    uv = clamp(uv,uvRange.x,uvRange.y);
+    uv = uv*2-1;
     float3 uvBounds = float3(uv,1);
 
     viewDirTS *= -1;
@@ -22,6 +24,8 @@ float3 CalcInteriorMapReflectDir(float3 viewDirTS,float2 uv){
     viewDirTS = viewDirTS * corner + uvBounds;
     // flip back
     viewDirTS.xy *= -1;
+
+    // viewDirTS = lerp(viewDirTS,0,uvBorder);
     return viewDirTS;
 }
 

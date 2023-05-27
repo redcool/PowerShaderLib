@@ -34,4 +34,20 @@ float HeightLine(float n){
     return (a+b);
 }
 
+/**
+    is x in range[a,b]
+*/
+float IsIn(float x,float a,float b){
+    return x - clamp(x,a,b) != 0;
+}
+
+/**
+    is in uv border ?
+*/
+float UVBorder(float2 uv,float2 uvRange){
+    uv = frac(uv);
+    float2 uvBorder = (uv - clamp(uv,uvRange.x,uvRange.y)) != 0;
+    return 1-saturate(dot(uvBorder,1));
+    // return uvBorder.x || uvBorder.y;
+}
 #endif //SDF_LIB_HLSL
