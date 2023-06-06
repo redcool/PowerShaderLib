@@ -84,7 +84,7 @@ v2f vert(appdata input){
     #if defined(SHADOW_PASS)
         output.pos = GetShadowPositionHClip(input);
     #else
-        output.pos = TransformObjectToHClip(input.vertex);
+        output.pos = TransformObjectToHClip(input.vertex.xyz);
     #endif
     output.uv = TRANSFORM_TEX(input.texcoord,_MainTex);
     return output;

@@ -239,7 +239,7 @@ float3 CalcGIDiff(float3 normal,float3 diffColor,float2 lightmapUV=0){
     #if defined(LIGHTMAP_ON)
         giDiff = SampleLightmap(lightmapUV) * diffColor;
     #else
-        giDiff = SampleSH(float4(normal,1)) * diffColor;
+        giDiff = SampleSH(normal) * diffColor;
     #endif
     return giDiff;
 }
