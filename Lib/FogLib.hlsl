@@ -2,8 +2,38 @@
 #define FOG_LIB_HLSL
 
 /** Warning 
-    include this file, need define
+    include this file, material need define
+
     half _FogOn
+    half _FogNoiseOn
+    half _DepthFogOn
+    half _HeightFogOn
+
+
+1 shader
+
+    [Header(Fog)]
+    [GroupToggle()]_FogOn("_FogOn",int) = 1
+    [GroupToggle(_,_DEPTH_FOG_NOISE_ON)]_FogNoiseOn("_FogNoiseOn",int) = 0
+    [GroupToggle(_)]_DepthFogOn("_DepthFogOn",int) = 1
+    [GroupToggle(_)]_HeightFogOn("_HeightFogOn",int) = 1
+
+//--------------------------------- Fog define
+    UNITY_DEFINE_INSTANCED_PROP(half ,_FogOn)
+    UNITY_DEFINE_INSTANCED_PROP(half ,_FogNoiseOn)
+    UNITY_DEFINE_INSTANCED_PROP(half ,_DepthFogOn)
+    UNITY_DEFINE_INSTANCED_PROP(half ,_HeightFogOn)
+
+//--------------------------------- Fog access
+    #define _FogOn UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial,_FogOn)
+    #define _FogNoiseOn UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial,_FogNoiseOn)
+    #define _DepthFogOn UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial,_DepthFogOn)
+    #define _HeightFogOn UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial,_HeightFogOn)    
+
+2 shader's vertex function
+    float2 fogCoord = CalcFogFactor(worldPos);
+3 shader's fragment function
+    BlendFogSphere(color.rgb ,worldPos,sphereFogCoord,_HeightFogOn,fogNoise,_DepthFogOn,1);
 */
 
 #include "NodeLib.hlsl"
@@ -86,6 +116,11 @@ void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHe
     float3 fogColor = lerp(_FogNearColor.rgb,unity_FogColor.rgb,fog.x);
     mainColor = lerp(mainColor,fogColor, depthFactor * fogAtten * _GlobalFogIntensity);
     // mainColor = depthFactor;
+}
+
+float CalcFogNoise(float3 worldPos){
+    float fogNoise = unity_gradientNoise( (worldPos.xz+worldPos.yz) * _FogDirTiling.w+ _FogDirTiling.xz * _Time.y );
+    return fogNoise;
 }
 
 void BlendFogSphereKeyword(inout half3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,float fogNoise,bool hasDepthFog=true,half fogAtten=1){
