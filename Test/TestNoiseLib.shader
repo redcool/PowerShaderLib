@@ -8,10 +8,6 @@ Shader "Unlit/TestNoiseLib"
         _Scales("_Scales",vector) = (1,1,1,1)
     }
 
-CGINCLUDE
-
-ENDCG
-
     SubShader
     {
         Tags { "RenderType"="Opaque" }
@@ -19,11 +15,11 @@ ENDCG
 
         Pass
         {
-            CGPROGRAM
+            HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
 
-            // #include "UnityCG.cginc"
+            #include "../Lib/UnityLib.hlsl"
             #include "../Lib/NoiseLib.hlsl"
 
             struct appdata
@@ -53,12 +49,12 @@ ENDCG
 float pn = SmoothGradientNoise(o.worldPos.xyz*10,_Scales.x,_Scales.y+o.worldPos.y)+0.5;
 v.vertex.y += pn*10;
 
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.vertex = TransformObjectToHClip(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 return o;
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            half4 frag (v2f i) : SV_Target
             {
                 float3 worldPos = (i.worldPos * 5);
 //                 float x = worldPos.x;
@@ -86,7 +82,7 @@ v.vertex.y += pn*10;
                 dist = smoothstep(0.1,.2,dist);
                 return dist;
             }
-            ENDCG
+            ENDHLSL
         }
     }
 }
