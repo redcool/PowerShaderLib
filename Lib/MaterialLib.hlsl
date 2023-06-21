@@ -8,13 +8,14 @@
 
 /**
     float4 pbrMask = SAMPLE_TEXTURE2D(_MetallicMaskMap,sampler_MetallicMaskMap,uv);
-    SplitPbrMaskTexture(pbrMask,
-        int3(_MetallicChannel,_SmoothnessChannel,_OcclusionChannel), // int3(0,1,2)
-        float3(_Metallic,_Smoothness,_Occlusion),
+    SplitPbrMaskTexture(
         data.metallic,//out
         data.smoothness, //out
         data.occlusion, //out
-        _InvertSmoothnessOn
+        pbrMask, // pbrMask texture
+        int3(_MetallicChannel,_SmoothnessChannel,_OcclusionChannel), // int3(0,1,2)
+        float3(_Metallic,_Smoothness,_Occlusion), // pbrMask sliders
+        _InvertSmoothnessOn // use roughness
     );
 */
 void SplitPbrMaskTexture(out float m,out float s,out float o,float4 pbrMaskTex,int3 pbrMaskChannels,float3 pbrMaskRatios,bool isSmoothnessReversed=false){
