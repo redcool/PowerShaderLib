@@ -1,8 +1,12 @@
+/**
+    like urp Input.hlsl
+*/
+
 #if !defined(UNITY_LIB_HLSL)
 #define UNITY_LIB_HLSL
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
-#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
+
 #define TRANSFORM_TEX(tex, name) ((tex.xy) * name##_ST.xy + name##_ST.zw)
 
 
@@ -330,5 +334,8 @@ half4 unity_AmbientGround;
 half4 unity_IndirectSpecColor;
 float4 unity_FogParams;
 half4  unity_FogColor;
+
+
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
 
 #endif // UNITY_LIB_HLSL
