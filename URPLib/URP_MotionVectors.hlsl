@@ -1,3 +1,6 @@
+/**
+     DrawSettings.perObjectData need MotionVector
+*/
 #if !defined(URP_MOTION_VECTORS_HLSL)
 #define URP_MOTION_VECTORS_HLSL
 
