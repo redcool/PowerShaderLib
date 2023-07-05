@@ -4,6 +4,7 @@
 #if !defined(URP_MOTION_VECTORS_HLSL)
 #define URP_MOTION_VECTORS_HLSL
 
+
 /**
     output fragment's velocity
 */
@@ -23,18 +24,33 @@ float4 CalcMotionVectors(float4 hClipPos,float4 lastHClipPos){
 
 /***
     1 declare in vertex's Attribute(appdata)
+    varName : variable's name
 */
 #define DECLARE_MOTION_VS_INPUT(varName) float3 varName:TEXCOORD4
 
 /**
     2 declare in vs output struct (v2f)
+    id0 : texcoord X
+    id1 : texcoord Y
 */
 #define DECLARE_MOTION_VS_OUTPUT(id0,id1)\
     float4 lastHClipPos:TEXCOORD##id0;\
     float4 hClipPos:TEXCOORD##id1
 
 /**
-    3 call CALC_MOTION_VECTORS in frag function
+    3call  in vertex shader
+
+    input : vs's input struct,like appdata(Varying)
+    output : v2f
+    clipPos : homogeneous clip space position
+*/
+#define CALC_MOTION_POSITIONS(input,v2f,clipPos)\
+    const float4 prevPos = (unity_MotionVectorsParams.x ==1)? float4(input.prevPos,1) : input.pos;\
+    v2f.hClipPos = clipPos;\
+    v2f.lastHClipPos = mul(_PrevViewProjMatrix,mul(UNITY_PREV_MATRIX_M,prevPos))\
+
+/**
+    4 call in frag function
     return float4(xy:motion vectors,zw:(01))
 
     like :
