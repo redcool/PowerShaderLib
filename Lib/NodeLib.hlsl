@@ -96,12 +96,12 @@ float Gray(float3 rgb){
 	return dot(float3(0.07,0.7,0.2),rgb);
 }
 
-float2 PolarUV(float2 mainUV,float2 center,float lenScale,float lenOffset,float rotOffset){
-	float2 uv = mainUV-center;
+float2 PolarUV(float2 mainUV,float2 center,half2 polarUVScale,float lenOffset,float rotOffset){
+	float2 uv = mainUV - center;
 
-	float r = sqrt(uv.x*uv.x+uv.y*uv.y)*lenScale+lenOffset;
+	float r = sqrt(uv.x*uv.x + uv.y*uv.y) + lenOffset;
 	float t = atan2(uv.y,uv.x) + rotOffset;
-	return float2(t,r);
+	return float2(t,r) * polarUVScale;
 }
 
 float2 Twirl(float2 uv,float2 center,float scale,float2 offset){

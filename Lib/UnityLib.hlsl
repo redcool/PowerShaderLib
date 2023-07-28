@@ -211,6 +211,7 @@ float3 GetWorldSpaceLightDir(float3 worldPos){
 #define UnityObjectToWorldNormal(normal) TransformObjectToWorldNormal(normal)
 #define UnityWorldSpaceViewDir(worldPos) GetWorldSpaceViewDir(worldPos)
 #define UnityObjectToClipPos(objectPos) TransformObjectToHClip(objectPos)
+#define UnityWorldSpaceLightDir(worldPos) GetWorldSpaceLightDir(worldPos)
 //==============================
 //  sh
 //==============================
