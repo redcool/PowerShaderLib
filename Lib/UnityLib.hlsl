@@ -1,14 +1,20 @@
 /**
-    like urp Input.hlsl
+    use urp or simplified
 */
+// #define USE_URP_LIB // uncomment this use urp flow
+#if defined(USE_URP_LIB)
+    #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+    #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
+    #define UNITY_LIB_HLSL
+#endif
 
 #if !defined(UNITY_LIB_HLSL)
 #define UNITY_LIB_HLSL
+
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
 
 #define TRANSFORM_TEX(tex, name) ((tex.xy) * name##_ST.xy + name##_ST.zw)
-
 
 #define HALF_MIN 6.103515625e-5  // 2^-14, the same value for 10, 11 and 16-bit: https://www.khronos.org/opengl/wiki/Small_Float_Formats
 #define HALF_MIN_SQRT 0.0078125  // 2^-7 == sqrt(HALF_MIN), useful for ensuring HALF_MIN after x^2
@@ -146,9 +152,17 @@ float4x4 unity_MatrixPreviousMI;
 //W : Camera only
 float4 unity_MotionVectorsParams;
 CBUFFER_END
+
 //==============================
-//  Transform
+//  env paramaters ,fog
 //==============================
+half4 glstate_lightmodel_ambient;
+half4 unity_AmbientSky;
+half4 unity_AmbientEquator;
+half4 unity_AmbientGround;
+half4 unity_IndirectSpecColor;
+float4 unity_FogParams;
+half4  unity_FogColor;
 
 #if !defined(USING_STEREO_MATRICES)
 float4x4 glstate_matrix_projection;
@@ -160,6 +174,10 @@ float4x4 unity_MatrixInvVP;
 float4 unity_StereoScaleOffset;
 int unity_StereoEyeIndex;
 #endif
+
+//==============================
+//  Transform
+//==============================
 
 #define UNITY_MATRIX_M     unity_ObjectToWorld
 #define UNITY_MATRIX_I_M   unity_WorldToObject
@@ -173,6 +191,11 @@ int unity_StereoEyeIndex;
 #define UNITY_MATRIX_T_MV  transpose(UNITY_MATRIX_MV)
 #define UNITY_MATRIX_IT_MV transpose(mul(UNITY_MATRIX_I_M, UNITY_MATRIX_I_V))
 #define UNITY_MATRIX_MVP   mul(UNITY_MATRIX_VP, UNITY_MATRIX_M)
+#define UNITY_PREV_MATRIX_M   unity_MatrixPreviousM
+#define UNITY_PREV_MATRIX_I_M unity_MatrixPreviousMI
+
+
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
 
 
 float3 TransformObjectToWorld(float3 objectPos){
@@ -325,18 +348,9 @@ float D_GGXNoPI(float NdotH, float rough)
 //==============================
 
 
-//==============================
-//  env paramaters ,fog
-//==============================
-half4 glstate_lightmodel_ambient;
-half4 unity_AmbientSky;
-half4 unity_AmbientEquator;
-half4 unity_AmbientGround;
-half4 unity_IndirectSpecColor;
-float4 unity_FogParams;
-half4  unity_FogColor;
 
 
-#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
+
+
 
 #endif // UNITY_LIB_HLSL
