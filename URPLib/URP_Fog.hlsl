@@ -19,7 +19,8 @@
     #define UNITY_Z_0_FAR_FROM_CLIPSPACE(coord) (coord)
 #endif
 
-float ComputeFogFactor(float z)
+#define ComputeFogFactor _ComputeFogFactor
+float _ComputeFogFactor(float z)
 {
     float clipZ_01 = UNITY_Z_0_FAR_FROM_CLIPSPACE(z);
 
@@ -36,7 +37,8 @@ float ComputeFogFactor(float z)
     #endif
 }
 
-float ComputeFogIntensity(float fogFactor)
+#define ComputeFogIntensity _ComputeFogIntensity
+float _ComputeFogIntensity(float fogFactor)
 {
     float fogIntensity = 0.0h;
     #if defined(FOG_LINEAR) || defined(FOG_EXP) || defined(FOG_EXP2)
@@ -54,8 +56,8 @@ float ComputeFogIntensity(float fogFactor)
     #endif
     return fogIntensity;
 }
-
-float3 MixFogColor(float3 fragColor, float3 fogColor, float fogFactor)
+#define MixFogColor _MixFogColor
+float3 _MixFogColor(float3 fragColor, float3 fogColor, float fogFactor)
 {
     #if defined(FOG_LINEAR) || defined(FOG_EXP) || defined(FOG_EXP2)
         float fogIntensity = ComputeFogIntensity(fogFactor);
@@ -64,7 +66,8 @@ float3 MixFogColor(float3 fragColor, float3 fogColor, float fogFactor)
     return fragColor;
 }
 
-float3 MixFog(float3 fragColor, float fogFactor)
+#define MixFog _MixFog
+float3 _MixFog(float3 fragColor, float fogFactor)
 {
     return MixFogColor(fragColor, unity_FogColor.rgb, fogFactor);
 }

@@ -1,10 +1,10 @@
 /**
     use urp or simplified
 */
-// #define USE_URP_LIB // uncomment this use urp flow
-#if defined(USE_URP_LIB)
+// #define USE_URP // uncomment this use urp flow
+#if defined(USE_URP)
     #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
-    #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
+    #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
     #define UNITY_LIB_HLSL
 #endif
 
@@ -199,7 +199,7 @@ int unity_StereoEyeIndex;
 
 
 float3 TransformObjectToWorld(float3 objectPos){
-    return mul(unity_ObjectToWorld,float4(objectPos,1)).xyz;
+    return mul(UNITY_MATRIX_M,float4(objectPos,1)).xyz;
 }
 
 float3 TransformObjectToWorldDir(float3 objectDir){
@@ -211,7 +211,7 @@ float4 TransformObjectToHClip(float3 objectPos){
 }
 
 float4 TransformWorldToHClip(float3 worldPos){
-    return mul(unity_MatrixVP,float4(worldPos,1));
+    return mul(UNITY_MATRIX_VP,float4(worldPos,1));
 }
 
 float3 TransformObjectToWorldNormal(float3 normal){
