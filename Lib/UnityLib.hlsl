@@ -19,8 +19,8 @@
 #define HALF_MIN 6.103515625e-5  // 2^-14, the same value for 10, 11 and 16-bit: https://www.khronos.org/opengl/wiki/Small_Float_Formats
 #define HALF_MIN_SQRT 0.0078125  // 2^-7 == sqrt(HALF_MIN), useful for ensuring HALF_MIN after x^2
 
-#define CBUFFER_START(name) cbuffer name {
-#define CBUFFER_END };
+// #define CBUFFER_START(name) cbuffer name {
+// #define CBUFFER_END };
 
 float4 _MainLightPosition;
 half4 _MainLightColor;
