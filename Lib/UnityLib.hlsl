@@ -3,7 +3,6 @@
 */
 // #define USE_URP // uncomment this use urp flow
 #if defined(USE_URP)
-    #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
     #define UNITY_LIB_HLSL
 #endif
