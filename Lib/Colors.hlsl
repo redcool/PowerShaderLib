@@ -159,7 +159,7 @@ float4 GlitchUV(
     ){
     float u = uv.x;
     float v = uv.y;
-    float time = _Time.w;
+    float time = max(1234,_Time.x);
 
     float snowFlackPeriod = sin(N21(uv+time))*2;
 
