@@ -145,17 +145,14 @@ float3 ApplyColorGradingLUT(float3 c){
 /**
 
 */
-
-
-float4 GlitchUV(    
-    float2 uv,
-    float _SnowFlakeIntensity=1,
-    float _JitterBlockSize=0.5, // [0,1]
-    float _JitterIntensity=0.5,
-    float _VerticalJumpIntensity=0.15,
-    float _HorizontalShake=0.5,
-    float _ColorDriftSpeed=0.1,float _ColorDriftIntensity=1,
-    float _HorizontalIntensity=0.1
+float4 GlitchUV(float2 uv,
+    float SnowFlakeIntensity=1,
+    float JitterBlockSize=0.5, // [0,1]
+    float JitterIntensity=0.5,
+    float VerticalJumpIntensity=0.15,
+    float HorizontalShake=0.5,
+    float ColorDriftSpeed=0.1,float ColorDriftIntensity=1,
+    float HorizontalIntensity=0.1
     ){
     float u = uv.x;
     float v = uv.y;
@@ -163,39 +160,39 @@ float4 GlitchUV(
 
     float snowFlackPeriod = sin(N21(uv+time))*2;
 
-    float2 snowFlake = (N21(uv * snowFlackPeriod)) * _SnowFlakeIntensity;
+    float2 snowFlake = (N21(uv * snowFlackPeriod)) * SnowFlakeIntensity;
 
-    float jitterThreshold = 0.002+pow(_JitterIntensity,3)*0.05;
-    float jitterBlockSize = lerp(0.0001,0.1,_JitterBlockSize);
+    float jitterThreshold = 0.002+pow(JitterIntensity,3)*0.05;
+    float jitterBlockSize = lerp(0.0001,0.1,JitterBlockSize);
     float jitter = N21(float2(v * jitterBlockSize,time)) *2-1;
-    jitter *= step(jitterThreshold,abs(jitter)) * _JitterIntensity;
+    jitter *= step(jitterThreshold,abs(jitter)) * JitterIntensity;
 
-    float verticalJumpTime = _Time.y * _VerticalJumpIntensity * 10.0;
-    float jump = lerp(v, frac(v + verticalJumpTime), _VerticalJumpIntensity);
+    float verticalJumpTime = _Time.y * VerticalJumpIntensity * 10.0;
+    float jump = lerp(v, frac(v + verticalJumpTime), VerticalJumpIntensity);
 
-    float hshake = N21(float2(time,2)-0.5) * _HorizontalShake;
+    float hshake = N21(float2(time,2)-0.5) * HorizontalShake;
 
-    float drift = sin(jump + _ColorDriftSpeed * time) * _ColorDriftIntensity;
+    float drift = sin(jump + ColorDriftSpeed * time) * ColorDriftIntensity;
 // return frac(drift);
 
-    float u1 = (jitter + snowFlake.x + hshake) * _HorizontalIntensity;
-    float u2 = (jitter + snowFlake.x + hshake + drift ) * _HorizontalIntensity;
+    float u1 = (jitter + snowFlake.x + hshake) * HorizontalIntensity;
+    float u2 = (jitter + snowFlake.x + hshake + drift ) * HorizontalIntensity;
     return float4(frac(float2(u + u1,jump)) , frac(float2(u + u2 ,jump)));
 }
 
 float4 Glitch(
     TEXTURE2D_PARAM(tex,sampler_tex),
     float2 uv,
-    float _SnowFlakeIntensity=1,
-    float _JitterBlockSize=0.5, // [0,1]
-    float _JitterIntensity=0.5,
-    float _VerticalJumpIntensity=0.15,
-    float _HorizontalShake=0.5,
-    float _ColorDriftSpeed=0.1,float _ColorDriftIntensity=1,
-    float _HorizontalIntensity=0.1
+    float SnowFlakeIntensity=1,
+    float JitterBlockSize=0.5, // [0,1]
+    float JitterIntensity=0.5,
+    float VerticalJumpIntensity=0.15,
+    float HorizontalShake=0.5,
+    float ColorDriftSpeed=0.1,float ColorDriftIntensity=1,
+    float HorizontalIntensity=0.1
 ){
-    float4 glitchUV = GlitchUV(uv,_SnowFlakeIntensity,_JitterBlockSize,_JitterIntensity,_VerticalJumpIntensity,
-        _HorizontalShake,_ColorDriftSpeed,_ColorDriftIntensity,_HorizontalIntensity);
+    float4 glitchUV = GlitchUV(uv,SnowFlakeIntensity,JitterBlockSize,JitterIntensity,VerticalJumpIntensity,
+        HorizontalShake,ColorDriftSpeed,ColorDriftIntensity,HorizontalIntensity);
 
     float4 c1 = SAMPLE_TEXTURE2D(tex,sampler_tex,glitchUV.xy);
     float4 c2 = SAMPLE_TEXTURE2D(tex,sampler_tex,glitchUV.zw);

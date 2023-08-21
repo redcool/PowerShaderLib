@@ -46,7 +46,10 @@ float3x3 AngleAxis3x3(float rad, float3 axis)
 void RotateUV(float rotAngle,float2 center,inout float2 uv){
     uv -= center;
     float uvAngle = radians(rotAngle);
-    uv.xy = mul(half2x2(cos(uvAngle),-sin(uvAngle),sin(uvAngle),cos(uvAngle)),uv.xy);
+
+    float c,s;
+    sincos(uvAngle,s,c);
+    uv.xy = mul(half2x2(c,s,-s,c),uv.xy);
     uv += center;
 }
 
