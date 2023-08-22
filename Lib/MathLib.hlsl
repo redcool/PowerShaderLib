@@ -127,4 +127,8 @@ float4x4 inverse(float4x4 m) {
     return ret;
 }
 
+float3 ConstructVector(float2 xy){
+    return float3(xy,sqrt(1 - dot(xy,xy)));
+}
+
 #endif //MATH_LIB_HLSL
