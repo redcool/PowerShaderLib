@@ -156,15 +156,19 @@ float4 GlitchUV(float2 uv,
     ){
     float u = uv.x;
     float v = uv.y;
-    float2 time = frac(_Time.xy);
+    float2 time = frac(_Time.zy+0.5);
 
     float snowFlackPeriod = sin(N21(uv+time.x))*2;
 
-    float2 snowFlake = (N21(uv * snowFlackPeriod)) * SnowFlakeIntensity;
+    float2 snowFlake = (N21(uv * snowFlackPeriod)*2-1) * SnowFlakeIntensity;
 
+// block
+// float jitter = N21(ceil(uv*JitterBlockSize)+time.xx+frac(uv*JitterBlockSize)*0.0)*2-1;
+// jitter *= step(JitterIntensity,abs(jitter));
+// return jitter;
     float jitterThreshold = 0.002+pow(JitterIntensity,3)*0.05;
     float jitterBlockSize = lerp(0.0001,0.1,JitterBlockSize);
-    float jitter = N21(float2(v * jitterBlockSize,time.x)) *2-1;
+    float jitter = N21(float2(ceil(v * JitterBlockSize*100),time.x)) *2-1;
     jitter *= step(jitterThreshold,abs(jitter)) * JitterIntensity;
 
     float verticalJumpTime = time.y * VerticalJumpIntensity * 10.0;
