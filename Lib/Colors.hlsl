@@ -152,7 +152,8 @@ float4 GlitchUV(float2 uv,
     float VerticalJumpIntensity=0.15,
     float HorizontalShake=0.5,
     float ColorDriftSpeed=0.1,float ColorDriftIntensity=1,
-    float HorizontalIntensity=0.1
+    float HorizontalIntensity=0.1,
+    half JitterHorizontalIntensity=1,half JitterVerticalIntensity=0
     ){
     float u = uv.x;
     float v = uv.y;
@@ -162,15 +163,16 @@ float4 GlitchUV(float2 uv,
 
     float snowFlake = (N21(uv * snowFlackPeriod)*2-1) * SnowFlakeIntensity;
 
-// block
-// float jitter = N21(ceil(uv*JitterBlockSize)+time.xx+frac(uv*JitterBlockSize)*0.0)*2-1;
-// jitter *= step(JitterIntensity,abs(jitter));
-// return jitter;
+// jitter & block
+    float2 jitterUV = ceil(uv.yx * JitterBlockSize)*time.x;
+    jitterUV *= lerp(0,1,half2(JitterHorizontalIntensity,JitterVerticalIntensity));
+
+    // float jitter = N21(float2(ceil(v * JitterBlockSize),time.x)) *2-1;
+    float jitter = N21(jitterUV) * 2-1;
     float jitterThreshold = 0.002+pow(JitterIntensity,3)*0.05;
-    float jitterBlockSize = lerp(0.0001,0.1,JitterBlockSize);
-    float jitter = N21(float2(ceil(v * JitterBlockSize*100),time.x)) *2-1;
     jitter *= step(jitterThreshold,abs(jitter)) * JitterIntensity;
 
+// vertical 
     float verticalJumpTime = time.y * VerticalJumpIntensity * 10.0;
     float jump = lerp(v, frac(v + verticalJumpTime), VerticalJumpIntensity);
 
@@ -193,10 +195,12 @@ float4 Glitch(
     float VerticalJumpIntensity=0.15,
     float HorizontalShake=0.5,
     float ColorDriftSpeed=0.1,float ColorDriftIntensity=1,
-    float HorizontalIntensity=0.1
+    float HorizontalIntensity=0.1,
+    float JitterHorizontalIntensity=1,float JitterVerticalIntensity=0
 ){
     float4 glitchUV = GlitchUV(uv,SnowFlakeIntensity,JitterBlockSize,JitterIntensity,VerticalJumpIntensity,
-        HorizontalShake,ColorDriftSpeed,ColorDriftIntensity,HorizontalIntensity);
+        HorizontalShake,ColorDriftSpeed,ColorDriftIntensity,HorizontalIntensity,
+        JitterHorizontalIntensity,JitterVerticalIntensity);
 
     float4 c1 = SAMPLE_TEXTURE2D(tex,sampler_tex,glitchUV.xy);
     float4 c2 = SAMPLE_TEXTURE2D(tex,sampler_tex,glitchUV.zw);
