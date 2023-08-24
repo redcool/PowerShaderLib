@@ -29,12 +29,13 @@ float3 CalcInteriorMapReflectDir(float3 viewDirTS,float2 uv,float2 uvRange=float
     return viewDirTS;
 }
 
-float3 CalcReflectDir(float3 worldPos,float3 normal,float3 viewDir,float3 reflectDirOffset=0){
+float3 CalcReflectDir(float3 worldPos,float3 normal,float3 viewDir,float3 reflectDirOffset=0,bool isBoxProjection=false){
     float3 reflectDir = reflect(-viewDir,normal);
     reflectDir = (reflectDir + reflectDirOffset);
 
-    #if (SHADER_LIBRARY_VERSION_MAJOR >= 12) && defined(_REFLECTION_PROBE_BOX_PROJECTION)
-    reflectDir = BoxProjectedCubemapDirection(reflectDir,worldPos,unity_SpecCube0_ProbePosition,unity_SpecCube0_BoxMin,unity_SpecCube0_BoxMax);
+    #if (SHADER_LIBRARY_VERSION_MAJOR >= 12) //&& defined(_REFLECTION_PROBE_BOX_PROJECTION)
+    if(isBoxProjection)
+        reflectDir = BoxProjectedCubemapDirection(reflectDir,worldPos,unity_SpecCube0_ProbePosition,unity_SpecCube0_BoxMin,unity_SpecCube0_BoxMax);
     #endif
     return reflectDir;
 }
