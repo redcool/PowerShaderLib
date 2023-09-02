@@ -21,7 +21,7 @@
 void SplitPbrMaskTexture(out float m,out float s,out float o,float4 pbrMaskTex,int3 pbrMaskChannels,float3 pbrMaskRatios,bool isSmoothnessReversed=false){
     m = pbrMaskTex[pbrMaskChannels.x] * pbrMaskRatios.x;
     s = pbrMaskTex[pbrMaskChannels.y] * pbrMaskRatios.y;
-    s = lerp(s,1-s,isSmoothnessReversed);
+    s = isSmoothnessReversed? 1-s : s;
     
     o = lerp(1,pbrMaskTex[pbrMaskChannels.z],pbrMaskRatios.z);
 }

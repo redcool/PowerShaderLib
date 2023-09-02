@@ -29,13 +29,34 @@ float3 CalcInteriorMapReflectDir(float3 viewDirTS,float2 uv,float2 uvRange=float
     return viewDirTS;
 }
 
+half3 BoxProjectedCubemapDir(half3 reflectionWS, float3 positionWS, float4 cubemapPositionWS, float4 boxMin, float4 boxMax)
+{
+    // Is this probe using box projection?
+    if (cubemapPositionWS.w > 0.0f)
+    {
+        float3 boxMinMax = (reflectionWS > 0.0f) ? boxMax.xyz : boxMin.xyz;
+        half3 rbMinMax = half3(boxMinMax - positionWS) / reflectionWS;
+
+        half fa = half(min(min(rbMinMax.x, rbMinMax.y), rbMinMax.z));
+
+        half3 worldPos = half3(positionWS - cubemapPositionWS.xyz);
+
+        half3 result = worldPos + reflectionWS * fa;
+        return result;
+    }
+    else
+    {
+        return reflectionWS;
+    }
+}
+
 float3 CalcReflectDir(float3 worldPos,float3 normal,float3 viewDir,float3 reflectDirOffset=0,bool isBoxProjection=false){
     float3 reflectDir = reflect(-viewDir,normal);
     reflectDir = (reflectDir + reflectDirOffset);
 
     #if (SHADER_LIBRARY_VERSION_MAJOR >= 12) //&& defined(_REFLECTION_PROBE_BOX_PROJECTION)
-    if(isBoxProjection)
-        reflectDir = BoxProjectedCubemapDirection(reflectDir,worldPos,unity_SpecCube0_ProbePosition,unity_SpecCube0_BoxMin,unity_SpecCube0_BoxMax);
+    UNITY_BRANCH if(isBoxProjection)
+        reflectDir = BoxProjectedCubemapDir(reflectDir,worldPos,unity_SpecCube0_ProbePosition,unity_SpecCube0_BoxMin,unity_SpecCube0_BoxMax);
     #endif
     return reflectDir;
 }

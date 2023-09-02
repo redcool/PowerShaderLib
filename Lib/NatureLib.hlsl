@@ -71,6 +71,7 @@ float4 WindAnimationVertex( float3 worldPos,float3 vertex,float3 normal,float4 a
 
     // apply perlin noise
     float gradientNoise = unity_gradientNoise(worldPos.xz*0.1 + windDir.xz * _Time.y * windSpeed);
+    // float gradientNoise = InterleavedGradientNoise(worldPos.xz*0.1 + windDir.xz * _Time.y * windSpeed);
     atten_AnimParam.w += localWindIntensity * gradientNoise*0.3;
 
     // apply y atten
