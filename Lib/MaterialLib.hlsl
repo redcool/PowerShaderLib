@@ -62,4 +62,8 @@ void CalcSurfaceColor(out half3 albedo,out half alpha,half4 mainTex,half4 color,
     }
 }
 
+half3 CalcEmission(half3 tex,half3 color,half mask){
+    return tex.xyz * color * mask;
+}
+
 #endif //MATERIAL_LIB_HLSL
