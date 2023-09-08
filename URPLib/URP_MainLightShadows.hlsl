@@ -21,7 +21,7 @@
         #endif
     #endif
 
-    #if defined(_ADDITIONAL_LIGHT_SHADOWS)
+    #if defined(_ADDITIONAL_LIGHT_SHADOWS) || defined(_ADDITIONAL_LIGHT_SHADOWS_ON)
         #define ADDITIONAL_LIGHT_CALCULATE_SHADOWS
     #endif
 #endif
