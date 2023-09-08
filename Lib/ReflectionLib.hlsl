@@ -50,12 +50,12 @@ half3 BoxProjectedCubemapDir(half3 reflectionWS, float3 positionWS, float4 cubem
     }
 }
 
-float3 CalcReflectDir(float3 worldPos,float3 normal,float3 viewDir,float3 reflectDirOffset=0,bool isBoxProjection=false){
+float3 CalcReflectDir(float3 worldPos,float3 normal,float3 viewDir,float3 reflectDirOffset=0){
     float3 reflectDir = reflect(-viewDir,normal);
     reflectDir = (reflectDir + reflectDirOffset);
 
-    #if (SHADER_LIBRARY_VERSION_MAJOR >= 12) //&& defined(_REFLECTION_PROBE_BOX_PROJECTION)
-    UNITY_BRANCH if(isBoxProjection)
+    #if (SHADER_LIBRARY_VERSION_MAJOR >= 12) && defined(_REFLECTION_PROBE_BOX_PROJECTION)
+    // UNITY_BRANCH if(isBoxProjection)
         reflectDir = BoxProjectedCubemapDir(reflectDir,worldPos,unity_SpecCube0_ProbePosition,unity_SpecCube0_BoxMin,unity_SpecCube0_BoxMax);
     #endif
     return reflectDir;
