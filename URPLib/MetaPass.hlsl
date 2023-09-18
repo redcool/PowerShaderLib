@@ -24,10 +24,10 @@ struct MetaInput{
 };
 
 float4 CalcMetaPosition(float4 pos,float2 uv1,float2 uv2,float4 uv1ST,float4 uv2ST){
-    branch_if(unity_MetaVertexControl.x){
+    if(unity_MetaVertexControl.x){
         pos.xy = uv1 * uv1ST.xy + uv1ST.zw;
     }
-    branch_if(unity_MetaVertexControl.y){
+    if(unity_MetaVertexControl.y){
         pos.xy = uv2 * uv2ST.xy + uv2ST.zw;
     }
         pos.z = pos.z > 0 ? REAL_MIN : 0;
@@ -36,13 +36,13 @@ float4 CalcMetaPosition(float4 pos,float2 uv1,float2 uv2,float4 uv1ST,float4 uv2
 
 float4 CalcMetaFragment(MetaInput input){
     float4 color = float4(0,0,0,0);
-    branch_if(unity_MetaFragmentControl.x){
+    if(unity_MetaFragmentControl.x){
         color = float4(input.albedo,1);
         color.rgb = clamp(PositivePow(color.rgb,saturate(unity_OneOverOutputBoost)) ,0,unity_MaxOutputValue);
     }
-    branch_if(unity_MetaFragmentControl.y){
+    if(unity_MetaFragmentControl.y){
         float3 emission= input.emission;
-        branch_if(!unity_UseLinearSpace){
+        if(!unity_UseLinearSpace){
             emission = LinearToSRGB(emission);
         }
         color = float4(emission,1);
