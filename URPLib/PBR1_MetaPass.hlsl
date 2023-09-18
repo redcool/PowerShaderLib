@@ -4,7 +4,10 @@
 #if !defined(PBR1_META_PASS_HLSL)
 #define PBR1_META_PASS_HLSL
 
+// define baseMap
 #define _BaseMap _MainTex
+// #define _EmissionMap _EmissionMap1
+
 #include "MetaPass.hlsl"
 #include "../Lib/MaterialLib.hlsl"
 
@@ -31,7 +34,7 @@ float4 frag(Varyings input):SV_Target{
     float3 emissionColor = 0;
 
     #if defined(_EMISSION)
-        float3 emissionColor = CalcEmission(tex2D(_EmissionMap,mainUV),_EmissionColor.xyz,_EmissionColor.w);
+        emissionColor = CalcEmission(tex2D(_EmissionMap,mainUV).xyz,_EmissionColor.xyz,_EmissionColor.w);
     #endif
 
     MetaInput metaInput = (MetaInput)0;
