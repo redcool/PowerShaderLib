@@ -5,7 +5,7 @@
 #define PBR1_META_PASS_HLSL
 
 // define baseMap
-#define _BaseMap _MainTex
+// #define _BaseMap _MainTex
 // #define _EmissionMap _EmissionMap1
 
 #include "MetaPass.hlsl"
