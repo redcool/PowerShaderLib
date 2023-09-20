@@ -9,7 +9,7 @@
     return float4(iblCol,1);
 */
 
-float3 CalcInteriorMapReflectDir(float3 viewDirTS,float2 uv,float2 uvRange=float2(0,1)){
+float3 CalcInteriorMapReflectDir(float3 viewDirTS,float2 uv,float2 uvRange=float2(0,1),bool isReverseViewDirZ=1){
     // calc uvBounds
     uv = frac(uv);
     uv = clamp(uv,uvRange.x,uvRange.y);
@@ -24,6 +24,9 @@ float3 CalcInteriorMapReflectDir(float3 viewDirTS,float2 uv,float2 uvRange=float
     viewDirTS = viewDirTS * corner + uvBounds;
     // flip back
     viewDirTS.xy *= -1;
+    
+    // show cube center block directly?
+    viewDirTS.z *= isReverseViewDirZ? -1 : 1;
 
     // viewDirTS = lerp(viewDirTS,0,uvBorder);
     return viewDirTS;
