@@ -34,7 +34,6 @@ Shader "Unlit/TestMathLib"
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-                UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
             };
 
@@ -50,15 +49,14 @@ Shader "Unlit/TestMathLib"
                 float3 t = normalize(mul(unity_ObjectToWorld,v.t));
                 float3 b = normalize(cross(n,t)) * v.t.w;
 
-float3 forward = normalize(worldPos);
-float3 axis = (cross(n,forward));
-float3x3 rotMat = AngleAxis3x3(_Angle,axis);
+// float3 forward = normalize(worldPos);
+// float3 axis = (cross(n,forward));
+float3x3 rotMat = AngleAxis3x3(_Angle,_Axis);
 worldPos = mul(rotMat,worldPos);
 
                 v2f o;
                 o.vertex = mul(unity_MatrixVP,float4(worldPos,1));
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }
 
@@ -66,8 +64,6 @@ worldPos = mul(rotMat,worldPos);
             {
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, i.uv);
-                // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
             }
             ENDCG
