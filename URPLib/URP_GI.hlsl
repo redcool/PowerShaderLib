@@ -78,9 +78,26 @@ float3 SampleLightmap(float2 uv){
 }
 
 float4 SampleShadowMask(float2 uv){
+    #if defined(SHADOWS_SHADOWMASK) && defined(LIGHTMAP_ON)
     return SAMPLE_TEXTURE2D(unity_ShadowMask,samplerunity_ShadowMask,uv);
+    #elif !defined(LIGHTMAP_ON)
+    return unity_ProbesOcclusion;
+    #else
+    return 1;
+    #endif
 }
-
+// not need use, keep it
+half4 CalcShadowMask(half4 shadowMask)
+{
+    // To ensure backward compatibility we have to avoid using shadowMask input, as it is not present in older shaders
+    #if defined(SHADOWS_SHADOWMASK) && defined(LIGHTMAP_ON)
+    return shadowMask;
+    #elif !defined (LIGHTMAP_ON)
+    return unity_ProbesOcclusion;
+    #else
+    return 1;
+    #endif
+}
  
 //--------------------- IBL
 float3 DecodeHDREnvironment(float4 encodedIrradiance, float4 decodeInstructions)

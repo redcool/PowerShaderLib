@@ -8,6 +8,10 @@
     _ADDITIONAL_LIGHT_SHADOWS 
     _ADDITIONAL_LIGHT_SHADOWS_SOFT
     _RECEIVE_SHADOWS_ON or _RECEIVE_SHADOWS_OFF // material keyword
+
+    // shadow(realtime,baked mixing)
+    LIGHTMAP_SHADOW_MIXING , urp use this 
+    SHADOWS_FULL_MIX , use this for full blend
 */
 #if !defined(MAIN_LIGHT_SHADOW_HLSL)
 #define MAIN_LIGHT_SHADOW_HLSL
@@ -30,6 +34,7 @@
     #define CALCULATE_BAKED_SHADOWS
 #endif
 
+TEXTURE2D_SHADOW(_ScreenSpaceShadowmapTexture);SAMPLER(sampler_ScreenSpaceShadowmapTexture);
 
 TEXTURE2D_SHADOW(_MainLightShadowmapTexture);SAMPLER_CMP(sampler_MainLightShadowmapTexture);
 
@@ -140,6 +145,10 @@ float SampleShadowmap(TEXTURE2D_SHADOW_PARAM(shadowMap,sampler_ShadowMap),float4
 
 float MixRealtimeAndBakedShadows(float realtimeShadow, float bakedShadow, float shadowFade)
 {
+#if defined(SHADOWS_FULL_MIX)
+    return min(lerp(realtimeShadow, bakedShadow, shadowFade),bakedShadow);
+#endif
+
 #if defined(LIGHTMAP_SHADOW_MIXING)
     return min(lerp(realtimeShadow, 1, shadowFade), bakedShadow);
 #else
