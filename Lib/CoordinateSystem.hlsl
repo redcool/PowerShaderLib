@@ -1,6 +1,7 @@
 #if !defined(COORDINATE_SYSTEM_HLSL)
 #define COORDINATE_SYSTEM_HLSL
-#define PI2 6.28
+#define PI2 6.283
+
 /**
     return {x:[-.5,.5],y:uv length}
 
@@ -24,10 +25,14 @@ float2 ToPolar(float2 uv){
 
 /**
     uv.x[-.5,.5],uv.y : length
+
+    float2 polar = ToPolar(i.uv);
+    polar.x += _Angle;//[0,1]
+    float2 coord = ToCartesian(polar);
 */
 float2 ToCartesian(float2 uv){
     float c,s;
-    sincos(uv.x*PI2,c,s);
+    sincos(uv.x*PI2,s,c);
     return float2(c,s) * uv.y;
 }
 #endif //COORDINATE_SYSTEM_HLSL
