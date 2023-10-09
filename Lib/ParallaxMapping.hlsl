@@ -11,19 +11,30 @@
     viewTS : tangent space view dir
     height : base height in map
 */
-float2 ParallaxMapOffset(half heightScale,half3 viewTS,half height){
+float2 ParallaxMapOffset(float heightScale,half3 viewTS,float height){
     return (height-0.5)* heightScale * viewTS.xy * 0.5;
 }
 
-half2 ParallaxOcclusionOffset(half heightScale,half3 viewTS,half sampleRatio,half2 uv,sampler2D heightMap,int minCount,int maxCount){
-    half parallaxLimit = -length(viewTS.xy)/viewTS.z;
+
+/** POM
+    demo:
+    input.uv.xy += ParallaxOcclusionOffset(_ParallaxHeight,input.viewDirTS_NV.xyz,0.5,input.uv.xy,_ParallaxMap,sampler_ParallaxMap,10,100);
+
+    define USE_SAMPLER2D,if use sampler2D
+*/
+#if defined(USE_SAMPLER2D)
+    #define TEXTURE2D_PARAM(textureName, samplerName)  sampler2D textureName
+#endif
+
+half2 ParallaxOcclusionOffset(float heightScale,half3 viewTS,float sampleRatio,half2 uv,TEXTURE2D_PARAM(heightMap,heightMapSampler),int minCount,int maxCount){
+    float parallaxLimit = -length(viewTS.xy)/viewTS.z;
     parallaxLimit *= heightScale;
 
     half2 offsetDir = normalize(viewTS.xy);
     half2 maxOffset = offsetDir * parallaxLimit;
 
     int numSamples = (int)lerp(minCount,maxCount,saturate(sampleRatio));
-    half stepSize = 1.0/numSamples;
+    float stepSize = 1.0/numSamples;
 
     half2 dx = ddx(uv);
     half2 dy = ddy(uv);
@@ -31,17 +42,24 @@ half2 ParallaxOcclusionOffset(half heightScale,half3 viewTS,half sampleRatio,hal
     half2 curOffset = 0;
     half2 lastOffset = 0;
 
-    half curRayHeight = 1;
-    half curHeight=1,lastHeight = 1;
+    float curRayHeight = 1;
+    float curHeight=1,lastHeight = 1;
 
     int curSample = 0;
     while(curSample < numSamples){
-        curHeight = tex2Dgrad(heightMap,uv + curOffset,dx,dy).x;
-        if( curHeight > curRayHeight){
-            half delta1 = curHeight - curRayHeight;
-            half delta2 = (curRayHeight + stepSize) - lastHeight;
+        float2 curUV = saturate(uv + curOffset);
+        #if defined(USE_SAMPLER2D)
+        curHeight = tex2Dgrad(heightMap,curUV,dx,dy).x;
+        #else
+        half4 tex = SAMPLE_TEXTURE2D_GRAD(heightMap,heightMapSampler,curUV,dx,dy);
+        curHeight = tex.x;
+        #endif
 
-            half ratio = delta1 /(delta1 + delta2);
+        if( curHeight > curRayHeight){
+            float delta1 = curHeight - curRayHeight;
+            float delta2 = (curRayHeight + stepSize) - lastHeight;
+
+            float ratio = delta1 /(delta1 + delta2);
 
             curOffset = lerp(curOffset,lastOffset,ratio);
             curSample = numSamples + 1;
@@ -57,4 +75,5 @@ half2 ParallaxOcclusionOffset(half heightScale,half3 viewTS,half sampleRatio,hal
     }
     return curOffset;
 }
+
 #endif //POM_HLSL
