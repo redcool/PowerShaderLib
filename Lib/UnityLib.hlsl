@@ -201,6 +201,10 @@ float3 TransformObjectToWorld(float3 objectPos){
     return mul(UNITY_MATRIX_M,float4(objectPos,1)).xyz;
 }
 
+float3 TransformObjectToView(float3 objectPos){
+    return mul(UNITY_MATRIX_MV,float4(objectPos,1)).xyz;
+}
+
 float3 TransformObjectToWorldDir(float3 objectDir){
     return normalize( mul((float3x3)UNITY_MATRIX_M,objectDir) );
 }
