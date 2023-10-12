@@ -38,13 +38,6 @@ TEXTURE2D_SHADOW(_ScreenSpaceShadowmapTexture);SAMPLER(sampler_ScreenSpaceShadow
 
 TEXTURE2D_SHADOW(_MainLightShadowmapTexture);SAMPLER_CMP(sampler_MainLightShadowmapTexture);
 
-#if defined(SHADER_API_MOBILE)
-    static const int SOFT_SHADOW_COUNT = 2;
-    static const float SOFT_SHADOW_WEIGHTS[] = {0.2,0.4,0.4};
-#else
-    static const int SOFT_SHADOW_COUNT = 4;
-    static const float SOFT_SHADOW_WEIGHTS[] = {0.2,0.25,0.25,0.15,0.15};
-#endif 
 
 #ifndef SHADER_API_GLES3
 CBUFFER_START(MainLightShadows)
@@ -123,7 +116,21 @@ float GetShadowFade(float3 positionWS)
     return fade;
 }
 
+/**
+    // retarget other texelSize
+    #define _MainLightShadowmapSize _BigShadowMap_TexelSize 
+
+*/
 float SampleShadowmap(TEXTURE2D_SHADOW_PARAM(shadowMap,sampler_ShadowMap),float4 shadowCoord,float shadowSoftScale){
+
+#if defined(SHADER_API_MOBILE)
+    static const int SOFT_SHADOW_COUNT = 2;
+    static const float SOFT_SHADOW_WEIGHTS[] = {0.2,0.4,0.4};
+#else
+    static const int SOFT_SHADOW_COUNT = 4;
+    static const float SOFT_SHADOW_WEIGHTS[] = {0.2,0.25,0.25,0.15,0.15};
+#endif 
+
     float shadow = SAMPLE_TEXTURE2D_SHADOW(shadowMap,sampler_ShadowMap, shadowCoord.xyz);
 
     // return shadow;
