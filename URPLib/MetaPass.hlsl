@@ -1,3 +1,8 @@
+/**
+    MetaPass, can redefine
+    _BaseMap 
+*/
+
 #if !defined(META_PASS)
 #define META_PASS
 // meta input
@@ -52,7 +57,7 @@ float4 CalcMetaFragment(MetaInput input){
 
 // meta lighting
 
-struct Atributes{
+struct Attributes{
     float4 vertex:POSITION;
     float2 uv:TEXCOORD0;
     float2 uv1:TEXCOORD1;
@@ -67,26 +72,24 @@ struct Varyings
 };
 
 
-Varyings vert(Atributes input){
+Varyings vert(Attributes input){
     Varyings output = (Varyings)0;
 
     output.uv = TRANSFORM_TEX(input.uv,_BaseMap);
     output.pos = CalcMetaPosition(input.vertex,input.uv1,input.uv2,unity_LightmapST,unity_DynamicLightmapST);
     return output;
 }
+
+float4 MetaFragment(float3 albedo,float3 emission){
+    MetaInput metaInput = (MetaInput)0;
+    metaInput.albedo = albedo;
+    metaInput.specularColor = 0;
+    metaInput.emission = emission;
+
+    return CalcMetaFragment(metaInput);
+}
+
 // float4 frag(Varyings input):SV_Target{
-//     SurfaceInputData surfaceInputData = (SurfaceInputData)0;
-//     InitSurfaceInputData(surfaceInputData/**/,input.uv,input.pos);
-
-//     BRDFData brdfData = (BRDFData)0;
-//     SurfaceData surfaceData = surfaceInputData.surfaceData;
-//     InitBRDFData(surfaceInputData,surfaceData.alpha/**/,brdfData);
-
-//     MetaInput metaInput = (MetaInput)0;
-//     metaInput.albedo = brdfData.diffuse + brdfData.specular * brdfData.roughness * 0.5;
-//     metaInput.specularColor = surfaceData.specular;
-//     metaInput.emission = surfaceData.emission;
-
-//     return CalcMetaFragment(metaInput);
+//     return MetaFragment(albedo,emision);
 // }
 #endif //META_PASS
