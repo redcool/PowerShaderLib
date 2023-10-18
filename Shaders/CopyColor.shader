@@ -19,7 +19,7 @@ Shader "Hidden/Utils/CopyColor"
     sampler2D _SourceTex;
 
     bool _ApplyColorGrading;
-    bool _LinearToGamma;
+    // bool _LinearToGamma;
 
     v2f vert (uint vid:SV_VERTEXID)
     {
@@ -35,8 +35,18 @@ Shader "Hidden/Utils/CopyColor"
         if(_ApplyColorGrading)
             col.xyz = ApplyColorGradingLUT(col.xyz);
 
-        if(_LinearToGamma)
-            col.xyz = Gamma22ToLinear(col.xyz);
+        // if(_LinearToGamma)
+        //     col.xyz = Gamma22ToLinear(col.xyz);
+
+        #if defined(_SRGB_TO_LINEAR_CONVERSION)
+        // return float4(1,0,0,1);
+        color.rgb = GammaToLinearSpace(color.rgb);
+        #endif
+
+        #if _LINEAR_TO_SRGB_CONVERSION
+        // return float4(0,1,0,1);
+        color.rgb = LinearToGammaSpace(color.rgb);
+        #endif
 
         return col;
     }
@@ -54,6 +64,7 @@ Shader "Hidden/Utils/CopyColor"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_fragment _ _SRGB_TO_LINEAR_CONVERSION _LINEAR_TO_SRGB_CONVERSION
             ENDHLSL
         }
     }
