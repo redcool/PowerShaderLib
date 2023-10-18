@@ -1,3 +1,6 @@
+/**
+    cmd.BlitTriangle
+*/
 Shader "Hidden/Utils/CopyColor"
 {
     Properties
