@@ -3,6 +3,13 @@
 #include "NodeLib.hlsl"
 
 /**
+    override this vars
+*/
+#define IsRainOn() (_IsGlobalRainOn)
+#define IsSnowOn() (_IsGlobalSnowOn)
+#define IsWindOn() (_IsGlobalWindOn)
+
+/**
     controlled by WeahterControl.cs
 */
 float4 _GlobalWindDir; /*global (xyz)wind direction,w : wind intensity*/
@@ -12,6 +19,7 @@ float _GlobalRainIntensity;
 half _IsGlobalRainOn;
 half _IsGlobalSnowOn;
 half _IsGlobalWindOn;
+
 
 
 float4 SmoothCurve( float4 x ) {
@@ -62,7 +70,11 @@ inline float4 AnimateVertex(float4 pos, float3 normal, float4 animParams,float4 
 
     return pos;
 }
-
+/**
+    demo:
+    float4 attenParam = v.color.x;
+    worldPos = WindAnimationVertex(worldPos,v.vertex.xyz,o.normal,attenParam * _WindAnimParam, _WindDir,_WindSpeed).xyz;
+*/
 float4 WindAnimationVertex( float3 worldPos,float3 vertex,float3 normal,float4 atten_AnimParam,float4 windDir,float windSpeed){
     float localWindIntensity = windDir.w;
     //Apply Global wind,  (xyz : dir, w : intensity)
