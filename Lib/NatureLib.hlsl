@@ -72,6 +72,15 @@ inline float4 AnimateVertex(float4 pos, float3 normal, float4 animParams,float4 
 }
 /**
     demo:
+    shader : 
+        [Header(Wind)]
+        [GroupToggle(_,_WIND_ON)]_WindOn("_WindOn (need vertex color.r)",float) = 0
+        [GroupVectorSlider(branch edge globalOffset flutterOffset,0_0.4 0_0.5 0_0.6 0_0.06)]_WindAnimParam("_WindAnimParam(x:branch,edge,z : global offset,w:flutter offset)",vector) = (1,1,0.1,0.3)
+        [GroupVectorSlider(WindVector Intensity,0_1)]_WindDir("_WindDir,dir:(xyz),Intensity:(w)",vector) = (1,0.1,0,0.5)
+        _WindSpeed("_WindSpeed",range(0,1)) = 0.3
+
+    vertex code:
+
     float4 attenParam = v.color.x;
     worldPos = WindAnimationVertex(worldPos,v.vertex.xyz,o.normal,attenParam * _WindAnimParam, _WindDir,_WindSpeed).xyz;
 */
