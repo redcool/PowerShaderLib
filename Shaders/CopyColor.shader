@@ -43,12 +43,12 @@ Shader "Hidden/Utils/CopyColor"
 
         #if defined(_SRGB_TO_LINEAR_CONVERSION)
         // return float4(1,0,0,1);
-        color.rgb = GammaToLinearSpace(color.rgb);
+        col.rgb = Gamma20ToLinear(col.rgb);
         #endif
 
         #if _LINEAR_TO_SRGB_CONVERSION
         // return float4(0,1,0,1);
-        color.rgb = LinearToGammaSpace(color.rgb);
+        col.rgb = LinearToGamma20(col.rgb);
         #endif
 
         return col;
