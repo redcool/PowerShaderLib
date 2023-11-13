@@ -1,7 +1,8 @@
 #if !defined(NATURE_LIB_HLSL)
 #define NATURE_LIB_HLSL
 #include "NodeLib.hlsl"
-
+#include "MathLib.hlsl"
+#include "WeatherNoiseTexture.hlsl"
 /**
     override this vars
 */
@@ -30,6 +31,26 @@ float4 TriangleWave( float4 x ) {
 }
 float4 SmoothTriangleWave( float4 x ) {
     return SmoothCurve( TriangleWave( x ) );
+}
+
+float CalcWorldNoise(float3 worldPos,float4 tilingOffset,float3 windDir){
+    // cross noise
+    float2 noiseUV = worldPos.xz * tilingOffset.xy+ windDir.xz * tilingOffset.zw* _Time.y;
+
+    float noise =0;
+    // noise version
+    // noise += unity_gradientNoise(noiseUV) + 0.5;
+    // noise += unity_gradientNoise(noiseUV2) + 0.5;
+
+    // texture version
+    noise += SampleWeatherNoise(noiseUV,half4(0.05,0.15,0.3,0.5));
+    return noise;
+
+    // full version
+    // float2 noiseUV2 = worldPos.xz * tilingOffset.xy + float2(windDir.x * -_Time.x,0);
+    // noise += SampleWeatherNoise(noiseUV2,half4(0.05,0.15,0.3,0.5));
+    // noise = noise * 0.5+0.5;
+    // return noise;  
 }
 
 // Detail bending
@@ -164,4 +185,47 @@ float3 CalcRipple(TEXTURE2D_PARAM(rippleTex,sampler_RippleTex),float2 rippleUV,f
     return rippleCol * intensity;
 }
 
+float2 CalcRippleUV(float3 worldPos,float4 rippleTex_ST,float rippleOffsetAutoStop){
+    float2 uvOffset = UVOffset(rippleTex_ST.zw,rippleOffsetAutoStop);
+    float2 rippleUV = worldPos.xz * rippleTex_ST.xy + uvOffset;
+    return rippleUV;
+}
+
+
+/** 
+    rain flow atten
+*/
+float GetRainFlowAtten(float3 worldPos,float3 vertexNormal,float rainIntensity,float rainSlopeAtten,float rainHeight){
+    float atten = saturate(dot(vertexNormal,float3(0,1,0))  - rainSlopeAtten);
+    atten *= saturate(rainHeight - worldPos.y);
+    atten *= rainIntensity;
+    return atten;
+}
+
+/**
+    rain pixel atten mode
+    
+    #define RAIN_MASK_PBR_SMOOTHNESS 1
+    #define RAIN_MASK_MAIN_TEX_ALPHA 2
+*/
+float GetRainRippleAtten(float smoothness,float mainTexAlpha,float rainMaskFrom){
+    float attenMaskMode[3] = {1,smoothness,mainTexAlpha};
+    return attenMaskMode[rainMaskFrom];
+}
+
+float2 GetRainFlowUVOffset(out float rainNoise,float rainAtten,float3 worldPos,float4 rainFlowTilingOffset,float rainFlowIntensity){
+    rainNoise = 0;
+    branch_if(!rainFlowIntensity)
+        return 0;
+    // flow
+    rainNoise = CalcWorldNoise(worldPos,rainFlowTilingOffset,_GlobalWindDir.xyz/*NatureLib.hlsl*/);
+    return rainNoise*0.02 * rainAtten * rainFlowIntensity;
+}
+
+void ApplyRainPbr(inout float3 albedo,inout float metallic,inout float smoothness,float3 rainColor,float rainMetallic,float rainSmoothness,float rainIntensity){
+    // float3 worldPos = ScreenToWorldPos(screenUV);
+    albedo *= lerp(1,rainColor.xyz,rainIntensity);
+    metallic = lerp(metallic , rainMetallic, rainIntensity);
+    smoothness = lerp(smoothness , rainSmoothness , rainIntensity);
+}
 #endif //NATURE_LIB_HLSL

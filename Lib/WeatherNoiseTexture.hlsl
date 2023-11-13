@@ -1,11 +1,8 @@
 /***
-    
-    SIMPLE_NOISE_TEX
-
+    get noise from _WeatherNoiseTexture
 */
-
-
 #if !defined(WEATHER_NOISE_TEX_HLSL)
+#define WEATHER_NOISE_TEX_HLSL
 // noise4Layer texture
 TEXTURE2D(_WeatherNoiseTexture);SAMPLER(sampler_WeatherNoiseTexture);
 /**

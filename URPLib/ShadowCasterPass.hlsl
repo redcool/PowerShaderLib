@@ -5,6 +5,9 @@
     _Cutoff
     _CustomShadowNormalBias,_CustomShadowDepthBias
 
+    //============================ weather function
+    _WIND_ON
+
     keywords:
     ALPHA_TEST or _ALPHATEST_ON : alpha test
     SHADOW_PASS : shadowCasterPass or depthpass
@@ -21,10 +24,12 @@
     
     // replace texture channel
     #define _MainTexChannel _DissolveTexChannel
+
 */
 #if !defined(URP_SHADOW_CASTER_PASS_HLSL)
 #define URP_SHADOW_CASTER_PASS_HLSL
 #include "../../PowerShaderLib/UrpLib/URP_MainLightShadows.hlsl"
+#include "../../PowerShaderLib/Lib/NatureLib.hlsl"
 
 // default values
 #if !defined(_MainTexChannel)
@@ -44,9 +49,10 @@
 
 struct shadow_appdata
 {
-    float4 vertex   : POSITION;
-    float3 normal     : NORMAL;
-    float2 texcoord     : TEXCOORD0;
+    float4 vertex : POSITION;
+    float3 normal : NORMAL;
+    float2 texcoord : TEXCOORD0;
+    float3 color:COLOR;
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
@@ -60,8 +66,15 @@ float3 _LightPosition;
 
 //--------- shadow helpers
 float4 GetShadowPositionHClip(shadow_appdata input){
-    float3 worldPos = mul(unity_ObjectToWorld,input.vertex).xyz;
+    float3 worldPos = TransformObjectToWorld(input.vertex.xyz);
     float3 worldNormal = UnityObjectToWorldNormal(input.normal);
+
+    #if defined(_WIND_ON)
+    float4 attenParam = input.color.x; // vertex color atten
+    branch_if(IsWindOn()){
+        worldPos = WindAnimationVertex(worldPos,input.vertex.xyz,worldNormal,attenParam * _WindAnimParam, _WindDir,_WindSpeed).xyz;
+    }
+    #endif
 
     #if _CASTING_PUNCTUAL_LIGHT_SHADOW
         float3 lightDirectionWS = normalize(_LightPosition - worldPos);
