@@ -23,9 +23,9 @@ float SampleWeatherNoise(float2 uv,half4 ratio=half4(.5,.25,.0125,.063)){
     return n.x;
 }
 
-float SampleWeatherNoiseLOD(float2 uv,half lod){
+float SampleWeatherNoiseLOD(float2 uv,half lod,half4 ratio=half4(.5,.25,.0125,.063)){
     float4 n = SAMPLE_TEXTURE2D_LOD(_WeatherNoiseTexture,sampler_WeatherNoiseTexture,uv*0.1,lod);
-    return dot(n,half4(0.5,0.25,0.125,0.06).wzyx);
+    return dot(n,ratio);
 }
 
 #endif //WEATHER_NOISE_TEX_HLSL

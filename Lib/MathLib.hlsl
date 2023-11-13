@@ -58,12 +58,16 @@ half3 SchmidtOrtho(half3 dir,half3 normal){
 }
 
 /**
+    demo:
+    float2 uvOffset = UVOffset(_RippleTex_ST.zw,_RippleOffsetAutoStop);
+
     uv_t : uv translation part,like _MainTex_ST.zw
     autoStop : a switch
     return : uv_t or uv_t + _Time.xx
 */
 float2 UVOffset(float2 uv_t,float autoStop){
-    return uv_t * ( 1+ _Time.xx *( 1 - autoStop) );
+    return autoStop? uv_t : uv_t+_Time.xx;
+    // return uv_t * ( 1+ _Time.xx *( 1 - autoStop) );
 }
 /*
     matrix : http://mathworld.wolfram.com/images/equations/MatrixInverse/NumberedEquation3.gif
