@@ -320,6 +320,20 @@ SAMPLER(samplerunity_Lightmap);
 TEXTURE2D(unity_ShadowMask);
 SAMPLER(samplerunity_ShadowMask);
 
+// TODO: all affine matrices should be 3x4.
+// TODO: sort these vars by the frequency of use (descending), and put commonly used vars together.
+// Note: please use UNITY_MATRIX_X macros instead of referencing matrix variables directly.
+float4x4 _PrevViewProjMatrix;
+float4x4 _ViewProjMatrix;
+float4x4 _NonJitteredViewProjMatrix;
+float4x4 _ViewMatrix;
+float4x4 _ProjMatrix;
+float4x4 _InvViewProjMatrix;
+float4x4 _InvViewMatrix;
+float4x4 _InvProjMatrix;
+float4   _InvProjParam;
+float4   _ScreenSize;       // {w, h, 1/w, 1/h}
+float4   _FrustumPlanes[6]; // {(a, b, c) = N, d = -dot(N, P)} [L, R, T, B, N, F]
 //==============================
 //  ibl
 //==============================

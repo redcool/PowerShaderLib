@@ -40,12 +40,13 @@ float4 CalcMotionVectors(float4 hClipPos,float4 lastHClipPos){
 /**
     3call  in vertex shader
 
-    input : vs's input struct,like appdata(Varying)
+    inputPos : vs's input , previous position
+    inputPrevPos : vs input, current position
     output : v2f
     clipPos : homogeneous clip space position
 */
-#define CALC_MOTION_POSITIONS(input,v2f,clipPos)\
-    const float4 prevPos = (unity_MotionVectorsParams.x ==1)? float4(input.prevPos,1) : input.pos;\
+#define CALC_MOTION_POSITIONS(inputPrevPos,inputPos,v2f,clipPos)\
+    const float4 prevPos = (unity_MotionVectorsParams.x ==1)? float4(inputPrevPos,1) : inputPos;\
     v2f.hClipPos = clipPos;\
     v2f.lastHClipPos = mul(_PrevViewProjMatrix,mul(UNITY_PREV_MATRIX_M,prevPos))\
 
