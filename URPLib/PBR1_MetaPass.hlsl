@@ -34,7 +34,7 @@ float4 frag(Varyings input):SV_Target{
     float3 emissionColor = 0;
 
     #if defined(_EMISSION)
-        emissionColor = CalcEmission(tex2D(_EmissionMap,mainUV).xyz,_EmissionColor.xyz,_EmissionColor.w);
+        emissionColor = CalcEmission(tex2D(_EmissionMap,mainUV),_EmissionColor.xyz,_EmissionColor.w);
     #endif
 
     MetaInput metaInput = (MetaInput)0;
