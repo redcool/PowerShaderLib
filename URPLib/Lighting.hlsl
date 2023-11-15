@@ -10,6 +10,19 @@
 #include "URP_GI.hlsl"
 #include "URP_Lighting.hlsl"
 
+#define CHANGE_LIGHT_COLOR 0
+#define CHANGE_SPECULAR_COLOR 1
+
+void OffsetLight(inout float3 lightDir,inout float3 lightColor,inout float3 specularColor,half colorChangeMode,half3 newDir,half3 newColor){
+    lightDir = (newDir.xyz);
+    lightColor= colorChangeMode == 0 ? newColor : lightColor;
+    specularColor *= colorChangeMode == 1? newColor : 1;
+}
+
+void OffsetLight(inout Light light,inout float3 specularColor,half colorChangeMode,half3 newDir,half3 newColor){
+    OffsetLight(light.direction,light.color,specularColor,colorChangeMode,newDir,newColor);
+}
+
 float3 CalcLight(Light light,float3 diffColor,float3 specColor,float3 n,float3 v,float a,float a2){
     // if(!light.distanceAttenuation)
     //     return 0;
