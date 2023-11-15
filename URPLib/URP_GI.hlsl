@@ -281,7 +281,11 @@ float3 CalcIBL(float3 reflectDir,TEXTURECUBE_PARAM(cube,sampler_cube),float roug
 
 half3 CalcGISpec(float a2,float smoothness,float metallic,float fresnelTerm,half3 specColor,half3 iblColor,half3 grazingTermColor=1){
     float surfaceReduction = 1/(a2+1);
-    float grazingTerm = saturate(smoothness+metallic);
+    // float oneMinusReflective = (0.96 - metallic * 0.96);
+    // float reflective = 1 - oneMinusReflective;
+    float reflective = metallic *0.96 + 0.04;
+    
+    float grazingTerm = saturate(smoothness + reflective);
     float3 giSpec = iblColor * surfaceReduction * lerp(specColor,grazingTermColor * grazingTerm,fresnelTerm);
     return giSpec;
 }
