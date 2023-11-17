@@ -261,9 +261,15 @@ float3 CalcGIDiff(float3 normal,float3 diffColor,float2 lightmapUV=0){
     return giDiff;
 }
 
+
+/**
+    #define SIMPLE_FRESNEL, dont adjust fresnel curve
+*/
 float CalcFresnelTerm(float nv,half2 fresnelRange=half2(0,1)){
     float fresnelTerm = Pow4(1 - nv);
+    #if !defined(SIMPLE_FRESNEL)
     fresnelTerm = smoothstep(fresnelRange.x,fresnelRange.y,fresnelTerm);
+    #endif
     return fresnelTerm;
 }
 
