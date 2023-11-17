@@ -9,6 +9,14 @@
     float4 tSpace1:TEXCOORD##id1;\
     float4 tSpace2:TEXCOORD##id2
 
+/** 
+    alias
+*/
+#define WORLD_POS p
+#define WORLD_NORMAL n
+#define WORLD_TANGENT t
+#define WORLD_BITANGENT b
+
 /**
     combine tangent,binormal,normal,worldPos to putput.tSpace[0..2]
 */
@@ -29,6 +37,7 @@
     output.tSpace0 = float4(t.x,b.x,n.x,p.x);\
     output.tSpace1 = float4(t.y,b.y,n.y,p.y);\
     output.tSpace2 = float4(t.z,b.z,n.z,p.z)
+
 /**
     split input.tSpace[0..2] to
     float3 tangent,binormal,normal,worldPos 
@@ -39,8 +48,14 @@
     float3 normal = normalize(float3(input.tSpace0.z,input.tSpace1.z,input.tSpace2.z));\
     float3 worldPos = (float3(input.tSpace0.w,input.tSpace1.w,input.tSpace2.w))
 
-#define TangentToWorld(tn,tSpace0,tSpace1,tSpace2) normalize(float3(dot(tSpace0.xyz,tn),dot(tSpace1.xyz,tn),dot(tSpace2.xyz,tn)))
+/**
+    mul(tbn,dir)
+*/
+#define TangentToWorld(tn,tSpace0,tSpace1,tSpace2) float3(dot(tSpace0.xyz,tn),dot(tSpace1.xyz,tn),dot(tSpace2.xyz,tn))
 
+/**
+    mul(dir,tbn)
+*/
 float3 WorldToTangent(float3 dir,float4 tSpace0,float4 tSpace1,float4 tSpace2){
     float3x3 rot = float3x3(tSpace0.xyz,tSpace1.xyz,tSpace2.xyz);
     return mul(dir,rot);
