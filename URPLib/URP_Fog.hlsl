@@ -1,6 +1,12 @@
 #if !defined(URP_FOG_HLSL)
 #define URP_FOG_HLSL
+/**
+    1 urp fog
+    2 SIMPLE_FOG
+*/
 
+//------ SIMPLE_FOG use this
+half4 _FogParams;
 
 #if UNITY_REVERSED_Z
     #if SHADER_API_OPENGL || SHADER_API_GLES || SHADER_API_GLES3
@@ -24,6 +30,11 @@ float _ComputeFogFactor(float z)
 {
     float clipZ_01 = UNITY_Z_0_FAR_FROM_CLIPSPACE(z);
 
+    // -------------- custom linear depth fog
+    #if defined(SIMPLE_FOG)
+        return saturate(clipZ_01 * _FogParams.z + _FogParams.w);
+    #endif
+
     #if defined(FOG_LINEAR)
         // factor = (end-z)/(end-start) = z * (-1/(end-start)) + (end/(end-start))
         float fogFactor = saturate(clipZ_01 * unity_FogParams.z + unity_FogParams.w);
@@ -41,7 +52,6 @@ float _ComputeFogFactor(float z)
 float _ComputeFogIntensity(float fogFactor)
 {
     float fogIntensity = 0.0h;
-    #if defined(FOG_LINEAR) || defined(FOG_EXP) || defined(FOG_EXP2)
         #if defined(FOG_EXP)
             // factor = exp(-density*z)
             // fogFactor = density*z compute at vertex
@@ -50,19 +60,16 @@ float _ComputeFogIntensity(float fogFactor)
             // factor = exp(-(density*z)^2)
             // fogFactor = density*z compute at vertex
             fogIntensity = saturate(exp2(-fogFactor * fogFactor));
-        #elif defined(FOG_LINEAR)
+        #elif defined(FOG_LINEAR) || defined(SIMPLE_FOG)
             fogIntensity = fogFactor;
         #endif
-    #endif
     return fogIntensity;
 }
 #define MixFogColor _MixFogColor
 float3 _MixFogColor(float3 fragColor, float3 fogColor, float fogFactor)
 {
-    #if defined(FOG_LINEAR) || defined(FOG_EXP) || defined(FOG_EXP2)
-        float fogIntensity = ComputeFogIntensity(fogFactor);
-        fragColor = lerp(fogColor, fragColor, fogIntensity);
-    #endif
+    float fogIntensity = ComputeFogIntensity(fogFactor);
+    fragColor = lerp(fogColor, fragColor, fogIntensity);
     return fragColor;
 }
 
