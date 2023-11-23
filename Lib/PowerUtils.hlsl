@@ -12,7 +12,7 @@ float LinearizeDepth(float z)
 
 /**
 screenUV -> ndc -> clip -> view
-unity_MatrixInvVP
+UNITY_MATRIX_I_VP unity_MatrixInvVP
 */
 float3 ScreenToWorldPos(float2 uv,float rawDepth,float4x4 invVP){
     #if defined(UNITY_UV_STARTS_AT_TOP)
