@@ -50,4 +50,21 @@ float UVBorder(float2 uv,float2 uvRange){
     return 1-saturate(dot(uvBorder,1));
     // return uvBorder.x || uvBorder.y;
 }
+
+/**
+    world space sdf
+    
+    distSign,for texture blend
+    bandDist, for circle band blend
+*/
+float CalcWorldDistance(out float distSign,out float bandDist,float3 worldPos,float3 center,float radius,float2 distRange,float2 distSignRange=float2(-1,1)){
+    float d = distance(worldPos,center) - radius;
+    distSign = smoothstep(distSignRange.x,distSignRange.y,(d));
+    d = abs(d);
+
+    d = smoothstep(distRange.x,distRange.y,d);
+    d = 1-d;
+    bandDist = smoothstep(0,0.2,saturate(d)); // color blending
+    return d;
+}
 #endif //SDF_LIB_HLSL
