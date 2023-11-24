@@ -23,22 +23,37 @@ void OffsetLight(inout Light light,inout float3 specularColor,half colorChangeMo
     OffsetLight(light.direction,light.color,specularColor,colorChangeMode,newDir,newColor);
 }
 
-float3 CalcLight(Light light,float3 diffColor,float3 specColor,float3 n,float3 v,float a,float a2){
-    // if(!light.distanceAttenuation)
-    //     return 0;
-        
-    float3 l = light.direction;
+/**
+    calc nl,nh,lh
+*/
+void CalcBRDFWeights(out float nl,out float nh,out float lh,float3 l,float3 n,float3 v){
     float3 h = normalize(l+v);
-    float nl = saturate(dot(n,l));
+    nl = saturate(dot(n,l));
+    nh = saturate(dot(n,h));
+    lh = saturate(dot(l,h));
+}
 
-    float nh = saturate(dot(n,h));
-    float lh = saturate(dot(l,h));
-
+/**
+    Calc directColor
+*/
+half3 CalcLight(Light light,half3 diffColor,half3 specColor,float nl,float nh,float lh,float a,float a2){
     float d = nh*nh*(a2 - 1) +1;
     float specTerm = a2/(d*d * max(0.001,lh*lh) * (4*a+2));
     float radiance = nl * light.shadowAttenuation * light.distanceAttenuation;
     return (diffColor + specColor * specTerm) * light.color * radiance;
 }
+
+/**
+    Calc directColor
+*/
+half3 CalcLight(Light light,half3 diffColor,half3 specColor,float3 n,float3 v,float a,float a2){
+    // if(!light.distanceAttenuation)
+    //     return 0;
+    half nl,nh,lh;
+    CalcBRDFWeights(nl/**/,nh/**/,lh/**/,light.direction,n,v);
+    return CalcLight(light,diffColor,specColor,nl,nh,lh,a,a2);
+}
+
 
 float3 CalcAdditionalLights(float3 worldPos,float3 diffColor,float3 specColor,float3 n,float3 v,float a,float a2,float4 shadowMask,float softScale=1 ){
     uint count = GetAdditionalLightsCount();
@@ -49,6 +64,7 @@ float3 CalcAdditionalLights(float3 worldPos,float3 diffColor,float3 specColor,fl
     }
     return c;
 }
+
 
 
 
