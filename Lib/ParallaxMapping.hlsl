@@ -37,8 +37,8 @@ float2 ParallaxMapOffset(float heightScale,half3 viewTS,float height){
 #endif
 
 //half2 ParallaxOcclusionOffset(float heightScale,half3 viewTS,float sampleRatio,half2 uv,TEXTURE2D_PARAM(heightMap,heightMapSampler),)
-float2 ParallaxOcclusionOffset(float heightScale,float3 viewDirTS,float2 uv,TEXTURE2D_PARAM(depthTex,depthTexSampler),int minCount=8,int maxCount=30){
-    float numLayers = lerp(maxCount,minCount,abs(dot(half3(0,0,1),viewDirTS)));
+float2 ParallaxOcclusionOffset(float heightScale,float3 viewDirTS,float2 uv,TEXTURE2D_PARAM(depthTex,depthTexSampler),half2 layerRange=(8,30)){
+    float numLayers = lerp(layerRange.y,layerRange.x,abs(dot(half3(0,0,1),viewDirTS)));
     // const float numLayers = 10;
     float layerDepth = 1/numLayers;
     float curLayerDepth = 0.0;
