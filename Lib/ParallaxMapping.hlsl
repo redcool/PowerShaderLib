@@ -6,7 +6,7 @@
 //     half3 b = normalize(cross(input.normal,input.tangent.xyz)) * input.tangent.w;\
 //     half3x3 rotation = half3x3(input.tangent.xyz,b,input.normal)
 
-/**
+/** PM
     heightScale : material parameter
     viewTS : tangent space view dir
     height : base height in map
@@ -17,63 +17,49 @@ float2 ParallaxMapOffset(float heightScale,half3 viewTS,float height){
 
 
 /** POM
-    demo:
-    input.uv.xy += ParallaxOcclusionOffset(_ParallaxHeight,input.viewDirTS_NV.xyz,0.5,input.uv.xy,_ParallaxMap,sampler_ParallaxMap,10,100);
 
-    define USE_SAMPLER2D,if use sampler2D
+    demo:
+    uv += ParallaxOcclusionOffset(_ParallaxHeight,input.viewDirTS_NV.xyz,0.5,input.uv.xy,_ParallaxMap,sampler_ParallaxMap,10,100);
+    //---------
+    tex2D
+    #define USE_SAMPLER2D,if use sampler2D
+    ParallaxOcclusionOffset(_ParallaxHeight,input.viewDirTS_NV.xyz,0.5,input.uv.xy,_ParallaxMap,,10,100);
+    //---------
+    clamp uv
+    if(uv.x >1 || uv.x < 0 || uv.y>1 ||uv.y<0)
+        discard; // uv = 0
 */
 #if defined(USE_SAMPLER2D)
     #define TEXTURE2D_PARAM(textureName, samplerName)  sampler2D textureName
+    #define SAMPLE_DEPTH_TEX(depthTex,depthTexSampler,uv) tex2D(depthTex,uv)
+#else
+    #define SAMPLE_DEPTH_TEX(depthTex,depthTexSampler,uv) SAMPLE_TEXTURE2D(depthTex,depthTexSampler,uv)
 #endif
 
-half2 ParallaxOcclusionOffset(float heightScale,half3 viewTS,float sampleRatio,half2 uv,TEXTURE2D_PARAM(heightMap,heightMapSampler),int minCount,int maxCount){
-    float parallaxLimit = -length(viewTS.xy)/viewTS.z;
-    parallaxLimit *= heightScale;
+//half2 ParallaxOcclusionOffset(float heightScale,half3 viewTS,float sampleRatio,half2 uv,TEXTURE2D_PARAM(heightMap,heightMapSampler),)
+float2 ParallaxOcclusionOffset(float heightScale,float3 viewDirTS,float2 uv,TEXTURE2D_PARAM(depthTex,depthTexSampler),int minCount=8,int maxCount=30){
+    float numLayers = lerp(maxCount,minCount,abs(dot(half3(0,0,1),viewDirTS)));
+    // const float numLayers = 10;
+    float layerDepth = 1/numLayers;
+    float curLayerDepth = 0.0;
+    float2 P = viewDirTS.xy * heightScale;
+    float2 deltaUV = P/numLayers;
+    float2 curUV = uv;
 
-    half2 offsetDir = normalize(viewTS.xy);
-    half2 maxOffset = offsetDir * parallaxLimit;
-
-    int numSamples = (int)lerp(minCount,maxCount,saturate(sampleRatio));
-    float stepSize = 1.0/numSamples;
-
-    half2 dx = ddx(uv);
-    half2 dy = ddy(uv);
-
-    half2 curOffset = 0;
-    half2 lastOffset = 0;
-
-    float curRayHeight = 1;
-    float curHeight=1,lastHeight = 1;
-
-    int curSample = 0;
-    while(curSample < numSamples){
-        float2 curUV = saturate(uv + curOffset);
-        #if defined(USE_SAMPLER2D)
-        curHeight = tex2Dgrad(heightMap,curUV,dx,dy).x;
-        #else
-        half4 tex = SAMPLE_TEXTURE2D_GRAD(heightMap,heightMapSampler,curUV,dx,dy);
-        curHeight = tex.x;
-        #endif
-
-        if( curHeight > curRayHeight){
-            float delta1 = curHeight - curRayHeight;
-            float delta2 = (curRayHeight + stepSize) - lastHeight;
-
-            float ratio = delta1 /(delta1 + delta2);
-
-            curOffset = lerp(curOffset,lastOffset,ratio);
-            curSample = numSamples + 1;
-        }else{
-            curSample ++;
-            curRayHeight -= stepSize;
-
-            lastOffset = curOffset;
-            curOffset += stepSize * maxOffset;
-
-            lastHeight = curHeight;
-        }
+    float curDepth = SAMPLE_DEPTH_TEX(depthTex,depthTexSampler,curUV).x;
+    UNITY_LOOP while(curLayerDepth < curDepth){
+        curUV -= deltaUV;
+        curDepth = SAMPLE_DEPTH_TEX(depthTex,depthTexSampler,curUV).x;
+        curLayerDepth += layerDepth;
     }
-    return curOffset;
-}
+    // return curUV - uv; // steep end
 
+    // ------- occlusion offset
+    float2 prevUV = curUV + deltaUV;
+    float afterDepth = curDepth - curLayerDepth;
+    float beforeDepth = SAMPLE_DEPTH_TEX(depthTex,depthTexSampler,prevUV).x - curLayerDepth + layerDepth;
+    float weight = afterDepth/(afterDepth - beforeDepth);
+    float2 finalUV = lerp(curUV,prevUV,weight);
+    return finalUV - uv;
+}
 #endif //POM_HLSL
