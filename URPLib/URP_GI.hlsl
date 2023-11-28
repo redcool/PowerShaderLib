@@ -36,7 +36,8 @@ float3 UnpackLightmapRGBM(float4 rgbmInput, float4 decodeInstructions)
 #ifdef UNITY_COLORSPACE_GAMMA
     return rgbmInput.rgb * (rgbmInput.a * decodeInstructions.x);
 #else
-    // return rgbmInput.rgb * (pow(rgbmInput.a, decodeInstructions.y) * decodeInstructions.x);
+    return rgbmInput.rgb * (PositivePow(rgbmInput.a, decodeInstructions.y) * decodeInstructions.x);
+
     // optimise 
     float scale = rgbmInput.w;
     #if defined(UNITY_LIGHTMAP_RGBM_ENCODING)
