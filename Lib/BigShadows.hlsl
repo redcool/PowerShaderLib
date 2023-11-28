@@ -8,6 +8,7 @@
 #define SHADOW_INTENSITY _BigShadowParams.x
 
 TEXTURE2D(_BigShadowMap); SAMPLER_CMP(sampler_BigShadowMap);
+float4x4 _BigShadowMap_TexelSize;
 float4x4 _BigShadowVP;
 float4 _BigShadowParams; //{x: shadow intensity}
 
