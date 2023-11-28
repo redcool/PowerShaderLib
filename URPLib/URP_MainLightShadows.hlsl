@@ -16,6 +16,8 @@
 #if !defined(MAIN_LIGHT_SHADOW_HLSL)
 #define MAIN_LIGHT_SHADOW_HLSL
 
+#include "../Lib/ShadowsLib.hlsl"
+
 #if defined(_RECEIVE_SHADOWS_ON) || ! defined(_RECEIVE_SHADOWS_OFF)
     #if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN)
         #define MAIN_LIGHT_CALCULATE_SHADOWS
@@ -35,9 +37,7 @@
 #endif
 
 TEXTURE2D_SHADOW(_ScreenSpaceShadowmapTexture);SAMPLER(sampler_ScreenSpaceShadowmapTexture);
-
 TEXTURE2D_SHADOW(_MainLightShadowmapTexture);SAMPLER_CMP(sampler_MainLightShadowmapTexture);
-
 
 #ifndef SHADER_API_GLES3
 CBUFFER_START(MainLightShadows)
@@ -116,39 +116,6 @@ float GetShadowFade(float3 positionWS)
     return fade;
 }
 
-/**
-    // retarget other texelSize
-    #define _MainLightShadowmapSize _BigShadowMap_TexelSize 
-
-*/
-float SampleShadowmap(TEXTURE2D_SHADOW_PARAM(shadowMap,sampler_ShadowMap),float4 shadowCoord,float shadowSoftScale){
-
-#if defined(SHADER_API_MOBILE)
-    static const int SOFT_SHADOW_COUNT = 2;
-    static const float SOFT_SHADOW_WEIGHTS[] = {0.2,0.4,0.4};
-#else
-    static const int SOFT_SHADOW_COUNT = 4;
-    static const float SOFT_SHADOW_WEIGHTS[] = {0.2,0.25,0.25,0.15,0.15};
-#endif 
-
-    float shadow = SAMPLE_TEXTURE2D_SHADOW(shadowMap,sampler_ShadowMap, shadowCoord.xyz);
-
-    // return shadow;
-    #if defined(_SHADOWS_SOFT)
-        shadow *= SOFT_SHADOW_WEIGHTS[0];
-
-        float2 psize = _MainLightShadowmapSize.xy * shadowSoftScale;
-        const float2 uvs[] = { float2(-psize.x,0),float2(0,psize.y),float2(psize.x,0),float2(0,-psize.y) };
-
-        float2 offset = 0;
-        for(int x=0;x< SOFT_SHADOW_COUNT;x++){
-            offset = uvs[x] ;
-            shadow +=SAMPLE_TEXTURE2D_SHADOW(shadowMap,sampler_ShadowMap, float3(shadowCoord.xy + offset,shadowCoord.z)) * SOFT_SHADOW_WEIGHTS[x+1];
-        }
-    #endif 
-    
-    return shadow;
-}
 
 float MixRealtimeAndBakedShadows(float realtimeShadow, float bakedShadow, float shadowFade)
 {
