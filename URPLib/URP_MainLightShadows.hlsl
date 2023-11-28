@@ -16,7 +16,7 @@
 #if !defined(MAIN_LIGHT_SHADOW_HLSL)
 #define MAIN_LIGHT_SHADOW_HLSL
 
-#include "../Lib/ShadowsLib.hlsl"
+
 
 #if defined(_RECEIVE_SHADOWS_ON) || ! defined(_RECEIVE_SHADOWS_OFF)
     #if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN)
@@ -59,6 +59,8 @@ CBUFFER_START(MainLightShadows)
 #ifndef SHADER_API_GLES3
 CBUFFER_END
 #endif
+
+#include "../Lib/ShadowsLib.hlsl"
 
 #define BEYOND_SHADOW_FAR(shadowCoord) shadowCoord.z <= 0.0 || shadowCoord.z >= 1.0
 

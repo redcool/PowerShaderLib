@@ -3,12 +3,14 @@
 #include "UnityLib.hlsl"
 
 #define _MainLightShadowmapSize _BigShadowMap_TexelSize
-#include "ShadowsLib.hlsl"
-
 #define SHADOW_INTENSITY _BigShadowParams.x
 
+
+float4 _BigShadowMap_TexelSize;
+#include "ShadowsLib.hlsl"
+
+
 TEXTURE2D(_BigShadowMap); SAMPLER_CMP(sampler_BigShadowMap);
-float4x4 _BigShadowMap_TexelSize;
 float4x4 _BigShadowVP;
 float4 _BigShadowParams; //{x: shadow intensity}
 
