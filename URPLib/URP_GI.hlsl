@@ -1,11 +1,6 @@
 #if !defined(URP_GI_HLSL)
 #define URP_GI_HLSL
-
-#include "../Lib/ReflectionLib.hlsl"
-
-// #define SampleSH(n) ShadeSH9(float4(n,1)) 
-// #define PerceptualRoughnessToMipmapLevel(roughness) roughness * (1.7 - roughness * 0.7) * 6
-
+#include "../Lib/GILib.hlsl"
 //-----------------------------------------------------------EntityLight
 #define LIGHTMAP_RGBM_MAX_GAMMA     float(5.0)       // NB: Must match value in RGBMRanges.h
 #define LIGHTMAP_RGBM_MAX_LINEAR    float(34.493242) // LIGHTMAP_RGBM_MAX_GAMMA ^ 2.2
@@ -101,36 +96,27 @@ half4 CalcShadowMask(half4 shadowMask)
 }
  
 //--------------------- IBL
-float3 DecodeHDREnvironment(float4 encodedIrradiance, float4 decodeInstructions)
-{
-    // Take into account texture alpha if decodeInstructions.w is true(the alpha value affects the RGB channels)
-    float alpha = max(decodeInstructions.w * (encodedIrradiance.a - 1.0) + 1.0, 0.0);
 
-    // If Linear mode is not supported we can skip exponent part
-    return (decodeInstructions.x * PositivePow(alpha, decodeInstructions.y)) * encodedIrradiance.rgb;
-}
-#define DecodeHDR(encodedIrradiance,decodeInstructions) DecodeHDREnvironment(encodedIrradiance,decodeInstructions) 
+// float3 BoxProjectedCubemapDirection(float3 reflectionWS, float3 positionWS, float4 cubemapPositionWS, float4 boxMin, float4 boxMax)
+// {
+//     // Is this probe using box projection?
+//     if (cubemapPositionWS.w > 0.0f)
+//     {
+//         float3 boxMinMax = (reflectionWS > 0.0f) ? boxMax.xyz : boxMin.xyz;
+//         float3 rbMinMax = float3(boxMinMax - positionWS) / reflectionWS;
 
-float3 BoxProjectedCubemapDirection(float3 reflectionWS, float3 positionWS, float4 cubemapPositionWS, float4 boxMin, float4 boxMax)
-{
-    // Is this probe using box projection?
-    if (cubemapPositionWS.w > 0.0f)
-    {
-        float3 boxMinMax = (reflectionWS > 0.0f) ? boxMax.xyz : boxMin.xyz;
-        float3 rbMinMax = float3(boxMinMax - positionWS) / reflectionWS;
+//         float fa = float(min(min(rbMinMax.x, rbMinMax.y), rbMinMax.z));
 
-        float fa = float(min(min(rbMinMax.x, rbMinMax.y), rbMinMax.z));
+//         float3 worldPos = float3(positionWS - cubemapPositionWS.xyz);
 
-        float3 worldPos = float3(positionWS - cubemapPositionWS.xyz);
-
-        float3 result = worldPos + reflectionWS * fa;
-        return result;
-    }
-    else
-    {
-        return reflectionWS;
-    }
-}
+//         float3 result = worldPos + reflectionWS * fa;
+//         return result;
+//     }
+//     else
+//     {
+//         return reflectionWS;
+//     }
+// }
 
 float CalculateProbeWeight(float3 positionWS, float4 probeBoxMin, float4 probeBoxMax)
 {
@@ -251,72 +237,4 @@ float3 GlossyEnvironmentReflection(float3 reflectVector, float3 positionWS, floa
 #endif // _ENVIRONMENTREFLECTIONS_OFF
 }
 
-
-float3 CalcGIDiff(float3 normal,float3 diffColor,float2 lightmapUV=0){
-    float3 giDiff = 0;
-    #if defined(LIGHTMAP_ON)
-        giDiff = SampleLightmap(lightmapUV) * diffColor;
-    #else
-        giDiff = SampleSH(normal) * diffColor;
-    #endif
-    return giDiff;
-}
-
-
-/**
-    #define SMOOTH_FRESNEL, adjust fresnel curve
-*/
-float CalcFresnelTerm(float nv,half2 fresnelRange=half2(0,1)){
-    float fresnelTerm = Pow4(1 - nv);
-    #if defined(SMOOTH_FRESNEL)
-    fresnelTerm = smoothstep(fresnelRange.x,fresnelRange.y,fresnelTerm);
-    #endif
-    return fresnelTerm;
-}
-
-
-float3 CalcIBL(float3 reflectDir,TEXTURECUBE_PARAM(cube,sampler_cube),float rough,float4 hdrEncode){
-    float mip = (1.7 - 0.7*rough)*6*rough;
-    float4 cubeColor = SAMPLE_TEXTURECUBE_LOD(cube,sampler_cube,reflectDir,mip);
-    #if defined(UNITY_USE_NATIVE_HDR) || defined(UNITY_DOTS_INSTANTING_ENABLED)
-        float3 iblColor = cubeColor.rgb;
-    #else // mobile
-        float3 iblColor = DecodeHDREnvironment(cubeColor,hdrEncode);//_IBLCube_HDR,unity_SpecCube0_HDR
-    #endif
-    return iblColor;
-}
-
-half3 CalcGISpec(float a2,float smoothness,float metallic,float fresnelTerm,half3 specColor,half3 iblColor,half3 grazingTermColor=1){
-    float surfaceReduction = 1/(a2+1);
-    // float oneMinusReflective = (0.96 - metallic * 0.96);
-    // float reflective = 1 - oneMinusReflective;
-    float reflective = metallic *0.96 + 0.04;
-    
-    float grazingTerm = saturate(smoothness + reflective);
-    float3 giSpec = iblColor * surfaceReduction * lerp(specColor,grazingTermColor * grazingTerm,fresnelTerm);
-    return giSpec;
-}
-
-/**
-    _PLANAR_REFLECTION_ON, if use planar reflection
-*/
-
-half3 CalcGISpec(TEXTURECUBE_PARAM(cube,sampler_cube),float4 cubeHDR,float3 specColor,
-    float3 worldPos,float3 normal,float3 viewDir,float3 reflectDirOffset,float reflectIntensity,
-    float nv,float roughness,float a2,float smoothness,float metallic,half2 fresnelRange=half2(0,1),half3 grazingTermColor=1,
-    // planar reflection tex,(xyz:color,w: ratio)
-    half4 planarReflectTex=0)
-{
-    float3 reflectDir = CalcReflectDir(worldPos,normal,viewDir,reflectDirOffset);
-    float3 iblColor = CalcIBL(reflectDir,cube,sampler_cube,roughness,cubeHDR) * reflectIntensity;
-
-    #if defined(_PLANAR_REFLECTION_ON)
-        // blend planar reflection texture
-        iblColor = lerp(iblColor,planarReflectTex.xyz,planarReflectTex.w);
-    #endif
-    
-    float fresnelTerm = CalcFresnelTerm(nv,fresnelRange);
-    float3 giSpec = CalcGISpec(a2,smoothness,metallic,fresnelTerm,specColor,iblColor,grazingTermColor);
-    return giSpec;
-}
 #endif // URP_GI_HLSL
