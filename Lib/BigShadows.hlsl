@@ -23,11 +23,14 @@ float3 TransformWorldToBigShadow(float3 worldPos){
     _SHADOWS_SOFT for soft shadow 
 */
 float CalcBigShadowAtten(float3 bigShadowCoord,float softScale){
+    branch_if(SHADOW_INTENSITY<=0)
+        return 1;
+    
+    branch_if(any(bigShadowCoord <= 0) || any(bigShadowCoord >= 1))
+        return 1;
+    
     float shadow = SampleShadowmap(_BigShadowMap,sampler_BigShadowMap,bigShadowCoord.xyzx,softScale);
     shadow = lerp(1,shadow,SHADOW_INTENSITY);
-    
-    if(any(bigShadowCoord <= 0) || any(bigShadowCoord >= 1))
-        shadow = 1;
     
     return shadow;
 }
