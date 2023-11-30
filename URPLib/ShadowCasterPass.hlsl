@@ -30,6 +30,7 @@
 #define URP_SHADOW_CASTER_PASS_HLSL
 #include "../../PowerShaderLib/UrpLib/URP_MainLightShadows.hlsl"
 #include "../../PowerShaderLib/Lib/NatureLib.hlsl"
+#include "../../PowerShaderLib/Lib/TextureLib.hlsl"
 
 // default values
 #if !defined(_MainTexChannel)
