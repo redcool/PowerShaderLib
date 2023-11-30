@@ -3,6 +3,101 @@
 
 #include "../Lib/ReflectionLib.hlsl"
 
+//-----------------------------------------------------------EntityLight
+#define LIGHTMAP_RGBM_MAX_GAMMA     float(5.0)       // NB: Must match value in RGBMRanges.h
+#define LIGHTMAP_RGBM_MAX_LINEAR    float(34.493242) // LIGHTMAP_RGBM_MAX_GAMMA ^ 2.2
+
+#ifdef UNITY_LIGHTMAP_RGBM_ENCODING
+    #ifdef UNITY_COLORSPACE_GAMMA
+        #define LIGHTMAP_HDR_MULTIPLIER LIGHTMAP_RGBM_MAX_GAMMA
+        #define LIGHTMAP_HDR_EXPONENT   float(1.0)   // Not used in gamma color space
+    #else
+        #define LIGHTMAP_HDR_MULTIPLIER LIGHTMAP_RGBM_MAX_LINEAR
+        #define LIGHTMAP_HDR_EXPONENT   float(2.2)
+    #endif
+#elif defined(UNITY_LIGHTMAP_DLDR_ENCODING)
+    #ifdef UNITY_COLORSPACE_GAMMA
+        #define LIGHTMAP_HDR_MULTIPLIER float(2.0)
+    #else
+        #define LIGHTMAP_HDR_MULTIPLIER float(4.59) // 2.0 ^ 2.2
+    #endif
+    #define LIGHTMAP_HDR_EXPONENT float(0.0)
+#else // (UNITY_LIGHTMAP_FULL_HDR)
+    #define LIGHTMAP_HDR_MULTIPLIER float(1.0)
+    #define LIGHTMAP_HDR_EXPONENT float(1.0)
+#endif
+
+
+float3 UnpackLightmapRGBM(float4 rgbmInput, float4 decodeInstructions)
+{
+#ifdef UNITY_COLORSPACE_GAMMA
+    return rgbmInput.rgb * (rgbmInput.a * decodeInstructions.x);
+#else
+    return rgbmInput.rgb * (PositivePow(rgbmInput.a, decodeInstructions.y) * decodeInstructions.x);
+
+    // optimise 
+    float scale = rgbmInput.w;
+    #if defined(UNITY_LIGHTMAP_RGBM_ENCODING)
+        scale = scale * scale;
+    #endif
+
+    return rgbmInput.rgb * ( scale * decodeInstructions.x);
+#endif
+}
+
+float3 UnpackLightmapDoubleLDR(float4 encodedColor, float4 decodeInstructions)
+{
+    return encodedColor.rgb * decodeInstructions.x;
+}
+
+#ifndef BUILTIN_TARGET_API
+float3 DecodeLightmap(float4 encodedIlluminance, float4 decodeInstructions)
+{
+#if defined(UNITY_LIGHTMAP_RGBM_ENCODING)
+    return UnpackLightmapRGBM(encodedIlluminance, decodeInstructions);
+#elif defined(UNITY_LIGHTMAP_DLDR_ENCODING)
+    return UnpackLightmapDoubleLDR(encodedIlluminance, decodeInstructions);
+#else // (UNITY_LIGHTMAP_FULL_HDR)
+    return encodedIlluminance.rgb;
+#endif
+}
+#endif
+
+float3 SampleLightmap(float2 uv){
+    #ifdef UNITY_LIGHTMAP_FULL_HDR
+    bool encodedLightmap = false;
+#else
+    bool encodedLightmap = true;
+#endif
+
+    float4 decodeInstructions = float4(LIGHTMAP_HDR_MULTIPLIER, LIGHTMAP_HDR_EXPONENT, 0.0h, 0.0h);
+    float4 illum = SAMPLE_TEXTURE2D(unity_Lightmap,samplerunity_Lightmap,uv);
+    return DecodeLightmap(illum,decodeInstructions);
+}
+
+float4 SampleShadowMask(float2 uv){
+    #if defined(SHADOWS_SHADOWMASK) && defined(LIGHTMAP_ON)
+    return SAMPLE_TEXTURE2D(unity_ShadowMask,samplerunity_ShadowMask,uv);
+    #elif !defined(LIGHTMAP_ON)
+    return unity_ProbesOcclusion;
+    #else
+    return 1;
+    #endif
+}
+// not need use, keep it
+half4 CalcShadowMask(half4 shadowMask)
+{
+    // To ensure backward compatibility we have to avoid using shadowMask input, as it is not present in older shaders
+    #if defined(SHADOWS_SHADOWMASK) && defined(LIGHTMAP_ON)
+    return shadowMask;
+    #elif !defined (LIGHTMAP_ON)
+    return unity_ProbesOcclusion;
+    #else
+    return 1;
+    #endif
+}
+
+
 float3 CalcGIDiff(float3 normal,float3 diffColor,float2 lightmapUV=0){
     float3 giDiff = 0;
     #if defined(LIGHTMAP_ON)
