@@ -39,6 +39,25 @@ half3 CalculateDebugShadowCascadeColor(float3 positionWS)
     }
 }
 
+bool CalculateValidationMetallic(half3 albedo, half metallic, inout half4 debugColor)
+{
+    if (metallic < _DebugValidateMetallicMinValue)
+    {
+        debugColor = _DebugValidateBelowMinThresholdColor;
+    }
+    else if (metallic > _DebugValidateMetallicMaxValue)
+    {
+        debugColor = _DebugValidateAboveMaxThresholdColor;
+    }
+    else
+    {
+        half luminance = Luminance(albedo);
+
+        debugColor = half4(luminance, luminance, luminance, 1);
+    }
+    return true;
+}
+
 /**
     Get urp debug display color
 */
@@ -67,7 +86,7 @@ half3 CalcDebugColor(
 
     // run scene debug
     if(_DebugSceneOverrideMode != DEBUGSCENEOVERRIDEMODE_NONE)
-        return _DebugColor;
+        return _DebugColor.xyz;
     
     // run material check mode
     switch(_DebugMaterialMode)
@@ -102,10 +121,10 @@ half3 CalcDebugColor(
     {
         case DEBUGMATERIALVALIDATIONMODE_ALBEDO:
             CalculateValidationAlbedo(albedo,debugColor/**/);
-            return debugColor;
+            return debugColor.xyz;
         case DEBUGMATERIALVALIDATIONMODE_METALLIC:
             CalculateValidationMetallic(albedo,metallic,debugColor/**/);
-            return debugColor;
+            return debugColor.xyz;
     }
 
     // lighting mode
@@ -115,10 +134,12 @@ half3 CalcDebugColor(
         albedo = emission = specular = occlusion = metallic = smoothness = 0;
         if (_DebugLightingMode == DEBUGLIGHTINGMODE_LIGHTING_WITHOUT_NORMAL_MAPS || _DebugLightingMode == DEBUGLIGHTINGMODE_LIGHTING_WITH_NORMAL_MAPS)
         {
-            albedo = occlusion = 1;
+            albedo = 1;
+            occlusion = 1;
         }else if(_DebugLightingMode == DEBUGLIGHTINGMODE_REFLECTIONS || _DebugLightingMode == DEBUGLIGHTINGMODE_REFLECTIONS_WITH_SMOOTHNESS)
         {
-            occlusion = specular =1;
+            occlusion = 1;
+            specular =1;
             smoothness = _DebugLightingMode == DEBUGLIGHTINGMODE_REFLECTIONS;
         }
 
