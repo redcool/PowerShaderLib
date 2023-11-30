@@ -52,8 +52,9 @@ half3 BoxProjectedCubemapDir(half3 reflectionWS, float3 positionWS, float4 cubem
         return reflectionWS;
     }
 }
+#define BoxProjectedCubemapDirection BoxProjectedCubemapDir
 
-float3 CalcReflectDir(float3 worldPos,float3 normal,float3 viewDir,float3 reflectDirOffset=0){
+float3 CalcReflectDir(float3 worldPos,float3 normal,float3 viewDir,float3 reflectDirOffset=0,bool isBoxProjection=false){
     float3 reflectDir = reflect(-viewDir,normal);
     reflectDir = (reflectDir + reflectDirOffset);
 

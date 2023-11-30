@@ -1,6 +1,19 @@
 #if !defined(GI_LIB_HLSL)
 #define GI_LIB_HLSL
+/**
+    GIDiff(sh,lightmap),
+    GISpec(ibl)
 
+    _INTERIOR_MAP_ON
+    _PLANAR_REFLECTION_ON
+    LIGHTMAP_ON
+    SMOOTH_FRESNEL //smooth pow(1-nv,4)
+
+    can override
+    unity_Lightmap samplerunity_Lightmap
+    unity_ShadowMask samplerunity_ShadowMask
+
+*/
 #include "../Lib/ReflectionLib.hlsl"
 
 //-----------------------------------------------------------EntityLight
@@ -155,6 +168,7 @@ half3 CalcGISpec(float a2,float smoothness,float metallic,float fresnelTerm,half
 
 /**
     _PLANAR_REFLECTION_ON, if use planar reflection
+    _INTERIOR_MAP_ON ,use interior map
 */
 
 half3 CalcGISpec(TEXTURECUBE_PARAM(cube,sampler_cube),float4 cubeHDR,float3 specColor,
