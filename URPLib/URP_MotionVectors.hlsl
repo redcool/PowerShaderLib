@@ -26,7 +26,7 @@ float4 CalcMotionVectors(float4 hClipPos,float4 lastHClipPos){
     1 declare in vertex's Attribute(appdata)
     varName : variable's name
 */
-#define DECLARE_MOTION_VS_INPUT(varName) float3 varName:TEXCOORD4
+#define DECLARE_MOTION_VS_INPUT(varName) float4 varName:TEXCOORD4
 
 /**
     2 declare in vs output struct (v2f)
@@ -46,7 +46,7 @@ float4 CalcMotionVectors(float4 hClipPos,float4 lastHClipPos){
     clipPos : homogeneous clip space position
 */
 #define CALC_MOTION_POSITIONS(inputPrevPos,inputPos,v2f,clipPos)\
-    const float4 prevPos = (unity_MotionVectorsParams.x ==1)? float4(inputPrevPos,1) : inputPos;\
+    const float4 prevPos = (unity_MotionVectorsParams.x ==1)? float4(inputPrevPos.xyz,1) : inputPos;\
     v2f.hClipPos = clipPos;\
     v2f.lastHClipPos = mul(_PrevViewProjMatrix,mul(UNITY_PREV_MATRIX_M,prevPos))\
 
