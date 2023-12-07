@@ -144,6 +144,10 @@ float3 DecodeHDREnvironment(float4 encodedIrradiance, float4 decodeInstructions)
 }
 #define DecodeHDR(encodedIrradiance,decodeInstructions) DecodeHDREnvironment(encodedIrradiance,decodeInstructions) 
 
+float CalcLOD(float rough){
+    return (1.7-0.7*rough)*6*rough;
+}
+
 float3 CalcIBL(float3 reflectDir,TEXTURECUBE_PARAM(cube,sampler_cube),float rough,float4 hdrEncode){
     float mip = (1.7 - 0.7*rough)*6*rough;
     float4 cubeColor = SAMPLE_TEXTURECUBE_LOD(cube,sampler_cube,reflectDir,mip);
