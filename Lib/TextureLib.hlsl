@@ -7,6 +7,9 @@
 */
 
 #if defined(USE_SAMPLER2D)
+    #undef TEXTURE2D_PARAM
+    #undef TEXTURE2D_ARGS
+    #undef SAMPLE_TEXTURE2D
     #define TEXTURE2D_PARAM(textureName, samplerName)  sampler2D textureName
     #define TEXTURE2D_ARGS(textureName,samplerName) textrueName
     #define SAMPLE_TEXTURE2D(depthTex,depthTexSampler,uv) tex2D(depthTex,uv)
