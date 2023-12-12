@@ -1,13 +1,19 @@
 #if !defined(WAVE_LIB_HLSL)
 #define WAVE_LIB_HLSL
-
-float3 GerstnerWave(float4 wave,float3 p,inout float3 tangent,inout float3 binormal){
-    float steepness = wave.z;
-    float waveLength = max(0.001,wave.w);
+/**
+    waveInfo 
+        xy: wave direction,
+        z : wave steepness,
+        w : wave length
+    
+*/
+float3 GerstnerWave(inout float3 tangent,inout float3 binormal,float4 waveInfo,float3 worldPos,float waveScrollSpeed=1){
+    float steepness = waveInfo.z;
+    float waveLength = max(0.001,waveInfo.w);
     float k = 2 * PI / waveLength;
     float c = sqrt(9.8/k);
-    float2 d = normalize(wave.xy);
-    float f = k * dot(d,p.xz) - c * _Time.y;
+    float2 d = normalize(waveInfo.xy);
+    float f = k * dot(d,worldPos.xz)  - c * _Time.y * waveScrollSpeed;
     float a = steepness/k;
 
     tangent += float3(

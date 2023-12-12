@@ -52,13 +52,18 @@ float UVBorder(float2 uv,float2 uvRange){
 }
 
 /**
-    world space sdf
+    world space sphere sdf
     
-    distSign,for texture blend
-    bandDist, for circle band blend
+    distSign : for texture blend
+    bandDist : for circle band blend
+    d : circle
+
+    distRange
+    distSignRange
 */
-float CalcWorldDistance(out float distSign,out float bandDist,float3 worldPos,float3 center,float radius,float2 distRange,float2 distSignRange=float2(-1,1)){
-    float d = distance(worldPos,center) - radius;
+float CalcWorldDistance(out float dist,out float distSign,out float bandDist,float3 worldPos,float3 center,float radius,float2 distRange,float2 distSignRange=float2(-1,1)){
+    float d =  distance(worldPos,center) - radius;
+    dist = d;
     distSign = smoothstep(distSignRange.x,distSignRange.y,(d));
     d = abs(d);
 
