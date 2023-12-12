@@ -59,11 +59,22 @@ void CalcDiffuseSpecularColor(out float3 diffColor,out float3 specColor,float4 a
     specColor = lerp(0.04,albedo.xyz,metallic);
 }
 
+void CalcTriplanarUV(out float2 uv0,out float2 uv1,out float2 uv2,out float3 weights,float3 worldPos,float3 normal,float4 tilingOffset=float4(1,1,0,0)){
+    weights = abs(normal)/dot(normal,1);
+    
+    uv0 = float2(worldPos.yz * tilingOffset.xy + tilingOffset.zw);
+    uv1 = float2(worldPos.xz * tilingOffset.xy + tilingOffset.zw);
+    uv2 = float2(worldPos.xy * tilingOffset.xy + tilingOffset.zw);
+}
+
 float4 TriplanarSample(TEXTURE2D_PARAM(tex,sampler_tex),float3 worldPos,float3 normal,float4 tilingOffset=float4(1,1,0,0)){
-    float3 weights = abs(normal)/dot(normal,1);
-    float4 c = SAMPLE_TEXTURE2D(tex,sampler_tex,worldPos.yz * tilingOffset.xy + tilingOffset.zw) * weights.x;
-    c += SAMPLE_TEXTURE2D(tex,sampler_tex,worldPos.xz * tilingOffset.xy + tilingOffset.zw) * weights.y;
-    c += SAMPLE_TEXTURE2D(tex,sampler_tex,worldPos.xy * tilingOffset.xy + tilingOffset.zw) * weights.z;
+    float2 uv0,uv1,uv2;
+    float3 weights;
+    CalcTriplanarUV(uv0/**/,uv1/**/,uv2/**/,weights/**/,worldPos,normal,tilingOffset);
+
+    float4 c = SAMPLE_TEXTURE2D(tex,sampler_tex,uv0) * weights.x;
+    c += SAMPLE_TEXTURE2D(tex,sampler_tex,uv1) * weights.y;
+    c += SAMPLE_TEXTURE2D(tex,sampler_tex,uv2) * weights.z;
     return c;
 }
 
