@@ -51,8 +51,9 @@ float4 CalcMotionVectors(float4 hClipPos,float4 lastHClipPos){
     v2f.lastHClipPos = mul(_PrevViewProjMatrix,mul(UNITY_PREV_MATRIX_M,prevPos))\
 
 #define ZERO_MOTION_POSITIONS(inputPrevPos,inputPos,v2f,clipPos)\
-    v2f.hclipPos = clipPos;\
+    v2f.hClipPos = clipPos;\
     v2f.lastHClipPos = clipPos;\
+
 /**
     4 call in frag function
     return float4(xy:motion vectors,zw:(01))
