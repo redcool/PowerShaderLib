@@ -8,24 +8,31 @@
 
 #if defined(USE_SAMPLER2D)
     #undef TEXTURE2D_PARAM
-    #undef TEXTURE2D_ARGS
-    #undef SAMPLE_TEXTURE2D
     #define TEXTURE2D_PARAM(textureName, samplerName)  sampler2D textureName
-    #define TEXTURE2D_ARGS(textureName,samplerName) textrueName
-    #define SAMPLE_TEXTURE2D(depthTex,depthTexSampler,uv) tex2D(depthTex,uv)
-    
+
+    #undef TEXTURE2D_ARGS
+    #define TEXTURE2D_ARGS(textureName,samplerName) textureName
+
+    #undef SAMPLE_TEXTURE2D
+    #define SAMPLE_TEXTURE2D(depthTex,depthTexSampler,uv) tex2D(depthTex,(uv))
+
+    #undef TEXTURE2D
+    #define TEXTURE2D(textureName) sampler2D textureName
+
+    #undef SAMPLE_TEXTURE2D_LOD
+    #define SAMPLE_TEXTURE2D_LOD(tex,sampler_Tex,uv,lod) tex2Dlod(tex,float4(uv,0,lod))
 #endif
 
 /**
     _MainTex,_BaseMap
 */
-#if defined(USE_BASEMAP)
+#if defined(USE_BASEMAP) || defined(MAINTEX_TO_BASEMAP)
     #define _MainTex _BaseMap 
     #define _MainTex_ST _BaseMap_ST
     #define sampler_MainTex sampler_BaseMap
 #endif
 
-#if defined(USE_MAINTEX)
+#if defined(USE_MAINTEX) || defined(BASEMAP_TO_MAINTEX)
     #define _BaseMap _MainTex
     #define _BaseMap_ST _MainTex_ST
     #define sampler_BaseMap sampler_MainTex
