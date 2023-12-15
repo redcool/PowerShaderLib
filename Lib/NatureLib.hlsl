@@ -228,4 +228,17 @@ void ApplyRainPbr(inout float3 albedo,inout float metallic,inout float smoothnes
     metallic = lerp(metallic , rainMetallic, rainIntensity);
     smoothness = lerp(smoothness , rainSmoothness , rainIntensity);
 }
+
+half3 CalcCloudShadow(TEXTURE2D_PARAM(tex,samplerTex),float3 worldPos,float4 noiseTilingOffset,bool isAutoOffsetStop,float noiseRangeMin,float noiseRangeMax,
+float4 shadowColor,float shadowIntensity,float baseShadowIntensity){
+    float2 uv = worldPos.xz * noiseTilingOffset.xy + UVOffset(noiseTilingOffset.zw,isAutoOffsetStop);
+    float noise = SampleWeatherNoise(TEXTURE2D_ARGS(tex,samplerTex),uv,half4(0.1,0.2,0.3,0.4));
+    noise = smoothstep(noiseRangeMin,noiseRangeMax,noise);
+
+    float rate = saturate(noise * shadowIntensity + baseShadowIntensity);
+    
+    return lerp(shadowColor,1,rate );
+}
+
+
 #endif //NATURE_LIB_HLSL
