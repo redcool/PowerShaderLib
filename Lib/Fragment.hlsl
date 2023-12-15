@@ -14,7 +14,8 @@ Fragment GetFragment(float4 posHClip){
     Fragment f = (Fragment)0;
     f.screenPos = posHClip.xy;
     f.screenUV = f.screenPos/_ScreenParams.xy;
-    f.depth = IsOrthographicCamera()? OrthographicDepthBufferToLinear(posHClip.z) : LinearEyeDepth(posHClip.w,_ZBufferParams);
+    // f.depth = IsOrthographicCamera()? OrthographicDepthBufferToLinear(posHClip.z) : LinearEyeDepth(posHClip.w,_ZBufferParams);
+    f.depth = CalcLinearEyeDepth(posHClip);
     return f;
 }
 
