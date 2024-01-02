@@ -32,4 +32,14 @@ float2 RectUV(float id,float2 uv,half2 sheet,bool invertY,bool playOnce){
     return lerp(rect.xy,rect.zw,uv);
 }
 
+/**
+    repeat uv in uvRange,used for Sprite in atlas
+*/
+float2 UVRepeat(float2 uv,float2 uvRange,float2 uvStart){
+    uv %= uvRange;
+    uv += sign(uv) < 0 ? uvRange : 0;
+    uv += uvStart;
+    return uv;
+}
+
 #endif //UV_MAPPING_HLSL            
