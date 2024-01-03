@@ -20,7 +20,16 @@ float3 BlendVertexNormal(float3 tn,float3 worldPos,float3 t,float3 b,float3 n){
     return BlendNormal(tn,vn);
 }
 
+void ClipLOD(float2 screenPos){
+    // #if defined(LOD_FADE_CROSSFADE)
+    float fade = unity_LODFade.x;
 
+    // float dither = screenPos.y % 16/16;
+    float dither = InterleavedGradientNoise(screenPos.xy,0);
+    dither *= lerp(-1,1,fade < 0);
+    clip(fade + dither);
+    // #endif
+}
 
 
 #endif //POWER_UTILS_HLSL
