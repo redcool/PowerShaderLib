@@ -1,4 +1,4 @@
-Shader "Character/Unlit/ShowOcclusion"
+Shader "Hidden/testGlitch"
 {
     Properties
     {
