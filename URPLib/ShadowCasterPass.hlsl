@@ -1,7 +1,7 @@
 /** 
     variables(can override):
     _MainTex,sampler_MainTex
-    _MainTexChannel
+    _MainTexChannel  // mainTex's alpha
     _Cutoff
     _CustomShadowNormalBias,_CustomShadowDepthBias
 
