@@ -1,7 +1,7 @@
 /** 
     variables(can override):
     _MainTex,sampler_MainTex
-    _MainTexChannel
+    _MainTexChannel  // mainTex's alpha
     _Cutoff
     _CustomShadowNormalBias,_CustomShadowDepthBias
 
@@ -64,6 +64,7 @@ struct shadow_v2f{
 
 float3 _LightDirection;
 float3 _LightPosition;
+float2 _CustomShadowBias; //x:depth bias,y:normal bias, global ,set by commandbuffer or Shader
 
 //--------- shadow helpers
 float4 GetShadowPositionHClip(shadow_appdata input){
@@ -83,7 +84,7 @@ float4 GetShadowPositionHClip(shadow_appdata input){
         float3 lightDirectionWS = _LightDirection;
     #endif
 
-    float4 positionCS = UnityWorldToClipPos(ApplyShadowBias(worldPos,worldNormal,lightDirectionWS,_CustomShadowNormalBias,_CustomShadowDepthBias));
+    float4 positionCS = UnityWorldToClipPos(ApplyShadowBias(worldPos,worldNormal,lightDirectionWS,_CustomShadowNormalBias + _CustomShadowBias.y,_CustomShadowDepthBias + _CustomShadowBias.x));
     #if UNITY_REVERSED_Z
         positionCS.z = min(positionCS.z, positionCS.w * UNITY_NEAR_CLIP_VALUE);
     #else

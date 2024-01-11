@@ -1,6 +1,20 @@
 #if !defined(COORDINATE_SYSTEM_HLSL)
 #define COORDINATE_SYSTEM_HLSL
 #define PI2 6.283
+/**
+    demo:, rotate and strength
+//============== Noise
+    half2 noiseOffset = UVOffset(_NoiseTex_ST.zw, _NoiseTexOffsetStop);
+//============== Polar or Cartesian
+    float2 noiseUV = screenUV;
+    #if defined(_NOISE_POLAR_UV)
+        noiseUV = ToPolar(screenUV*2-1);
+        noiseUV= noiseUV * _NoiseTex_ST.xy + noiseOffset;
+        noiseUV = ToCartesian(noiseUV);
+    #else
+        noiseUV= noiseUV * _NoiseTex_ST.xy + noiseOffset;
+    #endif
+*/
 
 /**
     return {x:[-.5,.5],y:uv length}
@@ -35,4 +49,6 @@ float2 ToCartesian(float2 uv){
     sincos(uv.x*PI2,s,c);
     return float2(c,s) * uv.y;
 }
+
+
 #endif //COORDINATE_SYSTEM_HLSL
