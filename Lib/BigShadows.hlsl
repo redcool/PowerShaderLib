@@ -19,22 +19,19 @@ float3 TransformWorldToBigShadow(float3 worldPos){
     return bigShadowCoord;
 }
 
-#define BEYOND_SHADOW_FAR(shadowCoord) shadowCoord.z <= 0.0 || shadowCoord.z >= 1.0
+// #define BEYOND_SHADOW_FAR(shadowCoord) shadowCoord.z <= 0.0 || shadowCoord.z >= 1.0
 
 /**
     _SHADOWS_SOFT for soft shadow 
 */
 float CalcBigShadowAtten(float3 bigShadowCoord,float softScale){
-    // branch_if(SHADOW_INTENSITY<=0)
-    //     return 1;
-    
-    // branch_if(any(bigShadowCoord <= 0) || any(bigShadowCoord >= 1))
-    //     return 1;
+    branch_if(SHADOW_INTENSITY<=0 || any(bigShadowCoord <= 0) || any(bigShadowCoord >= 1))
+        return 1;
     
     float shadow = SampleShadowmap(TEXTURE2D_ARGS(_BigShadowMap,sampler_BigShadowMap),bigShadowCoord.xyzx,softScale);
     shadow = lerp(1,shadow,SHADOW_INTENSITY);
-    
-    return BEYOND_SHADOW_FAR(bigShadowCoord) ? 1 : shadow;
+
+    return shadow;   
 }
 
 #endif // BIG_SHADOWS_HLSL
