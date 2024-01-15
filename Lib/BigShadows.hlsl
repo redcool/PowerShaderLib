@@ -13,6 +13,7 @@ TEXTURE2D_SHADOW(_BigShadowMap); SAMPLER_CMP(sampler_BigShadowMap);
 
 float4x4 _BigShadowVP;
 float4 _BigShadowParams; //{x: shadow intensity}
+half _BigShadowOn;
 
 float3 TransformWorldToBigShadow(float3 worldPos){
     float3 bigShadowCoord = mul(_BigShadowVP,float4(worldPos,1)).xyz;
@@ -25,11 +26,11 @@ float3 TransformWorldToBigShadow(float3 worldPos){
     _SHADOWS_SOFT for soft shadow 
 */
 float CalcBigShadowAtten(float3 bigShadowCoord,float softScale){
-    branch_if(SHADOW_INTENSITY<=0 || any(bigShadowCoord <= 0) || any(bigShadowCoord >= 1))
+    branch_if(any(bigShadowCoord <= 0) || any(bigShadowCoord >= 1))
         return 1;
     
     float shadow = SampleShadowmap(TEXTURE2D_ARGS(_BigShadowMap,sampler_BigShadowMap),bigShadowCoord.xyzx,softScale);
-    shadow = lerp(1,shadow,SHADOW_INTENSITY);
+    shadow = lerp(1,shadow,SHADOW_INTENSITY * _BigShadowOn);
 
     return shadow;   
 }
