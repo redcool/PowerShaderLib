@@ -171,8 +171,11 @@ half3 CalcGISpec(float a2,float smoothness,float metallic,float fresnelTerm,half
 }
 
 /**
-    _PLANAR_REFLECTION_ON, if use planar reflection
-    _INTERIOR_MAP_ON ,use interior map
+    Get GISpec,macros:
+    
+    1 _PLANAR_REFLECTION_ON, if use planar reflection
+    2 _INTERIOR_MAP_ON ,use interior map
+    3 define SMOOTH_FRESNEL, control fresnel width use fresnelRange
 */
 
 half3 CalcGISpec(TEXTURECUBE_PARAM(cube,sampler_cube),float4 cubeHDR,float3 specColor,
