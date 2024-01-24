@@ -67,17 +67,10 @@ float3 _LightPosition;
 float2 _CustomShadowBias; //x:depth bias,y:normal bias, global ,set by commandbuffer or Shader
 
 //--------- shadow helpers
-float4 GetShadowPositionHClip(shadow_appdata input){
-    float3 worldPos = TransformObjectToWorld(input.vertex.xyz);
-    float3 worldNormal = UnityObjectToWorldNormal(input.normal);
-
-    #if defined(_WIND_ON)
-    float4 attenParam = input.color.x; // vertex color atten
-    branch_if(IsWindOn()){
-        worldPos = WindAnimationVertex(worldPos,input.vertex.xyz,worldNormal,attenParam * _WindAnimParam, _WindDir,_WindSpeed).xyz;
-    }
-    #endif
-
+/**
+    return shadow position hclip space
+*/
+float4 GetShadowPositionHClip(float3 worldPos,float3 worldNormal){
     #if _CASTING_PUNCTUAL_LIGHT_SHADOW
         float3 lightDirectionWS = normalize(_LightPosition - worldPos);
     #else
@@ -93,13 +86,38 @@ float4 GetShadowPositionHClip(shadow_appdata input){
     return positionCS;
 }
 
+/**
+    worldPos apply wind(WindAnimationVertex)
+*/
+void CaclWaveAnimationWorldPos(float3 vertex,float3 normal,inout float3 worldPos,inout float3 worldNormal){
+    worldPos = TransformObjectToWorld(vertex.xyz);
+    worldNormal = UnityObjectToWorldNormal(normal);
+
+    #if defined(_WIND_ON)
+    float4 attenParam = input.color.x; // vertex color atten
+    branch_if(IsWindOn()){
+        worldPos = WindAnimationVertex(worldPos,input.vertex.xyz,worldNormal,attenParam * _WindAnimParam, _WindDir,_WindSpeed).xyz;
+    }
+    #endif
+}
+
+// float4 GetShadowPositionHClip(shadow_appdata input){
+//     float3 worldPos,worldNormal;
+//     CaclWaveAnimationWorldPos(input.vertex.xyz,input.normal,worldPos/**/,worldNormal/**/);
+//     return GetShadowPositionHClip(worldPos,worldNormal);
+// }
+
+
 shadow_v2f vert(shadow_appdata input){
     shadow_v2f output;
 
+    float3 worldPos,worldNormal;
+    CaclWaveAnimationWorldPos(input.vertex.xyz,input.normal,worldPos/**/,worldNormal/**/);
+
     #if defined(SHADOW_PASS)
-        output.pos = GetShadowPositionHClip(input);
+        output.pos = GetShadowPositionHClip(worldPos,worldNormal);
     #else
-        output.pos = TransformObjectToHClip(input.vertex.xyz);
+        output.pos = TransformWorldToHClip(worldPos);
     #endif
     output.uv = TRANSFORM_TEX(input.texcoord,_MainTex);
     return output;

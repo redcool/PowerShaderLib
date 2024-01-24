@@ -237,7 +237,7 @@ float4 shadowColor,float shadowIntensity,float baseShadowIntensity){
 
     float rate = saturate(noise * shadowIntensity + baseShadowIntensity);
     
-    return lerp(shadowColor,1,rate );
+    return lerp(shadowColor.xyz,1,rate );
 }
 
 
