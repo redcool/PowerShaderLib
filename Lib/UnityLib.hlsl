@@ -1,5 +1,8 @@
 /**
     use urp or simplified
+
+    macros:
+    _TEST
 */
 // #define USE_URP // uncomment this use urp flow
 #if defined(USE_URP)
@@ -342,14 +345,16 @@ TEXTURECUBE(unity_SpecCube0);SAMPLER(samplerunity_SpecCube0);
 TEXTURECUBE(unity_SpecCube1);SAMPLER(samplerunity_SpecCube1);
 TEXTURECUBE(_GlossyEnvironmentCubeMap);SAMPLER(sampler_GlossyEnvironmentCubeMap);
 
-// float3 DecodeHDREnvironment(float4 encodedIrradiance, float4 decodeInstructions)
-// {
-//     // Take into account texture alpha if decodeInstructions.w is true(the alpha value affects the RGB channels)
-//     float alpha = max(decodeInstructions.w * (encodedIrradiance.a - 1.0) + 1.0, 0.0);
+#if defined(_TEST)
+float3 DecodeHDREnvironment(float4 encodedIrradiance, float4 decodeInstructions)
+{
+    // Take into account texture alpha if decodeInstructions.w is true(the alpha value affects the RGB channels)
+    float alpha = max(decodeInstructions.w * (encodedIrradiance.a - 1.0) + 1.0, 0.0);
 
-//     // If Linear mode is not supported we can skip exponent part
-//     return (decodeInstructions.x * pow(alpha, decodeInstructions.y)) * encodedIrradiance.rgb;
-// }
+    // If Linear mode is not supported we can skip exponent part
+    return (decodeInstructions.x * pow(alpha, decodeInstructions.y)) * encodedIrradiance.rgb;
+}
+#endif
 
 //==============================
 //  lighting
