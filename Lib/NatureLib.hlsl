@@ -161,7 +161,8 @@ float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal
     rate = saturate(upAtten + dirAtten);
 
     UNITY_BRANCH if(applyEdgeOn){
-        float g = dot(float3(0.2,0.7,0.02),albedo) ;
+        //find edge
+        float g = 1 - dot(float3(0.2,0.7,0.02),albedo) ;
         rate = smoothstep(.1,.2,rate*g);
     }
     return lerp(albedo,snowColor,rate * intensity * _GlobalSnowIntensity);
