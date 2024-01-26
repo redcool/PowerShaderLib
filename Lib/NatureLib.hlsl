@@ -153,19 +153,24 @@ void SimpleWave(inout float3 worldPos,float3 vertex,float3 vertexColor,float ben
 /**
     Simple Snow from albedo
 */
-float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal,bool applyEdgeOn){
+float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal){
     float dirAtten = saturate(dot(worldNormal,_GlobalWindDir.xyz)); // filter by dir
 
     float rate = 0;
     half upAtten = dot(worldNormal,half3(0,1,0));
-    rate = saturate(upAtten + dirAtten);
+    rate = upAtten + dirAtten;
 
-    UNITY_BRANCH if(applyEdgeOn){
+    // UNITY_BRANCH if(applyEdgeOn)
+    {
         //find edge
-        float g = 1 - dot(float3(0.2,0.7,0.02),albedo) ;
-        rate = smoothstep(.1,.2,rate*g);
+        float g = dot(float3(0.2,0.7,0.02),albedo) ;
+        half snowMin = lerp(0.,0.6,_GlobalSnowIntensity);
+        half snowMax = lerp(0,0.2 , _GlobalSnowIntensity);
+        
+        rate *= smoothstep(snowMin,snowMax ,g);
     }
-    return lerp(albedo,snowColor,rate * intensity * _GlobalSnowIntensity);
+    return max(albedo , (rate*intensity)* snowColor);
+    return saturate(albedo + (rate*intensity)* snowColor);
 }
 
 float3 ComputeRipple(TEXTURE2D_PARAM(rippleTex,sampler_RippleTex),float2 uv, float t)
