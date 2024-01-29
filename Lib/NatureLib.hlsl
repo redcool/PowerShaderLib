@@ -159,18 +159,21 @@ float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal
     float rate = 0;
     half upAtten = dot(worldNormal,half3(0,1,0));
     rate = upAtten + dirAtten;
+    // snow intensity
+    
+    intensity *= _GlobalSnowIntensity;
 
     // UNITY_BRANCH if(applyEdgeOn)
     {
         //find edge
         float g = dot(float3(0.2,0.7,0.02),albedo) ;
-        half snowMin = lerp(0.,0.6,_GlobalSnowIntensity);
-        half snowMax = lerp(0,0.2 , _GlobalSnowIntensity);
+        half snowMin = lerp(0.,0.6,intensity);
+        half snowMax = lerp(0,0.2 , intensity);
         
         rate *= smoothstep(snowMin,snowMax ,g);
     }
-    return max(albedo , (rate*intensity)* snowColor);
-    return saturate(albedo + (rate*intensity)* snowColor);
+    return max(albedo , (rate)* snowColor);
+    // return saturate(albedo + (rate)* snowColor);
 }
 
 float3 ComputeRipple(TEXTURE2D_PARAM(rippleTex,sampler_RippleTex),float2 uv, float t)
