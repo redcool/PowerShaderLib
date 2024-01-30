@@ -89,30 +89,23 @@ float4 GetShadowPositionHClip(float3 worldPos,float3 worldNormal){
 /**
     worldPos apply wind(WindAnimationVertex)
 */
-void CaclWaveAnimationWorldPos(float3 vertex,float3 normal,inout float3 worldPos,inout float3 worldNormal){
+void CaclWaveAnimationWorldPos(float3 vertex,float3 vertexColor,float3 normal,inout float3 worldPos,inout float3 worldNormal){
     worldPos = TransformObjectToWorld(vertex.xyz);
     worldNormal = UnityObjectToWorldNormal(normal);
 
     #if defined(_WIND_ON)
-    float4 attenParam = input.color.x; // vertex color atten
+    float4 attenParam = vertexColor.x; // vertex color atten
     branch_if(IsWindOn()){
         worldPos = WindAnimationVertex(worldPos,input.vertex.xyz,worldNormal,attenParam * _WindAnimParam, _WindDir,_WindSpeed).xyz;
     }
     #endif
 }
 
-// float4 GetShadowPositionHClip(shadow_appdata input){
-//     float3 worldPos,worldNormal;
-//     CaclWaveAnimationWorldPos(input.vertex.xyz,input.normal,worldPos/**/,worldNormal/**/);
-//     return GetShadowPositionHClip(worldPos,worldNormal);
-// }
-
-
 shadow_v2f vert(shadow_appdata input){
     shadow_v2f output;
 
     float3 worldPos,worldNormal;
-    CaclWaveAnimationWorldPos(input.vertex.xyz,input.normal,worldPos/**/,worldNormal/**/);
+    CaclWaveAnimationWorldPos(input.vertex.xyz,input.color,input.normal,worldPos/**/,worldNormal/**/);
 
     #if defined(SHADOW_PASS)
         output.pos = GetShadowPositionHClip(worldPos,worldNormal);
