@@ -96,7 +96,7 @@ void CaclWaveAnimationWorldPos(float3 vertex,float3 vertexColor,float3 normal,in
     #if defined(_WIND_ON)
     float4 attenParam = vertexColor.x; // vertex color atten
     branch_if(IsWindOn()){
-        worldPos = WindAnimationVertex(worldPos,input.vertex.xyz,worldNormal,attenParam * _WindAnimParam, _WindDir,_WindSpeed).xyz;
+        worldPos = WindAnimationVertex(worldPos,vertexColor.xyz,worldNormal,attenParam * _WindAnimParam, _WindDir,_WindSpeed).xyz;
     }
     #endif
 }
