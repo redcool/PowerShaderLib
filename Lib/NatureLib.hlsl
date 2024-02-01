@@ -153,7 +153,7 @@ void SimpleWave(inout float3 worldPos,float3 vertex,float3 vertexColor,float ben
 /**
     Simple Snow from albedo
 */
-float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal){
+float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal,bool isStartFromEdge=true){
     float dirAtten = saturate(dot(worldNormal,_GlobalWindDir.xyz)); // filter by dir
 
     float rate = 0;
@@ -166,7 +166,7 @@ float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal
     // UNITY_BRANCH if(applyEdgeOn)
     {
         //find edge
-        float g = dot(float3(0.2,0.7,0.02),albedo) ;
+        float g = isStartFromEdge ? dot(float3(0.2,0.7,0.02),albedo) : 0;
         half snowMin = lerp(0.,0.6,intensity);
         half snowMax = lerp(0,0.2 , intensity);
         
