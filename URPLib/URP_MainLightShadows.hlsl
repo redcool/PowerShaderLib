@@ -43,7 +43,7 @@ TEXTURE2D_SHADOW(_MainLightShadowmapTexture);SAMPLER_CMP(sampler_MainLightShadow
 CBUFFER_START(MainLightShadows)
 #endif
     #define MAX_SHADOW_CASCADES 4
-    half4x4    _MainLightWorldToShadow[MAX_SHADOW_CASCADES + 1];
+    float4x4    _MainLightWorldToShadow[MAX_SHADOW_CASCADES + 1];
     float4      _CascadeShadowSplitSpheres0;
     float4      _CascadeShadowSplitSpheres1;
     float4      _CascadeShadowSplitSpheres2;
