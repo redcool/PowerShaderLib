@@ -47,10 +47,9 @@
     #define branch_if if
 #endif
 
-#define IsFogOn() (_IsGlobalFogOn && _FogOn)
+
 #define _FogNoiseStartRate _FogNoiseParams.x
 #define _FogNoiseIntensity _FogNoiseParams.y
-
 //------------------------------ sphere fog global params
 float _HeightFogMin,_HeightFogMax;
 float4 _HeightFogMinColor,_HeightFogMaxColor;
@@ -61,12 +60,18 @@ float2 _FogDistance;
 half4 _FogDirTiling;
 half4 _FogNoiseParams; // composite args
 
+
 //------------------------------  global fog params
 float _GlobalFogIntensity;
 half _IsGlobalFogOn;
 
-//----------------------------Sphere Fog
+// unity 2020, macro define not work
+// #define IsFogOn() (_IsGlobalFogOn && _FogOn)
+bool IsFogOn() {
+    return _IsGlobalFogOn && _FogOn;
+}
 
+//----------------------------Sphere Fog
 float3 GetFogCenter(){
     return _WorldSpaceCameraPos;
 }

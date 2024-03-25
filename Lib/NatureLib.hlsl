@@ -3,13 +3,11 @@
 #include "NodeLib.hlsl"
 #include "MathLib.hlsl"
 #include "WeatherNoiseTexture.hlsl"
+
+
 /**
     override this vars
 */
-#define IsRainOn() (_IsGlobalRainOn)
-#define IsSnowOn() (_IsGlobalSnowOn)
-#define IsWindOn() (_IsGlobalWindOn)
-
 /**
     controlled by WeahterControl.cs
 */
@@ -21,7 +19,14 @@ half _IsGlobalRainOn;
 half _IsGlobalSnowOn;
 half _IsGlobalWindOn;
 
+// unity 2020, empty define not work
+// #define IsRainOn() (_IsGlobalRainOn)
+// #define IsSnowOn() (_IsGlobalSnowOn)
+// #define IsWindOn() (_IsGlobalWindOn)
 
+bool IsRainOn() {return _IsGlobalRainOn;}
+bool IsSnowOn() {return _IsGlobalSnowOn;}
+bool IsWindOn() {return _IsGlobalWindOn;}
 
 float4 SmoothCurve( float4 x ) {
     return x * x *( 3.0 - 2.0 * x );
