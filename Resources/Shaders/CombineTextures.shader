@@ -13,8 +13,8 @@ Shader "Hidden/Utils/CombineTextures"
 
     HLSLINCLUDE
     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-    #include "../Lib/BlitLib.hlsl"
-    #include "../Lib/Colors.hlsl"
+    #include "../../Lib/BlitLib.hlsl"
+    #include "../../Lib/Colors.hlsl"
 
     struct v2f
     {

@@ -7,7 +7,7 @@ Shader "Hidden/Utils/CopyDepth"
 
     HLSLINCLUDE
     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-    #include "../Lib/BlitLib.hlsl"
+    #include "../../Lib/BlitLib.hlsl"
 
     struct v2f
     {
