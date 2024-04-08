@@ -7,7 +7,7 @@ void FastSinCos (float4 val, out float4 s, out float4 c) {
     float4 r5 = val * val;                  // wavevec ^ 2
     float4 r6 = r5 * r5;                        // wavevec ^ 4;
     float4 r7 = r6 * r5;                        // wavevec ^ 6;
-    float4 r8 = r6 * r5;                        // wavevec ^ 8;
+    float4 r8 = r7 * r5;                        // wavevec ^ 8;
 
     float4 r1 = r5 * val;                   // wavevec ^ 3
     float4 r2 = r1 * r5;                        // wavevec ^ 5;
