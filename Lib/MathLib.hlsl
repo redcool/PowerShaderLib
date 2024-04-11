@@ -67,7 +67,7 @@ half3 SchmidtOrtho(half3 dir,half3 normal){
 */
 float2 UVOffset(float2 uv_t,float autoStop){
     return autoStop? uv_t : (uv_t*(1+_Time.xx));
-    return uv_t * ( 1+ _Time.xx *( 1 - autoStop) );
+    // return uv_t * ( 1+ _Time.xx *( 1 - autoStop) );
 }
 /*
     matrix : http://mathworld.wolfram.com/images/equations/MatrixInverse/NumberedEquation3.gif
