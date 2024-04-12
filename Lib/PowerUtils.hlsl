@@ -36,5 +36,12 @@ void ClipLOD(float2 screenPos,float pixels=1){
     // #endif
 }
 
+void OffsetHClipVertexZ(inout float4 vertex,float zOffset){
+    #if defined(UNITY_REVERSED_Z)
+        vertex.z *= zOffset;  //[0,1]=>[1,0]
+    #else
+        vertex.z += (1 - zOffset)* _ProjectionParams.y; //[-1,1]=>[0,1], camera near plane
+    #endif
+}
 
 #endif //POWER_UTILS_HLSL
