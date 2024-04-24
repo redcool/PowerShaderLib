@@ -162,18 +162,17 @@ float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal
     float dirAtten = saturate(dot(worldNormal,_GlobalWindDir.xyz)); // filter by dir
 
     float rate = 0;
-    half upAtten = dot(worldNormal,half3(0,1,0));
-    rate = upAtten + dirAtten;
+    float upAtten = dot(worldNormal,half3(0,1,0));
+    rate = saturate(upAtten + dirAtten);
     // snow intensity
-    
     intensity *= _GlobalSnowIntensity;
 
     // UNITY_BRANCH if(applyEdgeOn)
     {
         //find edge
-        float g = isStartFromEdge ? dot(float3(0.2,0.7,0.02),albedo) : 0;
-        half snowMin = lerp(0.,0.6,intensity);
-        half snowMax = lerp(0,0.2 , intensity);
+        float g = isStartFromEdge ? dot(float3(0.2,0.7,0.02),albedo) : .2;
+        float snowMin = lerp(0.,0.6,intensity);
+        float snowMax = lerp(0,0.2 , intensity);
         
         rate *= smoothstep(snowMin,snowMax ,g);
     }
