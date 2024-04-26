@@ -9,10 +9,13 @@
     override this vars
 */
 /**
-    controlled by WeahterControl.cs
+    controlled by PowerLitWeahterControl.cs
 */
 float4 _GlobalWindDir; /*global (xyz)wind direction,w : wind intensity*/
-float _GlobalSnowIntensity; 
+
+float4 _GlobalSnowIntensity;
+#define _GlobalSnowColor _GlobalSnowIntensity.yzw
+
 float _GlobalRainIntensity;
 
 half _IsGlobalRainOn;
@@ -163,7 +166,7 @@ float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal
 
     float rate = 0;
     float upAtten = dot(worldNormal,half3(0,1,0));
-    rate = saturate(upAtten + dirAtten);
+    rate = (upAtten + dirAtten); // no saturate, snow more clear 
     // snow intensity
     intensity *= _GlobalSnowIntensity;
 
@@ -176,7 +179,7 @@ float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal
         
         rate *= smoothstep(snowMin,snowMax ,g);
     }
-    return max(albedo , (rate)* snowColor);
+    return max(albedo , (rate)* snowColor * _GlobalSnowColor);
     // return saturate(albedo + (rate)* snowColor);
 }
 
