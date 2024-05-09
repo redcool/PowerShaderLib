@@ -41,7 +41,7 @@ float4 SmoothTriangleWave( float4 x ) {
     return SmoothCurve( TriangleWave( x ) );
 }
 
-float CalcWorldNoise(float3 worldPos,float4 tilingOffset,float3 windDir){
+float CalcWorldNoise(float3 worldPos,float4 tilingOffset,float3 windDir,float4 blendWeights = float4(0.4,0.2,0.2,0.2)){
     // cross noise
     float2 noiseUV = worldPos.xz * tilingOffset.xy+ windDir.xz * tilingOffset.zw* _Time.y;
 
@@ -51,7 +51,7 @@ float CalcWorldNoise(float3 worldPos,float4 tilingOffset,float3 windDir){
     // noise += unity_gradientNoise(noiseUV2) + 0.5;
 
     // texture version
-    noise += SampleWeatherNoise(noiseUV,half4(0.05,0.15,0.3,0.5));
+    noise += SampleWeatherNoise(noiseUV,blendWeights);
     return noise;
 
     // full version
@@ -158,14 +158,19 @@ void SimpleWave(inout float3 worldPos,float3 vertex,float3 vertexColor,float ben
     worldPos.xz += offsetPos;
 }
 
+float3 CalcNoiseSnowColor(float3 albedo,float3 snowColor,float3 worldPos,float4 tilingOffset=float4(2,2,0,0)){
+    float noise = CalcWorldNoise(worldPos,tilingOffset,_GlobalWindDir.xyz,half4(.1,.1,.1,1.3));
+    return lerp(albedo,snowColor,saturate(noise));
+}
+
 /**
     Simple Snow from albedo
 */
-float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal,bool isStartFromEdge=true){
-    float dirAtten = saturate(dot(worldNormal,_GlobalWindDir.xyz)); // filter by dir
+float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal,half isStartFromEdge=1){
+    float dirAtten = abs(dot(worldNormal,_GlobalWindDir.xyz)); // filter by dir
 
     float rate = 0;
-    float upAtten = dot(worldNormal,half3(0,1,0));
+    float upAtten = saturate(dot(worldNormal,half3(0,1,0)));
     rate = (upAtten + dirAtten); // no saturate, snow more clear 
     // snow intensity
     intensity *= _GlobalSnowIntensity;
@@ -179,8 +184,10 @@ float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal
         
         rate *= smoothstep(snowMin,snowMax ,g);
     }
-    return max(albedo , (rate)* snowColor * _GlobalSnowColor);
-    // return saturate(albedo + (rate)* snowColor);
+    float3 finalSnowColor =  (rate)* snowColor * _GlobalSnowColor;
+    // float3 col = max(albedo , finalSnowColor);
+    float3 col = lerp(albedo,finalSnowColor,saturate(rate));
+    return col;
 }
 
 float3 ComputeRipple(TEXTURE2D_PARAM(rippleTex,sampler_RippleTex),float2 uv, float t)
