@@ -162,17 +162,4 @@ void ApplyStoreyLineEmission(inout float3 emissionColor,half4 lineNoise,float3 w
     emissionColor = lerp(emissionColor,lineColor,vertexColor.x>0.1);
 }
 
-/**
-calc a outerpoint world normal
-
-        *
-    *  worldPos *
-        *
-*/
-float3 CalcSphereWorldNormal(float4x4 objectToWorld,float3 worldPos){
-    float3 pos = float3(objectToWorld._m03,objectToWorld._m13,objectToWorld._m23);
-    float3 n = normalize(worldPos - pos);
-    return n;
-}
-
 #endif //MATERIAL_LIB_HLSL
