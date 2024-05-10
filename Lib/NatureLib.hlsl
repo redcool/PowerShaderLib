@@ -158,8 +158,13 @@ void SimpleWave(inout float3 worldPos,float3 vertex,float3 vertexColor,float ben
     worldPos.xz += offsetPos;
 }
 
-float3 CalcNoiseSnowColor(float3 albedo,float3 snowColor,float3 worldPos,float4 tilingOffset=float4(2,2,0,0)){
-    float noise = CalcWorldNoise(worldPos,tilingOffset,_GlobalWindDir.xyz,half4(.1,.1,.1,1.3));
+half3 CalcNoiseSnowColor(half3 albedo,half3 snowColor,float3 worldPos,
+    half4 tilingOffset=float4(2,2,0,0),half4 weights=float4(1,.1,.1,1),half edgeSmooth=.4
+    ){
+
+    float noise = CalcWorldNoise(worldPos,tilingOffset,_GlobalWindDir.xyz,weights);
+    noise = smoothstep(.1,edgeSmooth,noise);
+    // return noise;
     return lerp(albedo,snowColor,saturate(noise));
 }
 
