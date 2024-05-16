@@ -46,9 +46,14 @@ float4 CalcMotionVectors(float4 hClipPos,float4 lastHClipPos){
     clipPos : homogeneous clip space position
 */
 #define CALC_MOTION_POSITIONS(inputPrevPos,inputPos,v2f,clipPos)\
-    const float4 prevPos = (unity_MotionVectorsParams.x ==1)? float4(inputPrevPos.xyz,1) : inputPos;\
+    const float4 prevPos = (unity_MotionVectorsParams.x ==1)? float4(inputPrevPos.xyz,1) : float4(inputPos.xyz,1);\
     v2f.hClipPos = clipPos;\
     v2f.lastHClipPos = mul(_PrevViewProjMatrix,mul(UNITY_PREV_MATRIX_M,prevPos))\
+
+#define CALC_MOTION_POSITIONS_WORLD(inputPrevPos,inputPos,v2f,clipPos)\
+    const float4 prevPos = (unity_MotionVectorsParams.x ==1)? float4(inputPrevPos.xyz,1) : float4(inputPos.xyz,1);\
+    v2f.hClipPos = clipPos;\
+    v2f.lastHClipPos = mul(_PrevViewProjMatrix,prevPos)\
 
 #define ZERO_MOTION_POSITIONS(inputPrevPos,inputPos,v2f,clipPos)\
     v2f.hClipPos = clipPos;\
