@@ -50,9 +50,8 @@ float sunAtten2(float sunPower,float sunSize,float3 sunPos,float3 worldPos){
 	return atten * sunSize;
 }
 
-float3 ComputeRipple(sampler2D rippleTex,float2 uv, float t)
+float3 ComputeRipple(float4 ripple,float2 uv, float t)
 {
-	float4 ripple = tex2D(rippleTex, uv);
 	ripple.yz = ripple.yz * 2.0 - 1.0;
 
 	float drop = frac(ripple.a + t);
@@ -61,6 +60,12 @@ float3 ComputeRipple(sampler2D rippleTex,float2 uv, float t)
 
 	float final = dropFactor * sin(clamp(move*9,0,4)*PI);
 	return float3(ripple.yz * final,1);
+}
+
+float3 ComputeRipple(sampler2D rippleTex,float2 uv, float t)
+{
+	float4 ripple = tex2D(rippleTex, uv);
+	return ComputeRipple(ripple,uv,t);
 }
 
 /*

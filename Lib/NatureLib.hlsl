@@ -200,14 +200,7 @@ float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal
 float3 ComputeRipple(TEXTURE2D_PARAM(rippleTex,sampler_RippleTex),float2 uv, float t)
 {
 	float4 ripple = SAMPLE_TEXTURE2D(rippleTex,sampler_RippleTex, uv);
-	ripple.yz = ripple.yz * 2.0 - 1.0;
-
-	float drop = frac(ripple.a + t);
-	float move = ripple.x + drop -1;
-	float dropFactor = 1 - saturate(drop);
-
-	float final = dropFactor * sin(clamp(move*9,0,4)*PI);
-	return float3(ripple.yz * final,1);
+    return ComputeRipple(ripple,uv,t);
 }
 
 float3 CalcRipple(TEXTURE2D_PARAM(rippleTex,sampler_RippleTex),float2 rippleUV,float speed,float intensity){
