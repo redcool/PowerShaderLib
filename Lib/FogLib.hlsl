@@ -57,7 +57,7 @@ half _HeightFogFilterUpFace;
 
 float4 _FogNearColor;
 float2 _FogDistance;
-half4 _FogDirTiling;
+half4 _FogNoiseTilingOffset;
 half4 _FogNoiseParams; // composite args
 
 
@@ -121,9 +121,7 @@ void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHe
             return;
         
         float depthFactor = fog.x;
-        branch_if(fogNoise){
-            depthFactor = fog.x + fogNoise * _FogNoiseIntensity * (fog.x > _FogNoiseStartRate);
-        }
+            depthFactor += fogNoise * _FogNoiseIntensity * (fog.x > _FogNoiseStartRate);
 
         fogAtten = _HeightFogFilterUpFace? fogAtten : 1;
 
@@ -133,8 +131,8 @@ void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHe
     #endif //SIMPLE_FOG
 }
 
-float CalcFogNoise(float3 worldPos){
-    float fogNoise = unity_gradientNoise( (worldPos.xz+worldPos.yz) * _FogDirTiling.w+ _FogDirTiling.xz * _Time.y );
+float CalcFogNoise(float3 worldPos,float3 windDir=1){
+    float fogNoise = unity_gradientNoise( (worldPos.xz+worldPos.yz) * _FogNoiseTilingOffset.xy + _FogNoiseTilingOffset.zw * windDir.xz * _Time.y );
     return fogNoise;
 }
 
