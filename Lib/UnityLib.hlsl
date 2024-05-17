@@ -4,6 +4,9 @@
     macros:
     _TEST
 */
+
+#include "UnityCGCompatible.hlsl"
+
 // #define USE_URP // uncomment this use urp flow
 #if defined(USE_URP)
     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -235,13 +238,7 @@ float3 GetWorldSpaceViewDir(float3 worldPos){
 float3 GetWorldSpaceLightDir(float3 worldPos){
     return _MainLightPosition.xyz;// - worldPos;
 }
-// macros UnityCG.cginc
-#define UnityWorldToClipPos(worldPos) TransformWorldToHClip(worldPos)
-#define UnityObjectToWorldDir(worldDir) TransformObjectToWorldDir(worldDir)
-#define UnityObjectToWorldNormal(normal) TransformObjectToWorldNormal(normal)
-#define UnityWorldSpaceViewDir(worldPos) GetWorldSpaceViewDir(worldPos)
-#define UnityObjectToClipPos(objectPos) TransformObjectToHClip(objectPos)
-#define UnityWorldSpaceLightDir(worldPos) GetWorldSpaceLightDir(worldPos)
+
 //==============================
 //  sh
 //==============================

@@ -18,13 +18,6 @@
 #define Rad2Deg 57.295779
 #define Deg2Rad 0.0174533
 
-#define GAMMA_LINEAR(color) color.xyz = color.xyz * color.xyz
-// improve white color
-#define LINEAR_GAMMA(color)\
-                float4 gammaColor = sqrt(color);\
-                color.xyz = gammaColor.xyz;\
-                alpha = lerp(color.w,gammaColor.w,color.w)
-
 float3 RgbToXyz(float3 rgb){
     rgb = float3(INVGAMMACORRECTION(rgb.x),INVGAMMACORRECTION(rgb.y),INVGAMMACORRECTION(rgb.z));
     static float3x3 XYZ = float3x3(
@@ -86,6 +79,7 @@ float3 LchToRgb(float3 lch){
 
 
 float3 LinearToGamma(float3 color){return color.xyz*color.xyz;}
+
 /**
     GammaToLinear(color,alpha);
     
@@ -98,6 +92,18 @@ void GammaToLinear(inout float4 color,out float alpha){
 
     // improve white color
     alpha = lerp(color.w,gammaColor.w,color.w);
+}
+
+void LinearGammaAutoChange(inout float4 c){
+    #if defined(_SRGB_TO_LINEAR_CONVERSION)
+    c.xyz = LinearToGamma(c.xyz);
+    #endif
+
+    float alpha = c.a;
+    #if _LINEAR_TO_SRGB_CONVERSION
+    GammaToLinear(c/**/,alpha/**/);
+    #endif
+    c.xyz *= alpha;
 }
 
 #endif //COLOR_SPACE_HLSL
