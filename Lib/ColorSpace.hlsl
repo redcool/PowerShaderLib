@@ -103,7 +103,7 @@ void LinearGammaAutoChange(inout float4 c){
     #if _LINEAR_TO_SRGB_CONVERSION
     GammaToLinear(c/**/,alpha/**/);
     #endif
-    c.xyz *= alpha;
+    
 }
 
 #endif //COLOR_SPACE_HLSL
