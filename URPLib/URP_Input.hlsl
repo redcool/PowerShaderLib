@@ -18,7 +18,7 @@
 // Input.hlsl
 half4 _GlossyEnvironmentColor;
 half4 _SubtractiveShadowColor;
-float4 _ScaledScreenParams;
+// float4 _ScaledScreenParams;
 
 // half4 _MainLightPosition;
 // half4 _MainLightColor;

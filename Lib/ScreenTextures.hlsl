@@ -5,7 +5,6 @@
     define SKIP_DEPTH ,when you wanna use DeclareDepthTexture.hlsl
     define SKIP_OPAQUE , when you wanna use DeclareOpaqueTexture.hlsl
 */
-
 float GetScreenDepth(TEXTURE2D_PARAM(tex,state),float2 suv){
     float depth = SAMPLE_TEXTURE2D(tex,state,suv).x;
     #if !defined(UNITY_REVERSED_Z)
@@ -35,6 +34,11 @@ SAMPLER(sampler_CameraOpaqueTexture);
 
 float GetScreenDepth(float2 suv){
     return GetScreenDepth(_CameraDepthTexture,sampler_CameraDepthTexture,suv);
+}
+
+float GetRawScreenDepth(float2 suv){
+    float depth = SAMPLE_TEXTURE2D(_CameraDepthTexture,sampler_CameraDepthTexture,suv).x;
+    return depth;
 }
 
 float3 GetScreenColor(float2 suv){

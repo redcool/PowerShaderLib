@@ -4,7 +4,7 @@
 #if !defined(URP_MOTION_VECTORS_HLSL)
 #define URP_MOTION_VECTORS_HLSL
 
-
+#include "../Lib/DepthLib.hlsl"
 /**
     output fragment's velocity
 */
@@ -69,4 +69,9 @@ float4 CalcMotionVectors(float4 hClipPos,float4 lastHClipPos){
 */
 #define CALC_MOTION_VECTORS(v2f) CalcMotionVectors(v2f.hClipPos,v2f.lastHClipPos)
 
+float4 CalcMotionVectors(float3 worldPos,float2 screenUV,float rawDepth){
+    float3 lastWorldPos = ScreenToWorldPos(screenUV,rawDepth);
+    return float4(clamp(normalize(lastWorldPos - worldPos),0,0.2),1);
+}
+#define CALC_MOTION_VECTORS_SCREEN(worldPos,screenUV,rawDepth) CalcMotionVectors(worldPos,screenUV,rawDepth)
 #endif //URP_MOTION_VECTORS_HLSL

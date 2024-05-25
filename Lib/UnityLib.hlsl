@@ -63,7 +63,7 @@ float4 _ProjectionParams;
 // z = 1 + 1.0/width
 // w = 1 + 1.0/height
 float4 _ScreenParams;
-
+float4 _ScaledScreenParams;
 // x = Mip Bias
 // y = 2.0 ^ [Mip Bias]
 float2 _GlobalMipBias;

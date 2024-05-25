@@ -43,6 +43,10 @@ float3 ScreenToWorldPos(float2 uv,float rawDepth,float4x4 invVP){
     return p.xyz/p.w;
 }
 
+float3 ScreenToWorldPos(float2 uv,float rawDepth){
+    return ScreenToWorldPos(uv,rawDepth,UNITY_MATRIX_I_VP);
+}
+
 bool IsOrthographicCamera(){return unity_OrthoParams.w;}
 
 /**
