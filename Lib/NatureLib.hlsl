@@ -179,7 +179,7 @@ float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal
     float upAtten = saturate(dot(worldNormal,half3(0,1,0)));
     rate = (upAtten + dirAtten); // no saturate, snow more clear 
     // snow intensity
-    intensity *= _GlobalSnowIntensity;
+    intensity *= _GlobalSnowIntensity.x;
 
     // UNITY_BRANCH if(applyEdgeOn)
     {
