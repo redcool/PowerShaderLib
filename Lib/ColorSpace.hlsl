@@ -78,7 +78,7 @@ float3 LchToRgb(float3 lch){
 }
 
 
-float3 LinearToGamma(float3 color){return color.xyz*color.xyz;}
+float3 GammaToLinear(float3 color){return color.xyz*color.xyz;}
 
 /**
     GammaToLinear(color,alpha);
@@ -86,7 +86,7 @@ float3 LinearToGamma(float3 color){return color.xyz*color.xyz;}
     //--need call this 
     color.rgb *= alpha;
 */
-void GammaToLinear(inout float4 color,out float alpha){
+void LinearToGamma(inout float4 color,out float alpha){
     float4 gammaColor = sqrt(color);
     color.xyz = gammaColor.xyz;
 
@@ -95,15 +95,17 @@ void GammaToLinear(inout float4 color,out float alpha){
 }
 
 void LinearGammaAutoChange(inout float4 c){
+    float alpha = c.a;
+
     #if defined(_SRGB_TO_LINEAR_CONVERSION)
-    c.xyz = LinearToGamma(c.xyz);
+    c.xyz = GammaToLinear(c.xyz);
     #endif
 
-    float alpha = c.a;
-    #if _LINEAR_TO_SRGB_CONVERSION
-    GammaToLinear(c/**/,alpha/**/);
-    c.xyz *= alpha;
+    #if defined(_LINEAR_TO_SRGB_CONVERSION)
+    LinearToGamma(c/**/,alpha/**/);
     #endif
+
+    c.xyz *= alpha;
 }
 
 #endif //COLOR_SPACE_HLSL
