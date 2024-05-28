@@ -5,10 +5,17 @@
 #define URP_MOTION_VECTORS_HLSL
 
 #include "../Lib/DepthLib.hlsl"
+sampler2D _MotionVectorTexture;
 /**
     output fragment's velocity
 */
 float4 CalcMotionVectors(float4 hClipPos,float4 lastHClipPos){
+    // Note: unity_MotionVectorsParams.y is 0 is forceNoMotion is enabled
+    bool forceNoMotion = unity_MotionVectorsParams.y == 0.0;
+    if (forceNoMotion)
+    {
+        return half4(0.0, 0.0, 0.0, 0.0);
+    }
     hClipPos.xyz /= hClipPos.w;
     lastHClipPos.xyz /= lastHClipPos.w;
 
@@ -19,7 +26,26 @@ float4 CalcMotionVectors(float4 hClipPos,float4 lastHClipPos){
     // Convert from Clip space (-1..1) to NDC 0..1 space.
     // Note it doesn't mean we don't have negative value, we store negative or positive offset in NDC space.
     // Note: ((positionCS * 0.5 + 0.5) - (previousPositionCS * 0.5 + 0.5)) = (velocity * 0.5)    
-    return float4(velocity*0.5,0,1);
+    return float4(velocity*0.5,0,0);
+}
+
+float4 CalcMotionVectors(float4 hClipPos,float2 suv){
+    // Note: unity_MotionVectorsParams.y is 0 is forceNoMotion is enabled
+    bool forceNoMotion = unity_MotionVectorsParams.y == 0.0;
+    if (forceNoMotion)
+    {
+        return half4(0.0, 0.0, 0.0, 0.0);
+    }
+    hClipPos.xyz /= hClipPos.w;
+
+    float4 lastHClipPos = tex2D(_MotionVectorTexture,suv);
+
+    float2 velocity = hClipPos.xy - lastHClipPos.zw;
+    #if UNITY_UV_STARTS_AT_TOP
+        velocity.y *=-1;
+    #endif
+
+    return float4(velocity*0.5,hClipPos.xy);
 }
 
 /***
@@ -68,10 +94,6 @@ float4 CalcMotionVectors(float4 hClipPos,float4 lastHClipPos){
     
 */
 #define CALC_MOTION_VECTORS(v2f) CalcMotionVectors(v2f.hClipPos,v2f.lastHClipPos)
+#define CALC_MOTION_VECTORS2(v2f,suv) CalcMotionVectors(v2f.hClipPos,suv)
 
-float4 CalcMotionVectors(float3 worldPos,float2 screenUV,float rawDepth){
-    float3 lastWorldPos = ScreenToWorldPos(screenUV,rawDepth);
-    return float4(clamp(normalize(lastWorldPos - worldPos),0,0.2),1);
-}
-#define CALC_MOTION_VECTORS_SCREEN(worldPos,screenUV,rawDepth) CalcMotionVectors(worldPos,screenUV,rawDepth)
 #endif //URP_MOTION_VECTORS_HLSL
