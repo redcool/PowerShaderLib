@@ -190,7 +190,8 @@ float3 MixSnow(float3 albedo,float3 snowColor,float intensity,float3 worldNormal
         
         rate *= smoothstep(snowMin,snowMax ,g);
     }
-    float3 finalSnowColor =  saturate(rate)* snowColor.xyz * _GlobalSnowColor;
+    intensity *= saturate(rate);
+    float3 finalSnowColor =  snowColor.xyz * _GlobalSnowColor;
     // return finalSnowColor;
     // float3 col = max(albedo , finalSnowColor);
     float3 col = lerp(albedo,finalSnowColor,intensity);
