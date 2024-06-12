@@ -50,5 +50,12 @@ float2 ToCartesian(float2 uv){
     return float2(c,s) * uv.y;
 }
 
-
+/**
+    hclip pos[-w,w] -> screen pos [0,1]
+**/
+float4 ComputeNormalizedScreenPos(float4 posCS){
+    float4 pos = posCS * rcp(posCS.w);
+    pos.xy = pos.xy * 0.5 + 0.5;
+    return pos;
+}
 #endif //COORDINATE_SYSTEM_HLSL
