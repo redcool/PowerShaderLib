@@ -64,7 +64,6 @@ struct shadow_v2f{
 
 float3 _LightDirection;
 float3 _LightPosition;
-float2 _CustomShadowBias; //x:depth bias,y:normal bias, global ,set by commandbuffer or Shader
 
 //--------- shadow helpers
 /**
@@ -77,7 +76,7 @@ float4 GetShadowPositionHClip(float3 worldPos,float3 worldNormal){
         float3 lightDirectionWS = _LightDirection;
     #endif
 
-    float4 positionCS = UnityWorldToClipPos(ApplyShadowBias(worldPos,worldNormal,lightDirectionWS,_CustomShadowNormalBias + _CustomShadowBias.y,_CustomShadowDepthBias + _CustomShadowBias.x));
+    float4 positionCS = UnityWorldToClipPos(ApplyShadowBias(worldPos,worldNormal,lightDirectionWS,_CustomShadowNormalBias,_CustomShadowDepthBias));
     #if UNITY_REVERSED_Z
         positionCS.z = min(positionCS.z, positionCS.w * UNITY_NEAR_CLIP_VALUE);
     #else
@@ -112,7 +111,11 @@ shadow_v2f vert(shadow_appdata input){
     #else
         output.pos = TransformWorldToHClip(worldPos);
     #endif
+
+    #if defined(ALPHA_TEST) || defined(_ALPHATEST_ON)
     output.uv = TRANSFORM_TEX(input.texcoord,_MainTex);
+    #endif
+    
     return output;
 }
 
