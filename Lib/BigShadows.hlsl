@@ -35,4 +35,14 @@ float CalcBigShadowAtten(float3 bigShadowCoord,float softScale){
     return shadow;   
 }
 
+/**
+    ApplyDistanceAtten(mainLight.shadowAttenuation,worldPos,_WorldSpaceCameraPos,10);
+*/
+void ApplyDistanceAtten(inout float bigShadowAtten,float3 worldPos,float3 camPos,float dist,float fadeWidth = 10){
+    float3 camDir = worldPos - camPos;
+    float camDist2 = dot(camDir,camDir);
+    bigShadowAtten = lerp(bigShadowAtten,1,smoothstep(0,fadeWidth,camDist2 - dist*dist ));
+}
+
+
 #endif // BIG_SHADOWS_HLSL
