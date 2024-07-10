@@ -1,13 +1,8 @@
 #if ! defined(SHADOWS_LIB_HLSL)
 #define SHADOWS_LIB_HLSL
-
-/**
-    // retarget other texelSize
-    #define _MainLightShadowmapSize _BigShadowMap_TexelSize 
-
-*/
-float SampleShadowmap(TEXTURE2D_SHADOW_PARAM(shadowMap,sampler_ShadowMap),float4 shadowCoord,float shadowSoftScale){
-
+#define _SHADOWS_SOFT
+float SampleShadowmap(TEXTURE2D_SHADOW_PARAM(shadowMap,sampler_ShadowMap),float4 shadowCoord,float shadowSoftScale,float4 shadowMapTexelSize)
+{
 #if defined(SHADER_API_MOBILE)
     static const int SOFT_SHADOW_COUNT = 2;
     static const float SOFT_SHADOW_WEIGHTS[] = {0.2,0.4,0.4};
@@ -18,11 +13,11 @@ float SampleShadowmap(TEXTURE2D_SHADOW_PARAM(shadowMap,sampler_ShadowMap),float4
 
     float shadow = SAMPLE_TEXTURE2D_SHADOW(shadowMap,sampler_ShadowMap, shadowCoord.xyz);
 
-    // return shadow;
+
     #if defined(_SHADOWS_SOFT)
         shadow *= SOFT_SHADOW_WEIGHTS[0];
 
-        float2 psize = _MainLightShadowmapSize.xy * shadowSoftScale;
+        float2 psize = shadowMapTexelSize.xy * shadowSoftScale;
         const float2 uvs[] = { float2(-psize.x,0),float2(0,psize.y),float2(psize.x,0),float2(0,-psize.y) };
 
         float2 offset = 0;
@@ -35,5 +30,9 @@ float SampleShadowmap(TEXTURE2D_SHADOW_PARAM(shadowMap,sampler_ShadowMap),float4
     return shadow;
 }
 
+float SampleShadowmap(TEXTURE2D_SHADOW_PARAM(shadowMap,sampler_ShadowMap),float4 shadowCoord,float shadowSoftScale)
+{
+    return SampleShadowmap(TEXTURE2D_SHADOW_ARGS(shadowMap,sampler_ShadowMap),shadowCoord,shadowSoftScale,_MainLightShadowmapSize);
+}
 
 #endif //SHADOWS_LIB_HLSL

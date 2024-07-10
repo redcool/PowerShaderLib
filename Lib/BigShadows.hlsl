@@ -29,7 +29,7 @@ float CalcBigShadowAtten(float3 bigShadowCoord,float softScale){
     branch_if(any(bigShadowCoord <= 0) || any(bigShadowCoord >= 1))
         return 1;
     
-    float shadow = SampleShadowmap(TEXTURE2D_ARGS(_BigShadowMap,sampler_BigShadowMap),bigShadowCoord.xyzx,softScale);
+    float shadow = SampleShadowmap(TEXTURE2D_ARGS(_BigShadowMap,sampler_BigShadowMap),bigShadowCoord.xyzx,softScale,_MainLightShadowmapSize);
     shadow = lerp(1,shadow,SHADOW_INTENSITY * _BigShadowOn);
 
     return shadow;   
