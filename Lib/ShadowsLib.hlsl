@@ -1,6 +1,6 @@
 #if ! defined(SHADOWS_LIB_HLSL)
 #define SHADOWS_LIB_HLSL
-#define _SHADOWS_SOFT
+
 float SampleShadowmap(TEXTURE2D_SHADOW_PARAM(shadowMap,sampler_ShadowMap),float4 shadowCoord,float shadowSoftScale,float4 shadowMapTexelSize)
 {
 #if defined(SHADER_API_MOBILE)
