@@ -62,7 +62,11 @@ CBUFFER_END
 
 #include "../Lib/ShadowsLib.hlsl"
 
-#define BEYOND_SHADOW_FAR(shadowCoord) shadowCoord.z <= 0.0 || shadowCoord.z >= 1.0
+/**
+only z,only enought
+ */
+// #define BEYOND_SHADOW_FAR(shadowCoord) shadowCoord.z <= 0.0 || shadowCoord.z >= 1.0
+#define BEYOND_SHADOW_FAR(shadowCoord) any(shadowCoord.xyz <= 0.0) || any(shadowCoord.xyz >= 1.0) 
 
 float ComputeCascadeIndex(float3 positionWS)
 {
