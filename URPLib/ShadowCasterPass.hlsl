@@ -31,6 +31,7 @@
 #include "../../PowerShaderLib/UrpLib/URP_MainLightShadows.hlsl"
 #include "../../PowerShaderLib/Lib/NatureLib.hlsl"
 #include "../../PowerShaderLib/Lib/TextureLib.hlsl"
+#include "../../PowerShaderLib/Lib/CurvedLib.hlsl"
 
 // default values
 #if !defined(_MainTexChannel)
@@ -42,6 +43,14 @@
 #endif
 #if !defined(_CustomShadowDepthBias)
     #define _CustomShadowDepthBias 0
+#endif
+
+#if !defined(_CurvedSidewayScale)
+    #define _CurvedSidewayScale 0
+#endif
+
+#if !defined(_CurvedBackwardScale)
+    #define _CurvedBackwardScale 0
 #endif
 
 // #if !defined(_Cutoff)
@@ -98,6 +107,7 @@ void CaclWaveAnimationWorldPos(float3 vertex,float3 vertexColor,float3 normal,in
         worldPos = WindAnimationVertex(worldPos,vertexColor.xyz,worldNormal,attenParam * _WindAnimParam, _WindDir,_WindSpeed).xyz;
     }
     #endif
+    worldPos.xy += CalcCurvedPos(_WorldSpaceCameraPos,worldPos,_CurvedSidewayScale,_CurvedBackwardScale);
 }
 
 shadow_v2f vert(shadow_appdata input){
