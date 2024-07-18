@@ -45,12 +45,8 @@
     #define _CustomShadowDepthBias 0
 #endif
 
-#if !defined(_CurvedSidewayScale)
-    #define _CurvedSidewayScale 0
-#endif
-
-#if !defined(_CurvedBackwardScale)
-    #define _CurvedBackwardScale 0
+#if !defined(_CURVED_WORLD)
+    float _CurvedSidewayScale,_CurvedBackwardScale;
 #endif
 
 // #if !defined(_Cutoff)
