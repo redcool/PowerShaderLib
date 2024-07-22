@@ -57,7 +57,7 @@ CBUFFER_END
 
 #endif
 
-#define BEYOND_SHADOW_FAR(shadowCoord) shadowCoord.z <= 0.0 || shadowCoord.z >= 1.0
+// #define BEYOND_SHADOW_FAR(shadowCoord) shadowCoord.z <= 0.0 || shadowCoord.z >= 1.0
 
 struct ShadowSamplingData
 {

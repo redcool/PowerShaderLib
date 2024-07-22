@@ -45,6 +45,7 @@
     #define _CustomShadowDepthBias 0
 #endif
 
+// define curved_world variables
 #if !defined(_CURVED_WORLD)
     float _CurvedSidewayScale,_CurvedBackwardScale;
 #endif
@@ -107,7 +108,7 @@ void CaclWaveAnimationWorldPos(float3 vertex,float3 vertexColor,float3 normal,in
 }
 
 shadow_v2f vert(shadow_appdata input){
-    shadow_v2f output;
+    shadow_v2f output = (shadow_v2f)0;
 
     float3 worldPos,worldNormal;
     CaclWaveAnimationWorldPos(input.vertex.xyz,input.color,input.normal,worldPos/**/,worldNormal/**/);
