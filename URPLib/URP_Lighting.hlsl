@@ -14,7 +14,7 @@
 
 // #include "URP_Input.hlsl"
 #include "URP_AdditionalLightShadows.hlsl"
-
+#include "../Lib/RenderingLayer.hlsl"
 
 ///////////////////////////////////////////////////////////////////////////////
 //                          Light Helpers                                    //
@@ -96,12 +96,13 @@ Light GetMainLight()
 #endif
     light.shadowAttenuation = 1.0;
     light.color = _MainLightColor.rgb;
-
-#ifdef _LIGHT_LAYERS
     light.layerMask = _MainLightLayerMask;
-#else
-    light.layerMask = DEFAULT_LIGHT_LAYERS;
-#endif
+
+// #ifdef _LIGHT_LAYERS
+// #else
+//     light.layerMask = DEFAULT_LIGHT_LAYERS;
+// #endif
+    light.distanceAttenuation *= IsMatchRenderingLayer(light.layerMask);
 
     return light;
 }
@@ -134,11 +135,13 @@ Light GetAdditionalPerObjectLight(int perObjectLightIndex, float3 positionWS)
     float3 color = _AdditionalLightsBuffer[perObjectLightIndex].color.rgb;
     float4 distanceAndSpotAttenuation = _AdditionalLightsBuffer[perObjectLightIndex].attenuation;
     float4 spotDirection = _AdditionalLightsBuffer[perObjectLightIndex].spotDirection;
+    uint lightLayerMask = _AdditionalLightsBuffer[perObjectLightIndex].layerMask;
 #else
     float4 lightPositionWS = _AdditionalLightsPosition[perObjectLightIndex];
     float3 color = _AdditionalLightsColor[perObjectLightIndex].rgb;
     float4 distanceAndSpotAttenuation = _AdditionalLightsAttenuation[perObjectLightIndex];
     float4 spotDirection = _AdditionalLightsSpotDir[perObjectLightIndex];
+    uint lightLayerMask = asuint(_AdditionalLightsLayerMasks[perObjectLightIndex]);
 #endif
 
     // Directional lights store direction in lightPosition.xyz and have .w set to 0.0.
@@ -154,6 +157,9 @@ Light GetAdditionalPerObjectLight(int perObjectLightIndex, float3 positionWS)
     light.distanceAttenuation = saturate(attenuation);
     light.shadowAttenuation = 1.0;
     light.color = color;
+    light.layerMask = lightLayerMask;
+    // apply renderingLayerMask
+    light.distanceAttenuation *= IsMatchRenderingLayer(light.layerMask);
 
     return light;
 }
