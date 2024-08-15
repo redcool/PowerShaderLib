@@ -95,17 +95,26 @@ float2 CalcFogFactor(float3 worldPos,float clipZ_01=1,bool hasHeightFog=true,boo
     float depth = CalcDepthFactor(worldPos);
 
     #if defined(SIMPLE_FOG)
-        return max(ComputeFogFactor(clipZ_01) * hasDepthFog,height * hasHeightFog);
+        //max(ComputeFogFactor(clipZ_01) * hasDepthFog,height * hasHeightFog);
+
+        float2 fog=0;
+        fog.x = height * hasHeightFog;
+        fog.y = -mul(UNITY_MATRIX_V,float4(worldPos,1)).z; // z negative in viewSpace
+
+        return fog;
     #else
         return float2(smoothstep(0.25,1,depth),height);
     #endif
 }
 
-void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,float fogNoise,bool hasDepthFog=true,half fogAtten=1){
+void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,float fogNoise,bool hasDepthFog=true,half fogAtten=1,float3 viewPos=0){
     branch_if(!IsFogOn())
         return;
 
     #if defined(SIMPLE_FOG) // simple fog
+        // calc fogFactor(viewPos.z in fog.y)
+        float zFactor = max(fog.y - _ProjectionParams.y,0);
+        fog.x = ComputeFogFactor(zFactor) ;
         mainColor = lerp(unity_FogColor,mainColor,fog.x);
     #else   // sphere fog
         branch_if(hasHeightFog){
