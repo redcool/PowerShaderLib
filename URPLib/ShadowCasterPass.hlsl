@@ -21,6 +21,7 @@
 
     // replace texture
     #define _MainTex _DissolveTex
+    #define _MainTex_ST _DissolveTex_ST
     
     // replace texture channel
     #define _MainTexChannel _DissolveTexChannel
@@ -43,6 +44,9 @@
 #endif
 #if !defined(_CustomShadowDepthBias)
     #define _CustomShadowDepthBias 0
+#endif
+#if !defined(_MainTex_ST)
+    #define _MainTex_ST half4(1,1,0,0)
 #endif
 
 // define curved_world variables
@@ -119,9 +123,9 @@ shadow_v2f vert(shadow_appdata input){
         output.pos = TransformWorldToHClip(worldPos);
     #endif
 
-    #if defined(ALPHA_TEST) || defined(_ALPHATEST_ON)
+    // #if defined(ALPHA_TEST) || defined(_ALPHATEST_ON)
     output.uv = TRANSFORM_TEX(input.texcoord,_MainTex);
-    #endif
+    // #endif
     
     return output;
 }
