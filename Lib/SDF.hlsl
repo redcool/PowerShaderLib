@@ -72,4 +72,13 @@ float CalcWorldDistance(out float dist,out float distSign,out float bandDist,flo
     bandDist = smoothstep(0,0.2,saturate(d)); // color blending
     return d;
 }
+
+/**
+    return outline rate
+*/
+float CalcOutline(inout float outer,inout float inner,float alpha,float2 outerRange=float2(0.4,0.42) ,float2 innerRange=float2(0.5,0.52)){
+    outer = smoothstep(outerRange.x,outerRange.y,alpha);
+    inner = smoothstep(innerRange.x,innerRange.y,alpha);
+    return  abs(outer - inner);
+}
 #endif //SDF_LIB_HLSL

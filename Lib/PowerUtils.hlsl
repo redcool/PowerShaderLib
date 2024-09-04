@@ -43,5 +43,13 @@ void OffsetHClipVertexZ(inout float4 vertex,float zOffset){
         vertex.z += (1 - zOffset)* _ProjectionParams.y; //[-1,1]=>[0,1], camera near plane
     #endif
 }
-
+/**
+    
+    v : value in range
+    return : new value in newRange
+*/
+float Remap(float v, float2 range=float2(0,1),float2 newRange=float2(0,1)){
+    float rate = (v-range.x)/(range.y-range.x);
+    return rate * (newRange.y-newRange.x) + newRange.x;
+}
 #endif //POWER_UTILS_HLSL

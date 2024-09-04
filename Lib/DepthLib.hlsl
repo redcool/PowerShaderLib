@@ -3,6 +3,7 @@
 
 /*
     Linearize depth value sampled from the camera depth texture.
+    return [0,1]
 
     z : depth texture
 */
@@ -50,7 +51,7 @@ float3 ScreenToWorldPos(float2 uv,float rawDepth){
 bool IsOrthographicCamera(){return unity_OrthoParams.w;}
 
 /**
-    distance to camera's position(xy plane)
+    return z distance to camera near plane,[near,far]
 
     rawDepth : depth texture
 */
@@ -74,7 +75,8 @@ float CalcLinearEyeDepth(float4 posHClip){
     float eyeDepth = far * near / ((near - far) * depthTex + far);
 */
 float CalcLinearEyeDepth(float rawDepth){
-    return IsOrthographicCamera()? OrthographicDepthBufferToLinear(rawDepth) : LinearEyeDepth(rawDepth,_ZBufferParams);
+    // return IsOrthographicCamera()? OrthographicDepthBufferToLinear(rawDepth) : LinearEyeDepth(rawDepth,_ZBufferParams);
+    return lerp(_ProjectionParams.y,_ProjectionParams.z,LinearizeDepth(rawDepth));
 }
 /**
     too far or to near
