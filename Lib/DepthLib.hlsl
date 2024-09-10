@@ -13,6 +13,12 @@ float LinearizeDepth(float z)
     float isPers = 1 - unity_OrthoParams.w;
     z *= _ZBufferParams.x;
     return (1 - isOrtho * z) / (isPers * z + _ZBufferParams.y);
+    /**
+    z = (1-far/near) * z
+    ortho: (1-z)/(far/near)
+    pers : 1/(z + far/near)
+
+    */
 }
 
 /**

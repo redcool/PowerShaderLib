@@ -7,9 +7,12 @@
 
 /**
     override this vars
-*/
-/**
     controlled by PowerLitWeahterControl.cs
+
+    keywords:
+    
+    CALC_WORLD_NOISE_2_LAYERS
+
 */
 float4 _GlobalWindDir; /*global (xyz)wind direction,w : wind intensity*/
 
@@ -44,6 +47,10 @@ float4 SmoothTriangleWave( float4 x ) {
 float CalcWorldNoise(float3 worldPos,float4 tilingOffset,float3 windDir,float4 blendWeights = float4(0.4,0.2,0.2,0.2)){
     // cross noise
     float2 noiseUV = worldPos.xz * tilingOffset.xy+ windDir.xz * tilingOffset.zw* _Time.y;
+    #if defined(CALC_WORLD_NOISE_2_LAYERS)
+    noiseUV += worldPos.xy * tilingOffset.xy+ windDir.xy * tilingOffset.zw* _Time.y;
+    noiseUV *= 0.5f;
+    #endif
 
     float noise =0;
     // noise version
