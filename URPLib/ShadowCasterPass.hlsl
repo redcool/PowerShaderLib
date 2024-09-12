@@ -25,7 +25,8 @@
     
     // replace texture channel
     #define _MainTexChannel _DissolveTexChannel
-
+    // define outside file
+    #define _CURVED_WORLD
 */
 #if !defined(URP_SHADOW_CASTER_PASS_HLSL)
 #define URP_SHADOW_CASTER_PASS_HLSL
