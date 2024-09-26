@@ -20,6 +20,9 @@ float LinearizeDepth(float z)
 
     */
 }
+float LinearDepth01(float rawDepth){
+    return LinearizeDepth(rawDepth);
+}
 
 /**
     screenUV -> ndc -> clip -> view
