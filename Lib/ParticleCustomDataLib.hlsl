@@ -75,8 +75,22 @@ float customDatas[8] = {o.customData1,o.customData2}
 
 /**
     ps,define customDatas
+
+    < mali g76, will slower
 */
 #define CUSTOM_DATA_FRAGMENT(i)\
     float customDatas[8] = {i.customData1,i.customData2}
+
+
+/**
+    Get particleSystem's customData from datas1 or datas2
+
+    low device gpu, faster
+*/
+float GetCustomData(float4 datas1,float4 datas2,int dataId){
+    float4 datas = dataId<4 ? datas1 : datas2;
+    return datas[dataId];
+}
+#define GET_CUSTOM_DATA(input,dataId) GetCustomData(input.customData1,input.customData2,dataId)
 
 #endif //PARTICLE_CUSTOM_DATA_LIB
