@@ -37,6 +37,7 @@
 */
 
 #include "NodeLib.hlsl"
+#include "SphereFogLib.hlsl"
 #include "../URPLib/URP_Fog.hlsl"
 
 //------------------------------ macros
@@ -48,17 +49,17 @@
 #endif
 
 
-#define _FogNoiseStartRate _FogNoiseParams.x
-#define _FogNoiseIntensity _FogNoiseParams.y
+// #define _FogNoiseStartRate _FogNoiseParams.x
+// #define _FogNoiseIntensity _FogNoiseParams.y
 //------------------------------ sphere fog global params
-float _HeightFogMin,_HeightFogMax;
-float4 _HeightFogMinColor,_HeightFogMaxColor;
-half _HeightFogFilterUpFace;
+// float _HeightFogMin,_HeightFogMax;
+// float4 _HeightFogMinColor,_HeightFogMaxColor;
+// half _HeightFogFilterUpFace;
 
-float4 _FogNearColor;
-float2 _FogDistance;
-half4 _FogNoiseTilingOffset;
-half4 _FogNoiseParams; // composite args
+// float4 _FogNearColor;
+// float2 _FogDistance;
+// half4 _FogNoiseTilingOffset;
+// half4 _FogNoiseParams; // composite args
 
 
 //------------------------------  global fog params

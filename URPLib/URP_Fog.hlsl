@@ -8,6 +8,12 @@
 //------ SIMPLE_FOG use this
 half4 _FogParams;
 
+#if defined(_SPHERE_FOG_LAYERS)
+    #include "../Lib/SphereFogLib.hlsl"
+    // for SIMPLE_FOG
+    #define _FogParams _SphereFogDatas[SPHERE_FOG_ID].fogParams
+#endif
+
 #if UNITY_REVERSED_Z
     #if SHADER_API_OPENGL || SHADER_API_GLES || SHADER_API_GLES3
         //GL with reversed z => z clip range is [near, -far] -> should remap in theory but dont do it in practice to save some perf (range is close enough)
