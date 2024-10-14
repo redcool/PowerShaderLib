@@ -57,6 +57,7 @@
 // half _HeightFogFilterUpFace;
 
 // float4 _FogNearColor;
+// float4 _FogFarColor;
 // float2 _FogDistance;
 // half4 _FogNoiseTilingOffset;
 // half4 _FogNoiseParams; // composite args
@@ -116,7 +117,7 @@ void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHe
         // calc fogFactor(viewPos.z in fog.y)
         float zFactor = max(fog.y - _ProjectionParams.y,0);
         fog.x = ComputeFogFactor(zFactor) ;
-        mainColor = lerp(unity_FogColor,mainColor,fog.x);
+        mainColor = lerp(_FogFarColor,mainColor,fog.x);
     #else   // sphere fog
         branch_if(hasHeightFog){
             float3 heightFogColor = lerp(_HeightFogMinColor,_HeightFogMaxColor,fog.y).xyz;
@@ -135,8 +136,8 @@ void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHe
 
         fogAtten = _HeightFogFilterUpFace? fogAtten : 1;
 
-        float3 fogColor = lerp(_FogNearColor.rgb,unity_FogColor.rgb,fog.x);
-        mainColor = lerp(mainColor,fogColor, depthFactor * fogAtten * _GlobalFogIntensity);
+        float3 fogColor = lerp(_FogNearColor.rgb,_FogFarColor.rgb,fog.x);
+        mainColor = lerp(mainColor,fogColor,saturate(depthFactor * fogAtten * _GlobalFogIntensity));
         // mainColor = depthFactor;
     #endif //SIMPLE_FOG
 }

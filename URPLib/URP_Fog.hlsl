@@ -10,8 +10,12 @@ half4 _FogParams;
 
 #if defined(_SPHERE_FOG_LAYERS)
     #include "../Lib/SphereFogLib.hlsl"
-    // for SIMPLE_FOG
-    #define _FogParams _SphereFogDatas[SPHERE_FOG_ID].fogParams
+    // for SIMPLE_FOG extends
+    #if defined(USE_STRUCTURED_BUFFER)
+        #define _FogParams _SphereFogDatas[SPHERE_FOG_ID].fogParams
+    #else
+        #define _FogParams _FogParamsArray[SPHERE_FOG_ID]
+    #endif
 #endif
 
 #if UNITY_REVERSED_Z
