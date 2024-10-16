@@ -89,7 +89,7 @@ float customDatas[8] = {o.customData1,o.customData2}
 */
 float GetCustomData(float4 datas1,float4 datas2,int dataId){
     float4 datas = dataId<4 ? datas1 : datas2;
-    return datas[dataId];
+    return datas[dataId%4];
 }
 #define GET_CUSTOM_DATA(input,dataId) GetCustomData(input.customData1,input.customData2,dataId)
 
