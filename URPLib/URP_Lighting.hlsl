@@ -4,15 +4,7 @@
 */
 #if !defined(URP_LIGHTING_HLSL)
 #define URP_LIGHTING_HLSL
-#if defined(SHADER_API_MOBILE) && (defined(SHADER_API_GLES) || defined(SHADER_API_GLES30))
-    #define MAX_VISIBLE_LIGHTS 16
-#elif defined(SHADER_API_MOBILE) || (defined(SHADER_API_GLCORE) && !defined(SHADER_API_SWITCH)) || defined(SHADER_API_GLES) || defined(SHADER_API_GLES3) // Workaround for bug on Nintendo Switch where SHADER_API_GLCORE is mistakenly defined
-    #define MAX_VISIBLE_LIGHTS 32
-#else
-    #define MAX_VISIBLE_LIGHTS 256
-#endif
 
-// #include "URP_Input.hlsl"
 #include "URP_AdditionalLightShadows.hlsl"
 #include "../Lib/RenderingLayer.hlsl"
 
@@ -158,8 +150,6 @@ Light GetAdditionalPerObjectLight(int perObjectLightIndex, float3 positionWS)
     light.shadowAttenuation = 1.0;
     light.color = color;
     light.layerMask = lightLayerMask;
-    // apply renderingLayerMask
-    light.distanceAttenuation *= IsMatchRenderingLayer(light.layerMask);
 
     return light;
 }

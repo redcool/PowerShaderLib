@@ -15,7 +15,17 @@
 
 #if !defined(_SPHERE_FOG_LAYERS)
     #define _SphereFogId 0
+    #define MAX_COUNT 1
+#else
+    // save low gpu device's buffer storage
+    #if defined(SHADER_API_MOBILE) || (defined(SHADER_API_GLCORE) && !defined(SHADER_API_SWITCH)) || defined(SHADER_API_GLES) || defined(SHADER_API_GLES3) || defined(SHADER_API_GLES30)
+        #define MAX_COUNT 4
+    #else
+        #define MAX_COUNT 16
+    #endif
+
 #endif
+
 
 // total fog layers, by PowerLitFogControl
 int _SphereFogLayers;
@@ -31,18 +41,18 @@ int GetSphereFogId(){
 
 #if defined(USE_STRUCTURED_BUFFER)
     struct SphereFogData{
-        float heightFogMin;
-        float heightFogMax;
-        float4 heightFogMinColor;
-        float4 heightFogMaxColor;
-        float heightFogFilterUpFace;
+        half heightFogMin;
+        half heightFogMax;
+        half4 heightFogMinColor;
+        half4 heightFogMaxColor;
+        half heightFogFilterUpFace;
 
-        float4 fogNearColor;
-        float4 fogFarColor;
-        float2 fogDistance;
-        float4 fogNoiseTilingOffset;
-        float4 fogNoiseParams; // composite args
-        float4 fogParams; // for SIMPLE_FOG
+        half4 fogNearColor;
+        half4 fogFarColor;
+        half2 fogDistance;
+        half4 fogNoiseTilingOffset;
+        half4 fogNoiseParams; // composite args
+        half4 fogParams; // for SIMPLE_FOG
     };
 
     StructuredBuffer<SphereFogData> _SphereFogDatas;
@@ -63,17 +73,18 @@ int GetSphereFogId(){
 
 
 #else
-    #define MAX_COUNT 16
+
+
     CBUFFER_START(SphereFogs)
-        float _HeightFogMinArray[MAX_COUNT];
-        float _HeightFogMaxArray[MAX_COUNT];
-        float4 _HeightFogMinColorArray[MAX_COUNT];
-        float4 _HeightFogMaxColorArray[MAX_COUNT];
+        half _HeightFogMinArray[MAX_COUNT];
+        half _HeightFogMaxArray[MAX_COUNT];
+        half4 _HeightFogMinColorArray[MAX_COUNT];
+        half4 _HeightFogMaxColorArray[MAX_COUNT];
         half _HeightFogFilterUpFaceArray[MAX_COUNT];
 
-        float4 _FogNearColorArrays[MAX_COUNT];
-        float4 _FogFarColorArrays[MAX_COUNT];
-        float2 _FogDistanceArray[MAX_COUNT];
+        half4 _FogNearColorArrays[MAX_COUNT];
+        half4 _FogFarColorArrays[MAX_COUNT];
+        half2 _FogDistanceArray[MAX_COUNT];
         half4 _FogNoiseTilingOffsetArray[MAX_COUNT];
         half4 _FogNoiseParamsArray[MAX_COUNT]; // composite args
         half4 _FogParamsArray[MAX_COUNT]; // for SIMPLE_FOG

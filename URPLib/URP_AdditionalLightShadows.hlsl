@@ -7,23 +7,17 @@
 #if !defined(URP_ADDITIONAL_LIGHT_SHADOWS_HLSL)
 #define URP_ADDITIONAL_LIGHT_SHADOWS_HLSL
 #include "URP_MainLightShadows.hlsl"
-#define MAX_SHADOW_CASCADES 4
 
 TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture);SAMPLER_CMP(sampler_AdditionalLightsShadowmapTexture);
 
-#if USE_STRUCTURED_BUFFER_FOR_LIGHT_DATA
+#ifndef SHADER_API_GLES3
+CBUFFER_START(AddtionalLightShadows)
+#endif
 
-StructuredBuffer<float4>   _AdditionalShadowParams_SSBO;        // Per-light data - TODO: test if splitting _AdditionalShadowParams_SSBO[lightIndex].w into a separate StructuredBuffer<int> buffer is faster
-StructuredBuffer<half4x4> _AdditionalLightsWorldToShadow_SSBO; // Per-shadow-slice-data - A shadow casting light can have 6 shadow slices (if it's a point light)
-
-float4       _AdditionalShadowOffset0;
-float4       _AdditionalShadowOffset1;
-float4       _AdditionalShadowOffset2;
-float4       _AdditionalShadowOffset3;
-float4       _AdditionalShadowFadeParams; // x: additional light fade scale, y: additional light fade bias, z: 0.0, w: 0.0)
+float4      _AdditionalShadowOffset0; // xy: offset0, zw: offset1
+float4      _AdditionalShadowOffset1; // xy: offset2, zw: offset3
+float4      _AdditionalShadowFadeParams; // x: additional light fade scale, y: additional light fade bias, z: 0.0, w: 0.0)
 float4      _AdditionalShadowmapSize; // (xy: 1/width and 1/height, zw: width and height)
-#else
-
 
 #if defined(SHADER_API_MOBILE) || (defined(SHADER_API_GLCORE) && !defined(SHADER_API_SWITCH)) || defined(SHADER_API_GLES) || defined(SHADER_API_GLES3) // Workaround for bug on Nintendo Switch where SHADER_API_GLCORE is mistakenly defined
 // Point lights can use 6 shadow slices, but on some mobile GPUs performance decrease drastically with uniform blocks bigger than 8kb. This number ensures size of buffer AdditionalLightShadows stays reasonable.
@@ -36,47 +30,41 @@ float4      _AdditionalShadowmapSize; // (xy: 1/width and 1/height, zw: width an
 #define MAX_PUNCTUAL_LIGHT_SHADOW_SLICES_IN_UBO 545
 #endif
 
-// GLES3 causes a performance regression in some devices when using CBUFFER.
-#ifndef SHADER_API_GLES3
-CBUFFER_START(AdditionalLightShadows)
-#endif
-
-float4       _AdditionalShadowParams[MAX_VISIBLE_LIGHTS];                              // Per-light data
-half4x4    _AdditionalLightsWorldToShadow[MAX_PUNCTUAL_LIGHT_SHADOW_SLICES_IN_UBO];  // Per-shadow-slice-data
-
-float4       _AdditionalShadowOffset0;
-float4       _AdditionalShadowOffset1;
-float4       _AdditionalShadowOffset2;
-float4       _AdditionalShadowOffset3;
-float4       _AdditionalShadowFadeParams; // x: additional light fade scale, y: additional light fade bias, z: 0.0, w: 0.0)
-float4      _AdditionalShadowmapSize; // (xy: 1/width and 1/height, zw: width and height)
+// #if defined(ADDITIONAL_LIGHT_CALCULATE_SHADOWS)
+    #if !USE_STRUCTURED_BUFFER_FOR_LIGHT_DATA
+    // Point lights can use 6 shadow slices. Some mobile GPUs performance decrease drastically with uniform
+    // blocks bigger than 8kb while others have a 64kb max uniform block size. This number ensures size of buffer
+    // AdditionalLightShadows stays reasonable. It also avoids shader compilation errors on SHADER_API_GLES30
+    // devices where max number of uniforms per shader GL_MAX_FRAGMENT_UNIFORM_VECTORS is low (224)
+    float4      _AdditionalShadowParams[MAX_VISIBLE_LIGHTS];         // Per-light data
+    float4x4    _AdditionalLightsWorldToShadow[MAX_VISIBLE_LIGHTS];  // Per-shadow-slice-data
+    #endif
+// #endif
 
 #ifndef SHADER_API_GLES3
 CBUFFER_END
 #endif
 
-#endif
-
-// #define BEYOND_SHADOW_FAR(shadowCoord) shadowCoord.z <= 0.0 || shadowCoord.z >= 1.0
-
 struct ShadowSamplingData
 {
     float4 shadowOffset0;
     float4 shadowOffset1;
-    float4 shadowOffset2;
-    float4 shadowOffset3;
+    // unity 2022+, deprecated
+    // float4 shadowOffset2;
+    // float4 shadowOffset3;
     float4 shadowmapSize;
+    half softShadowQuality;
 };
 
 ShadowSamplingData GetAdditionalLightShadowSamplingData()
 {
-    ShadowSamplingData shadowSamplingData;
+    ShadowSamplingData shadowSamplingData = (ShadowSamplingData)0;
 
     // shadowOffsets are used in SampleShadowmapFiltered #if defined(SHADER_API_MOBILE) || defined(SHADER_API_SWITCH)
     shadowSamplingData.shadowOffset0 = _AdditionalShadowOffset0;
     shadowSamplingData.shadowOffset1 = _AdditionalShadowOffset1;
-    shadowSamplingData.shadowOffset2 = _AdditionalShadowOffset2;
-    shadowSamplingData.shadowOffset3 = _AdditionalShadowOffset3;
+    // shadowSamplingData.shadowOffset2 = _AdditionalShadowOffset2;
+    // shadowSamplingData.shadowOffset3 = _AdditionalShadowOffset3;
 
     // shadowmapSize is used in SampleShadowmapFiltered for other platforms
     shadowSamplingData.shadowmapSize = _AdditionalShadowmapSize;
@@ -100,10 +88,10 @@ float4 GetAdditionalLightShadowParams(int lightIndex)
 
 float SampleShadowmapFiltered(ShadowSamplingData samplingData,float4 shadowCoord,float softScale=1){
     float4 atten4 = 0;
-    atten4.x = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + samplingData.shadowOffset0.xyz * softScale);
-    atten4.y = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + samplingData.shadowOffset1.xyz * softScale);
-    atten4.z = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + samplingData.shadowOffset2.xyz * softScale);
-    atten4.w = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + samplingData.shadowOffset3.xyz * softScale);
+    atten4.x = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + float3(samplingData.shadowOffset0.xy,0) * softScale);
+    atten4.y = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + float3(samplingData.shadowOffset0.zw,0) * softScale);
+    atten4.z = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + float3(samplingData.shadowOffset1.xy,0) * softScale);
+    atten4.w = SAMPLE_TEXTURE2D_SHADOW(_AdditionalLightsShadowmapTexture,sampler_AdditionalLightsShadowmapTexture, shadowCoord.xyz + float3(samplingData.shadowOffset1.zw,0) * softScale);
     return dot(atten4,0.25);
 }
 
@@ -138,6 +126,7 @@ float AdditionalLightRealtimeShadow(int lightIndex, float3 positionWS,float soft
     float attenuation = 1;
     #if defined(_ADDITIONAL_LIGHT_SHADOWS_SOFT)
         ShadowSamplingData samplingData = GetAdditionalLightShadowSamplingData();
+        samplingData.softShadowQuality = shadowParams.y; //dont need yet
         attenuation = SampleShadowmapFiltered(samplingData,shadowCoord,softScale);
     #else
     // 1-tap hardware comparison
@@ -161,7 +150,7 @@ float GetAdditionalLightShadowFade(float3 positionWS)
 float AdditionalLightShadow(int lightIndex, float3 positionWS,float4 shadowMask,float4 occlusionProbeChannels,float softScale=1,float3 lightDirection=0)
 {
     float realtimeShadow = AdditionalLightRealtimeShadow(lightIndex, positionWS,softScale,lightDirection);
-    
+    return realtimeShadow;
     #ifdef CALCULATE_BAKED_SHADOWS
         float bakedShadow = BakedShadow(shadowMask, occlusionProbeChannels);
     #else

@@ -16,7 +16,7 @@
 #if !defined(MAIN_LIGHT_SHADOW_HLSL)
 #define MAIN_LIGHT_SHADOW_HLSL
 
-
+#define MAX_SHADOW_CASCADES 4
 
 #if defined(_RECEIVE_SHADOWS_ON) || ! defined(_RECEIVE_SHADOWS_OFF)
     #if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN)
@@ -39,31 +39,63 @@
 TEXTURE2D_SHADOW(_ScreenSpaceShadowmapTexture);SAMPLER(sampler_ScreenSpaceShadowmapTexture);
 TEXTURE2D_SHADOW(_MainLightShadowmapTexture);SAMPLER_CMP(sampler_MainLightShadowmapTexture);
 
+//=========== from URP Shadows.hlsl
+// GLES3 causes a performance regression in some devices when using CBUFFER.
 #ifndef SHADER_API_GLES3
-CBUFFER_START(MainLightShadows)
+CBUFFER_START(LightShadows)
 #endif
-    #define MAX_SHADOW_CASCADES 4
-    float4x4    _MainLightWorldToShadow[MAX_SHADOW_CASCADES + 1];
-    float4      _CascadeShadowSplitSpheres0;
-    float4      _CascadeShadowSplitSpheres1;
-    float4      _CascadeShadowSplitSpheres2;
-    float4      _CascadeShadowSplitSpheres3;
-    float4      _CascadeShadowSplitSphereRadii;
-    float4       _MainLightShadowOffset0;
-    float4       _MainLightShadowOffset1;
-    float4       _MainLightShadowOffset2;
-    float4       _MainLightShadowOffset3;
-    float4       _MainLightShadowParams;  // (x: shadowStrength, y: 1.0 if soft shadows, 0.0 otherwise, z: oneOverFadeDist, w: minusStartFade)
-    float4      _MainLightShadowmapSize; // (xy: 1/width and 1/height, zw: width and height)
-// CBUFFER_END
+
+// Last cascade is initialized with a no-op matrix. It always transforms
+// shadow coord to half3(0, 0, NEAR_PLANE). We use this trick to avoid
+// branching since ComputeCascadeIndex can return cascade index = MAX_SHADOW_CASCADES
+float4x4    _MainLightWorldToShadow[MAX_SHADOW_CASCADES + 1];
+float4      _CascadeShadowSplitSpheres0;
+float4      _CascadeShadowSplitSpheres1;
+float4      _CascadeShadowSplitSpheres2;
+float4      _CascadeShadowSplitSpheres3;
+float4      _CascadeShadowSplitSphereRadii;
+
+float4      _MainLightShadowOffset0; // xy: offset0, zw: offset1
+float4      _MainLightShadowOffset1; // xy: offset2, zw: offset3
+float4      _MainLightShadowParams;   // (x: shadowStrength, y: >= 1.0 if soft shadows, 0.0 otherwise, z: main light fade scale, w: main light fade bias)
+float4      _MainLightShadowmapSize;  // (xy: 1/width and 1/height, zw: width and height)
+
+// float4      _AdditionalShadowOffset0; // xy: offset0, zw: offset1
+// float4      _AdditionalShadowOffset1; // xy: offset2, zw: offset3
+// float4      _AdditionalShadowFadeParams; // x: additional light fade scale, y: additional light fade bias, z: 0.0, w: 0.0)
+// float4      _AdditionalShadowmapSize; // (xy: 1/width and 1/height, zw: width and height)
+
+// #if defined(ADDITIONAL_LIGHT_CALCULATE_SHADOWS)
+//     #if !USE_STRUCTURED_BUFFER_FOR_LIGHT_DATA
+//     // Point lights can use 6 shadow slices. Some mobile GPUs performance decrease drastically with uniform
+//     // blocks bigger than 8kb while others have a 64kb max uniform block size. This number ensures size of buffer
+//     // AdditionalLightShadows stays reasonable. It also avoids shader compilation errors on SHADER_API_GLES30
+//     // devices where max number of uniforms per shader GL_MAX_FRAGMENT_UNIFORM_VECTORS is low (224)
+//     float4      _AdditionalShadowParams[MAX_VISIBLE_LIGHTS];         // Per-light data
+//     float4x4    _AdditionalLightsWorldToShadow[MAX_VISIBLE_LIGHTS];  // Per-shadow-slice-data
+//     #endif
+// #endif
+
 #ifndef SHADER_API_GLES3
 CBUFFER_END
 #endif
 
+#if defined(ADDITIONAL_LIGHT_CALCULATE_SHADOWS)
+    #if USE_STRUCTURED_BUFFER_FOR_LIGHT_DATA
+        StructuredBuffer<float4>   _AdditionalShadowParams_SSBO;        // Per-light data - TODO: test if splitting _AdditionalShadowParams_SSBO[lightIndex].w into a separate StructuredBuffer<int> buffer is faster
+        StructuredBuffer<float4x4> _AdditionalLightsWorldToShadow_SSBO; // Per-shadow-slice-data - A shadow casting light can have 6 shadow slices (if it's a point light)
+    #endif
+#endif
+
+//=========== end from URP Shadows.hlsl
+
 #include "../Lib/ShadowsLib.hlsl"
 
+float4 _ShadowBias; // x: depth bias, y: normal bias
+float _MainLightShadowOn; //send  from PowerUrpLitFeature
+
 /**
-only z,only enought
+only z,not enought
  */
 // #define BEYOND_SHADOW_FAR(shadowCoord) shadowCoord.z <= 0.0 || shadowCoord.z >= 1.0
 #define BEYOND_SHADOW_FAR(shadowCoord) any(shadowCoord.xyz <= 0.0) || any(shadowCoord.xyz >= 1.0) 
@@ -99,8 +131,6 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
     return float4(shadowCoord.xyz, cascadeIndex);
 }
 
-float4 _ShadowBias; // x: depth bias, y: normal bias
-float _MainLightShadowOn; //send  from PowerUrpLitFeature
 
 float3 ApplyShadowBias(float3 positionWS, float3 normalWS, float3 lightDirection,float matShadowNormalBias=0,float matShadowDepthBias=0)
 {
