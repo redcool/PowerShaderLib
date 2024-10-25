@@ -6,6 +6,7 @@
 */
 
 #include "UnityCGCompatible.hlsl"
+#include "Project/ProjectMacros.hlsl"
 
 // #define USE_URP // uncomment this use urp flow
 #if defined(USE_URP)

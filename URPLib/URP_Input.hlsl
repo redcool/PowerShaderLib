@@ -4,16 +4,19 @@
 #define RENDERING_LIGHT_LAYERS_MASK (255)
 #define RENDERING_LIGHT_LAYERS_MASK_SHIFT (0)
 #define DEFAULT_LIGHT_LAYERS (RENDERING_LIGHT_LAYERS_MASK >> RENDERING_LIGHT_LAYERS_MASK_SHIFT)
-
-
-// Must match: UniversalRenderPipeline.maxVisibleAdditionalLights
-#if defined(SHADER_API_MOBILE) && (defined(SHADER_API_GLES) || defined(SHADER_API_GLES30))
-    #define MAX_VISIBLE_LIGHTS 16
-#elif defined(SHADER_API_MOBILE) || (defined(SHADER_API_GLCORE) && !defined(SHADER_API_SWITCH)) || defined(SHADER_API_GLES) || defined(SHADER_API_GLES3) // Workaround because SHADER_API_GLCORE is also defined when SHADER_API_SWITCH is
-    #define MAX_VISIBLE_LIGHTS 32
-#else
-    #define MAX_VISIBLE_LIGHTS 256
-#endif
+/**
+    MAX_VISIBLE_LIGHTS, can predefined 
+*/
+#if !defined(MAX_VISIBLE_LIGHTS)
+    // Must match: UniversalRenderPipeline.maxVisibleAdditionalLights
+    #if defined(SHADER_API_MOBILE) && (defined(SHADER_API_GLES) || defined(SHADER_API_GLES30))
+        #define MAX_VISIBLE_LIGHTS 16
+    #elif defined(SHADER_API_MOBILE) || (defined(SHADER_API_GLCORE) && !defined(SHADER_API_SWITCH)) || defined(SHADER_API_GLES) || defined(SHADER_API_GLES3) // Workaround because SHADER_API_GLCORE is also defined when SHADER_API_SWITCH is
+        #define MAX_VISIBLE_LIGHTS 32
+    #else
+        #define MAX_VISIBLE_LIGHTS 256
+    #endif
+#endif 
 
 // Input.hlsl
 half4 _GlossyEnvironmentColor;

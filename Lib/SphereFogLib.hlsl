@@ -2,26 +2,29 @@
     This file for SphereFog
 
     Macros:
-    _SPHERE_FOG_LAYERS   // use _SphereFogId
-    USE_STRUCTURED_BUFFER //
+    _SPHERE_FOG_LAYERS    // use _SphereFogId
+    USE_STRUCTURED_BUFFER // use ssbo, undefind use ubo
+    MAX_SPHERE_FOG_LAYERS // max sphere fog params
 
     Variables:
     need define _SphereFogId
 */
 #if !defined(SPHERE_FOG_LIB_HLSL)
 #define SPHERE_FOG_LIB_HLSL
-// force use structedBuffer
-// #define USE_STRUCTURED_BUFFER
+
+
 
 #if !defined(_SPHERE_FOG_LAYERS)
     #define _SphereFogId 0
-    #define MAX_COUNT 1
+    #define MAX_SPHERE_FOG_LAYERS 1
 #else
-    // save low gpu device's buffer storage
-    #if defined(SHADER_API_MOBILE) || (defined(SHADER_API_GLCORE) && !defined(SHADER_API_SWITCH)) || defined(SHADER_API_GLES) || defined(SHADER_API_GLES3) || defined(SHADER_API_GLES30)
-        #define MAX_COUNT 4
-    #else
-        #define MAX_COUNT 16
+    #if !defined(MAX_SPHERE_FOG_LAYERS)
+        // save low gpu device's buffer size
+        #if defined(SHADER_API_MOBILE) || (defined(SHADER_API_GLCORE) && !defined(SHADER_API_SWITCH)) || defined(SHADER_API_GLES) || defined(SHADER_API_GLES3) || defined(SHADER_API_GLES30)
+            #define MAX_SPHERE_FOG_LAYERS 4
+        #else
+            #define MAX_SPHERE_FOG_LAYERS 16
+        #endif
     #endif
 
 #endif
@@ -71,23 +74,21 @@ int GetSphereFogId(){
      // composite args
     #define _FogNoiseParams _SphereFogDatas[SPHERE_FOG_ID].fogNoiseParams
 
-
 #else
 
-
     CBUFFER_START(SphereFogs)
-        half _HeightFogMinArray[MAX_COUNT];
-        half _HeightFogMaxArray[MAX_COUNT];
-        half4 _HeightFogMinColorArray[MAX_COUNT];
-        half4 _HeightFogMaxColorArray[MAX_COUNT];
-        half _HeightFogFilterUpFaceArray[MAX_COUNT];
+        half _HeightFogMinArray[MAX_SPHERE_FOG_LAYERS];
+        half _HeightFogMaxArray[MAX_SPHERE_FOG_LAYERS];
+        half4 _HeightFogMinColorArray[MAX_SPHERE_FOG_LAYERS];
+        half4 _HeightFogMaxColorArray[MAX_SPHERE_FOG_LAYERS];
+        half _HeightFogFilterUpFaceArray[MAX_SPHERE_FOG_LAYERS];
 
-        half4 _FogNearColorArrays[MAX_COUNT];
-        half4 _FogFarColorArrays[MAX_COUNT];
-        half2 _FogDistanceArray[MAX_COUNT];
-        half4 _FogNoiseTilingOffsetArray[MAX_COUNT];
-        half4 _FogNoiseParamsArray[MAX_COUNT]; // composite args
-        half4 _FogParamsArray[MAX_COUNT]; // for SIMPLE_FOG
+        half4 _FogNearColorArrays[MAX_SPHERE_FOG_LAYERS];
+        half4 _FogFarColorArrays[MAX_SPHERE_FOG_LAYERS];
+        half2 _FogDistanceArray[MAX_SPHERE_FOG_LAYERS];
+        half4 _FogNoiseTilingOffsetArray[MAX_SPHERE_FOG_LAYERS];
+        half4 _FogNoiseParamsArray[MAX_SPHERE_FOG_LAYERS]; // composite args
+        half4 _FogParamsArray[MAX_SPHERE_FOG_LAYERS]; // for SIMPLE_FOG
     CBUFFER_END
     // shortcuts
     #define _HeightFogMin _HeightFogMinArray[SPHERE_FOG_ID]
