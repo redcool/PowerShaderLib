@@ -1,4 +1,4 @@
-Shader "Unlit/TestBlur"
+Shader "Hidden/Unlit/TestBlur"
 {
     Properties
     {

@@ -1,4 +1,4 @@
-Shader "Unlit/testDither"
+Shader "Hidden/Unlit/testDither"
 {
     Properties
     {

@@ -1,4 +1,4 @@
-Shader "Unlit/TestNoiseLib"
+Shader "Hidden/Unlit/TestNoiseLib"
 {
     Properties
     {

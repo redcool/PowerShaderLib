@@ -1,4 +1,4 @@
-Shader "Unlit/TestCoordinate"
+Shader "Hidden/Unlit/TestCoordinate"
 {
     Properties
     {

@@ -1,4 +1,4 @@
-Shader "Unlit/TestMathLib"
+Shader "Hidden/Unlit/TestMathLib"
 {
     Properties
     {
