@@ -87,7 +87,7 @@ float4 GetShadowPositionHClip(float3 worldPos,float3 worldNormal){
         float3 lightDirectionWS = _LightDirection;
     #endif
 
-    float4 positionCS = UnityWorldToClipPos(ApplyShadowBias(worldPos,worldNormal,lightDirectionWS,_CustomShadowNormalBias,_CustomShadowDepthBias));
+    float4 positionCS = TransformWorldToHClip(ApplyShadowBias(worldPos,worldNormal,lightDirectionWS,_CustomShadowNormalBias,_CustomShadowDepthBias));
     #if UNITY_REVERSED_Z
         positionCS.z = min(positionCS.z, positionCS.w * UNITY_NEAR_CLIP_VALUE);
     #else
