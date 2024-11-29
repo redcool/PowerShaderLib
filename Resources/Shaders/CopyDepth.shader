@@ -1,3 +1,7 @@
+/**
+    copy _SourceTex to DepthTarget
+*/
+
 Shader "Hidden/Utils/CopyDepth"
 {
     Properties
@@ -24,7 +28,7 @@ Shader "Hidden/Utils/CopyDepth"
         return o;
     }
 
-    float4 frag (v2f i) : SV_Target
+    float frag (v2f i) : SV_DEPTH
     {
         float depth = SAMPLE_TEXTURE2D(_SourceTex,sampler_SourceTex,i.uv).x;
         return depth;
@@ -36,7 +40,8 @@ Shader "Hidden/Utils/CopyDepth"
         Tags { "RenderType"="Opaque" }
         LOD 100
         Cull off
-        zwrite off
+        // zwrite off
+        colorMask r
         ztest always
         Pass
         {
@@ -44,7 +49,6 @@ Shader "Hidden/Utils/CopyDepth"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-
             
             ENDHLSL
         }

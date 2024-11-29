@@ -20,6 +20,7 @@ Shader "Hidden/Utils/CopyColor"
     };
 
     sampler2D _SourceTex;
+    sampler2D _DepthTex;
 
     bool _ApplyColorGrading;
 
@@ -31,7 +32,8 @@ Shader "Hidden/Utils/CopyColor"
         return o;
     }
 
-    float4 frag (v2f i) : SV_Target
+    float4 frag (v2f i,
+    out float depth:SV_DEPTH) : SV_Target
     {
         float4 col = tex2D(_SourceTex, i.uv);
         if(_ApplyColorGrading)
@@ -47,6 +49,9 @@ Shader "Hidden/Utils/CopyColor"
         col.rgb = LinearToGamma20(col.rgb);
         #endif
 
+        // depth,1 sample
+        depth = tex2D(_DepthTex,i.uv);
+
         return col;
     }
     ENDHLSL
@@ -54,7 +59,7 @@ Shader "Hidden/Utils/CopyColor"
     SubShader
     {
         Cull off
-        zwrite off
+        // zwrite off
         ztest always
 
         Pass
