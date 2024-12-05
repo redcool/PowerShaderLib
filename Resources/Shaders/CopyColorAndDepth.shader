@@ -1,7 +1,7 @@
 /**
     cmd.BlitTriangle
 */
-Shader "Hidden/Utils/CopyColor"
+Shader "Hidden/Utils/CopyColorAndDepth"
 {
     Properties
     {
@@ -20,7 +20,7 @@ Shader "Hidden/Utils/CopyColor"
     };
 
     sampler2D _SourceTex;
-    sampler2D _DepthTex;
+    sampler2D _SourceDepthTex;
 
     bool _ApplyColorGrading;
 
@@ -50,7 +50,7 @@ Shader "Hidden/Utils/CopyColor"
         #endif
 
         // depth,1 sample
-        depth = tex2D(_DepthTex,i.uv);
+        depth = tex2D(_SourceDepthTex,i.uv).x;
 
         return col;
     }
