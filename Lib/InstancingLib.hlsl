@@ -61,8 +61,8 @@ _BaseColor_DOTSInstancingOverrideMode == kDotsInstancedPropOverrideRequired ? Lo
 */
 #if defined(UNITY_DOTS_INSTANCING_ENABLED)
     // like,  UNITY_DOTS_INSTANCING_START(MaterialPropertyMetadata)
-    #define SRP_CBUFFER_START(name) cbuffer UnityDOTSInstancing_##name {
-    #define SRP_BUFFER_END }
+    #define DOTS_CBUFFER_START(name) cbuffer UnityDOTSInstancing_##name {
+    #define DOTS_CBUFFER_END }
     #define DEF_VAR(type,name) UNITY_DOTS_INSTANCED_PROP(type,name)
     #define GET_VAR(type,name) UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(type,name)
     // #define CBUFFER_END }
