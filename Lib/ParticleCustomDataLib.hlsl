@@ -87,7 +87,7 @@ float customDatas[8] = {o.customData1,o.customData2}
 
     low device gpu, faster
 */
-float GetCustomData(float4 datas1,float4 datas2,int dataId){
+float GetCustomData(float4 datas1,float4 datas2,uint dataId){
     float4 datas = dataId<4 ? datas1 : datas2;
     return datas[dataId%4];
 }
