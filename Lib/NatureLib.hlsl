@@ -12,7 +12,9 @@
     keywords:
     
     CALC_WORLD_NOISE_2_LAYERS
-
+    
+    Need vars:
+    _WindOn
 */
 float4 _GlobalWindDir; /*global (xyz)wind direction,w : wind intensity*/
 
@@ -28,11 +30,11 @@ half _IsGlobalWindOn;
 // unity 2020, empty define not work
 // #define IsRainOn() (_IsGlobalRainOn)
 // #define IsSnowOn() (_IsGlobalSnowOn)
-// #define IsWindOn() (_IsGlobalWindOn)
+#define IsWindOn() (_IsGlobalWindOn&&_WindOn)
 
 bool IsRainOn() {return _IsGlobalRainOn;}
 bool IsSnowOn() {return _IsGlobalSnowOn;}
-bool IsWindOn() {return _IsGlobalWindOn;}
+// bool IsWindOn() {return _IsGlobalWindOn;}
 
 float4 SmoothCurve( float4 x ) {
     return x * x *( 3.0 - 2.0 * x );
