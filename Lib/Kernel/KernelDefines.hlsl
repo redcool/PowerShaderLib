@@ -63,6 +63,16 @@ float4 funcName(sampler2D tex,float2 uv,float texelSizeScale,float2 offsets[coun
     return col;\
 }
 
+#define DEF_CALC_KERNELS_TEXTURE(funcName,tex,texState,uv,texelSizeScale,count)\
+float4 funcName(TEXTURE2D_PARAM(tex,texState),float2 uv,float texelSizeScale,float2 offsets[count],float kernels[count]){\
+    float4 col = 0;\
+    for(int x=0;x<count;x++){\
+        col += SAMPLE_TEXTURE2D(tex,texState,uv + offsets[x] * texelSizeScale) * kernels[x];\
+    }\
+    return col;\
+}
+
+
 
 // ====== kernels 3x3
 #define rcp16 0.0625
@@ -82,5 +92,8 @@ col = CalcKernel_2x2(_CameraOpaqueTexture,screenUV,_TexelSizeScale,offsets_2x2,k
 DEF_CALC_KERNELS(CalcKernel_3x3,tex,uv,texelSizeScale,9);
 DEF_CALC_KERNELS(CalcKernel_2x2,tex,uv,texelSizeScale,5);
 
+
+DEF_CALC_KERNELS_TEXTURE(CalcKernelTexture_3x3,tex,texState,uv,texelSizeScale,9);
+DEF_CALC_KERNELS_TEXTURE(CalcKernelTexture_2x2,tex,texState,uv,texelSizeScale,5);
 
 #endif //KERNEL_DEFINES_HLSL
