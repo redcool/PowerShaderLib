@@ -42,7 +42,7 @@ shader properties :
     };
 */
 #define CUSTOM_DATA_APPDATA() \
-float4 uv : TEXCOORD0;\ 
+float4 uv : TEXCOORD0;\
 float4 uv1 : TEXCOORD1;\
 float4 uv2 : TEXCOORD2
 
