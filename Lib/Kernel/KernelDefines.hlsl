@@ -37,7 +37,7 @@ static const float2 varName[] = {\
 static const float2 varName[] = {\
     float2(-texelSize.x,texelSize.y),\
     float2(texelSize.x,texelSize.y),\
-    float2(0,0),\    
+    float2(0,0),\
     float2(-texelSize.x,-texelSize.y),\
     float2(texelSize.x,-texelSize.y),\
 }
