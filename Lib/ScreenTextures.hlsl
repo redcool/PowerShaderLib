@@ -1,9 +1,11 @@
 #if !defined(SCREEN_TEXTURES_HLSL) 
 #define SCREEN_TEXTURES_HLSL
 
+#include "DepthLib.hlsl"
+
 /***
-    define SKIP_DEPTH ,when you wanna use DeclareDepthTexture.hlsl
-    define SKIP_OPAQUE , when you wanna use DeclareOpaqueTexture.hlsl
+    define SKIP_DEPTH ,when use DeclareDepthTexture.hlsl
+    define SKIP_OPAQUE , when use DeclareOpaqueTexture.hlsl
 */
 float GetScreenDepth(TEXTURE2D_PARAM(tex,state),float2 suv){
     float depth = SAMPLE_TEXTURE2D(tex,state,suv).x;
