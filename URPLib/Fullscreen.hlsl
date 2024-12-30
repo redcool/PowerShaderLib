@@ -30,6 +30,9 @@ struct Varyings
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
+/**
+    Fullscreen quad,define _USE_DRAW_PROCEDURAL
+*/
 Varyings FullscreenVert(Attributes input)
 {
     Varyings output;

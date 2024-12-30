@@ -1,6 +1,8 @@
 #if !defined(BLIT_LIB_HLSL)
 #define BLIT_LIB_HLSL
-
+/**
+    Fullscreen triangle
+*/
 void FullScreenTriangleVert(uint vertexId,out float4 posHClip,out float2 uv){
     posHClip = float4(
         vertexId <= 1 ? -1 : 3,
