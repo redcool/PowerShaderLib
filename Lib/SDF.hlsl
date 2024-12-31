@@ -81,4 +81,24 @@ float CalcOutline(inout float outer,inout float inner,float alpha,float2 outerRa
     inner = smoothstep(innerRange.x,innerRange.y,alpha);
     return  abs(outer - inner);
 }
+
+
+/*
+Box intersection by IQ, modified for neighbourhood clamping
+https://www.iquilezles.org/www/articles/boxfunctions/boxfunctions.htm
+*/
+float2 boxIntersection(in float3 ro, in float3 rd, in float3 rad)
+{
+    float3 m = 1.0 / rd;
+    float3 n = m * ro;
+    float3 k = abs(m) * rad;
+    float3 t1 = -n - k;
+    float3 t2 = -n + k;
+
+    float tN = max(max(t1.x, t1.y), t1.z);
+    float tF = min(min(t2.x, t2.y), t2.z);
+
+    return float2(tN, tF);
+}
+
 #endif //SDF_LIB_HLSL

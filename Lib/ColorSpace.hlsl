@@ -108,4 +108,26 @@ void LinearGammaAutoChange(inout float4 c){
     c.xyz *= alpha;
 }
 
+/*
+* GLSL Color Spaces by tobspr
+* https://github.com/tobspr/GLSL-Color-Spaces
+*/
+// RGB to YCbCr, ranges [0, 1]
+float3 RgbToYcbcr(float3 rgb) {
+    float y = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
+    float cb = (rgb.b - y) * 0.565;
+    float cr = (rgb.r - y) * 0.713;
+
+    return float3(y, cb, cr);
+}
+
+// YCbCr to RGB
+float3 YcbcrToRgb(float3 yuv) {
+    return float3(
+        yuv.x + 1.403 * yuv.z,
+        yuv.x - 0.344 * yuv.y - 0.714 * yuv.z,
+        yuv.x + 1.770 * yuv.y
+    );
+}
+
 #endif //COLOR_SPACE_HLSL
