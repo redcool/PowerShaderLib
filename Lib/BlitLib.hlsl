@@ -2,6 +2,7 @@
 #define BLIT_LIB_HLSL
 /**
     Fullscreen triangle
+    use CommandBufferEx.BlitTriangle
 */
 void FullScreenTriangleVert(uint vertexId,out float4 posHClip,out float2 uv){
     posHClip = float4(
@@ -17,6 +18,14 @@ void FullScreenTriangleVert(uint vertexId,out float4 posHClip,out float2 uv){
     if(_ProjectionParams.x < 0)
         uv.y = 1 - uv.y;
     // #endif
+}
+
+/**
+    use CommandBuffer.Blit
+*/
+void FullScreenQuadUnityBlit(float4 vertex,out float4 posHClip,out float2 uv){
+    posHClip = float4(vertex.xy*2-1,UNITY_NEAR_CLIP_VALUE,1);
+    uv = vertex.xy;
 }
 
 #endif //BLIT_LIB_HLSL

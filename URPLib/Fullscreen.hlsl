@@ -1,3 +1,7 @@
+/**
+    use BlitLib.hlsl instead
+*/
+
 #ifndef UNIVERSAL_FULLSCREEN_INCLUDED
 #define UNIVERSAL_FULLSCREEN_INCLUDED
 
@@ -30,9 +34,6 @@ struct Varyings
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
-/**
-    Fullscreen quad,define _USE_DRAW_PROCEDURAL
-*/
 Varyings FullscreenVert(Attributes input)
 {
     Varyings output;
