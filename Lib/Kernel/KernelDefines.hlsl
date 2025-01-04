@@ -1,6 +1,9 @@
 #if !defined(KERNEL_DEFINES_HLSL)
 #define KERNEL_DEFINES_HLSL
-//-- define 
+//-- define
+/**
+    3x3 offset texelSize
+*/
 #define DEF_OFFSETS_3X3(varName,texelSize)\
 static const float2 varName[] = {\
     float2(-texelSize.x,texelSize.y),\
@@ -12,6 +15,23 @@ static const float2 varName[] = {\
     float2(-texelSize.x,-texelSize.y),\
     float2(0,-texelSize.y),\
     float2(texelSize.x,-texelSize.y),\
+}
+
+/**
+    3x3 offset, 1 unit ,
+    need multiply texelSize outside
+*/
+#define DEF_OFFSETS_3X3_UNIT(varName)\
+static const float2 varName[] = {\
+    float2(-1,1),\
+    float2(0,1),\
+    float2(1,1),\
+    float2(-1,0),\
+    float2(0,0),\
+    float2(1,0),\
+    float2(-1,-1),\
+    float2(0,-1),\
+    float2(1,-1),\
 }
 
 /**
@@ -27,7 +47,14 @@ static const float2 varName[] = {\
     float2(0,-texelSize.y),\
     float2(0,texelSize.y),\
 }
-
+#define DEF_OFFSETS_2X2_UNIT(varName)\
+static const float2 varName[] = {\
+    float2(-1,0),\
+    float2(1,0),\
+    float2(0,0),\
+    float2(0,-1),\
+    float2(0,1),\
+}
 /**
     (-1,1)      (1,1)
            (0,0)
@@ -40,6 +67,15 @@ static const float2 varName[] = {\
     float2(0,0),\
     float2(-texelSize.x,-texelSize.y),\
     float2(texelSize.x,-texelSize.y),\
+}
+
+#define DEF_OFFSETS_2X2_CROS_UNIT(varName)\
+static const float2 varName[] = {\
+    float2(-1,1),\
+    float2(1,1),\
+    float2(0,0),\
+    float2(-1,-1),\
+    float2(1,-1),\
 }
 
 #define DEF_KERNELS_3X3(varName,i0,i1,i2,i3,i4,i5,i6,i7,i8)\

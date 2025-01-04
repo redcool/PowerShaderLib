@@ -164,7 +164,7 @@ uint esgtsa(uint s)
 float fast(float2 v)
 {
     v = (1./4320.) * v + float2(0.25,0.);
-    float state = frac( dot( v * v, float2(3571)));
+    float state = frac( dot( v * v, 3571));
     return frac( state * state * (3571. * 2.));
 }
 
@@ -639,14 +639,14 @@ uint2 pcg2d(uint2 v)
 {
     v = v * 1664525u + 1013904223u;
 
-    v.x += v.y * 1664525u;
-    v.y += v.x * 1664525u;
-
+    // v.x += v.y * 1664525u;
+    // v.y += v.x * 1664525u;
+    v += v.yx * 1664525u;
     v = v ^ (v>>16u);
 
-    v.x += v.y * 1664525u;
-    v.y += v.x * 1664525u;
-
+    // v.x += v.y * 1664525u;
+    // v.y += v.x * 1664525u;
+    v += v.yx * 1664525u;
     v = v ^ (v>>16u);
 
     return v;

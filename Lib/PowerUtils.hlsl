@@ -36,6 +36,9 @@ void ClipLOD(float2 screenPos,float pixels=1){
     // #endif
 }
 
+/**
+    offset hclip vertex, call in vas
+*/
 void OffsetHClipVertexZ(inout float4 vertex,float zOffset){
     #if defined(UNITY_REVERSED_Z)
         vertex.z *= zOffset;  //[0,1]=>[1,0]

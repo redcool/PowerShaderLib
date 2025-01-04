@@ -15,13 +15,22 @@ float LinearizeDepth(float z)
     return (1 - isOrtho * z) / (isPers * z + _ZBufferParams.y);
     /**
     z = (1-far/near) * z
+         or UNITY_REVERSED_Z 
+        z = (far/near - 1) * z
+    
     ortho: (1-z)/(far/near)
     pers : 1/(z + far/near)
 
     */
 }
-float LinearDepth01(float rawDepth){
+#undef Linear01Depth
+float Linear01Depth(float rawDepth){
     return LinearizeDepth(rawDepth);
+}
+
+#undef LinearEyeDepth
+float LinearEyeDepth(float rawDepth){
+    return lerp(_ZBufferParams.y,_ZBufferParams.z,LinearizeDepth(rawDepth));
 }
 
 /**
