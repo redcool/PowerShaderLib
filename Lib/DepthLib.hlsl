@@ -30,7 +30,7 @@ float Linear01Depth(float rawDepth){
 
 #undef LinearEyeDepth
 float LinearEyeDepth(float rawDepth){
-    return lerp(_ZBufferParams.y,_ZBufferParams.z,LinearizeDepth(rawDepth));
+    return lerp(_ProjectionParams.y,_ProjectionParams.z,LinearizeDepth(rawDepth));
 }
 
 /**
@@ -80,6 +80,7 @@ float OrthographicDepthBufferToLinear(float rawDepth/*depth buffer [0,1]*/){
     return (_ProjectionParams.z - _ProjectionParams.y) * rawDepth + _ProjectionParams.y;
 }
 
+
 /**
     output linear hclip pos.z, all projection
 */
@@ -101,6 +102,10 @@ float CalcLinearEyeDepth(float rawDepth){
 */
 bool IsTooFar(float rawDepth){
     return rawDepth > 0.99999 || rawDepth < 0.00001;
+}
+
+float CalcCurEyeDepth(float4 posHClip){
+    return IsOrthographicCamera() ? OrthographicDepthBufferToLinear(posHClip.z) : posHClip.w;
 }
 
 #endif //DEPTH_LIB_HLSL

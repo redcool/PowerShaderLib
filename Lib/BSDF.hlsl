@@ -190,4 +190,14 @@ half SheenLayer(float snh,float wnv,half2 range,half minLuminance=0.5,half scale
     return  max(minLuminance,smoothstep(range.x,range.y,wnv) + snh) * scale;
 }
 
+/*
+    Calc step siffuse color 
+*/
+float DiffuseStep(float diffMin,float diffMax,float stepCount,inout float nl){
+    float nlId = floor(nl * stepCount);
+    float nlRate = frac(nl * stepCount);
+    float rate = smoothstep(diffMin,diffMax,nlRate);
+    nl = lerp(nlId,nlId+1,rate)/ stepCount;
+}
+
 #endif //BSDF_HLSL

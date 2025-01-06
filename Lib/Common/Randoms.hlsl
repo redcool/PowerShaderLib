@@ -1,12 +1,17 @@
 /**
     https://www.pcg-random.org/download.html
     https://www.shadertoy.com/view/XlGcRh
+
+    demo:
+    float n = GetNoise( pcg2d(vertex.xy * _NoiseScale + _Time.zz * _NoiseSpeed));
+    float n = GetNoise( pcg2d(vertex.xy * 0.1 + _Time.zz) );
 */
 #if !defined(RANDOMS_HLSL)
 #define RANDOMS_HLSL
 // commonly used constants
 #define c1 0xcc9e2d51u
 #define c2 0x1b873593u
+#define GetNoise(n) (n&1)
 
 // Helper Functions
 uint rotl(uint x, uint r)

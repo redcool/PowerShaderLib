@@ -10,6 +10,7 @@
 #include "URP_GI.hlsl"
 #include "URP_Lighting.hlsl"
 #include "../Lib/BSDF.hlsl"
+#include "LightingAtten.hlsl"
 
 #define CHANGE_LIGHT_COLOR 0
 #define CHANGE_SPECULAR_COLOR 1
@@ -68,6 +69,49 @@ float3 CalcAdditionalLights(float3 worldPos,float3 diffColor,float3 specColor,fl
 }
 
 
+/**
+    Get Light for(dir,spot,point)
 
+    // demo
+    check DeferredLighting.cs
+    //======== use urp atten or use LightingAtten.hlsl
+    #define UNITY_ATTEN
+
+    //======== params
+    float4 lightPos : light world position, dir light w=0
+    float3 color : light color
+    float shadowAtten : light shadowMap attenuation
+    float3 worldPos : vertex' world position
+    float4 distanceAndSpotAttenuation : {xy: distance(point,spot), zw:angle(spot)}
+    float3 spotLightDir : spot light direction
+    float radius : light's range
+    float intensity : light 's intensity
+    float falloff : custom falloff
+    bool isSpot : is spot
+    float2 spotLightAngle : spot light angle in radians(outer angle,inner angle)
+*/
+Light GetLight(float4 lightPos,float3 color,float shadowAtten,float3 worldPos,float4 distanceAndSpotAttenuation,float3 spotLightDir
+,float radius,float intensity,float falloff,bool isSpot,float2 spotLightAngle
+){
+    float3 lightDir = lightPos.xyz - worldPos * lightPos.w;
+    float distSqr = max(dot(lightDir,lightDir),HALF_MIN);
+
+    lightDir = lightDir * rsqrt(distSqr);
+    float atten = 1;
+    #if defined(UNITY_ATTEN)
+        atten *= DistanceAttenuation(distSqr,distanceAndSpotAttenuation.xy);
+        atten *= AngleAttenuation(spotLightDir,lightDir,distanceAndSpotAttenuation.zw);
+    #else
+        atten *= DistanceAtten(distSqr,radius*radius,intensity,falloff);
+        atten *= isSpot ? AngleAtten(spotLightDir,lightDir,spotLightAngle.x,spotLightAngle.y) : 1;
+    #endif
+
+    Light l = (Light)0;
+    l.direction = lightDir;
+    l.distanceAttenuation = saturate(atten) + (1-lightPos.w);
+    l.color = color;
+    l.shadowAttenuation = shadowAtten;
+    return l;
+}
 
 #endif //LIGHTING_HLSL
