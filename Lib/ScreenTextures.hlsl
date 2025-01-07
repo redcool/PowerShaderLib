@@ -29,7 +29,7 @@ float GetScreenDepth(TEXTURE2D_PARAM(tex,state),float2 screenUV){
 }
 
 float GetScreenDepth(float2 screenUV){
-    return SAMPLE_TEXTURE2D(_CameraDepthTexture,sampler_CameraDepthTexture,screenUV);
+    return SAMPLE_TEXTURE2D(_CameraDepthTexture,sampler_CameraDepthTexture,screenUV).x;
 }
 
 float3 GetScreenColor(float2 screenUV){
