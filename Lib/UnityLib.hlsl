@@ -225,8 +225,9 @@ float4 TransformWorldToHClip(float3 worldPos){
     return mul(UNITY_MATRIX_VP,float4(worldPos,1));
 }
 
-float3 TransformObjectToWorldNormal(float3 normal){
-    return mul(float4(normal,1),UNITY_MATRIX_I_M).xyz;
+float3 TransformObjectToWorldNormal(float3 normal,bool isNormalized = true){
+    normal = mul(float4(normal,1),UNITY_MATRIX_I_M).xyz;
+    return isNormalized ? SafeNormalize(normal) : normal;
 }
 
 float3 TransformViewToProjection(float3 viewPos){
