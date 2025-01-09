@@ -58,9 +58,11 @@ float3 CalcReflectDir(float3 worldPos,float3 normal,float3 viewDir,float3 reflec
     float3 reflectDir = reflect(-viewDir,normal);
     reflectDir = (reflectDir + reflectDirOffset);
 
-    #if (SHADER_LIBRARY_VERSION_MAJOR >= 12) && (defined(_REFLECTION_PROBE_BOX_PROJECTION) || defined(_REFLECTION_PROBE_BOX_PROJECTION_1))
-    // UNITY_BRANCH if(isBoxProjection)
+    #if (SHADER_LIBRARY_VERSION_MAJOR >= 12 || UNITY_VERSION >= 202200) && (defined(_REFLECTION_PROBE_BOX_PROJECTION) || defined(_REFLECTION_PROBE_BOX_PROJECTION_1))
+    UNITY_BRANCH 
+    if(isBoxProjection){
         reflectDir = BoxProjectedCubemapDir(reflectDir,worldPos,unity_SpecCube0_ProbePosition,unity_SpecCube0_BoxMin,unity_SpecCube0_BoxMax);
+    }
     #endif
     return reflectDir;
 }

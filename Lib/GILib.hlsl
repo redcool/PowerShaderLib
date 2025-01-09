@@ -178,11 +178,27 @@ half3 CalcGISpec(float a2,float smoothness,float metallic,float fresnelTerm,half
     3 define SMOOTH_FRESNEL, control fresnel width use fresnelRange
 */
 
-half3 CalcGISpec(TEXTURECUBE_PARAM(cube,sampler_cube),float4 cubeHDR,float3 specColor,
-    float3 worldPos,float3 normal,float3 viewDir,float3 reflectDirOffset,float reflectIntensity,
-    float nv,float roughness,float a2,float smoothness,float metallic,half2 fresnelRange=half2(0,1),half3 grazingTermColor=1,
-    // planar reflection tex,(xyz:color,w: ratio)
-    half4 planarReflectTex=0,half3 viewDirTS=0,half2 uv=0)
+half3 CalcGISpec(
+    TEXTURECUBE_PARAM(cube,sampler_cube),
+    float4 cubeHDR,
+    float3 specColor,
+    float3 worldPos,
+    float3 normal,
+    float3 viewDir,
+    float3 reflectDirOffset,
+    float reflectIntensity,
+    float nv,
+    float roughness,
+    float a2,
+    float smoothness,
+    float metallic,
+    half2 fresnelRange=half2(0,1),
+    half3 grazingTermColor=1,
+    half4 planarReflectTex=0,// planar reflection tex,(xyz:color,w: ratio)
+    half3 viewDirTS=0,
+    half2 uv=0,
+    bool isBoxProjection=false 
+)
 {
     #if defined(_INTERIOR_MAP_ON)
         float2 uvRange = float2(_ReflectDirOffset.w,1 - _ReflectDirOffset.w);
@@ -190,7 +206,7 @@ half3 CalcGISpec(TEXTURECUBE_PARAM(cube,sampler_cube),float4 cubeHDR,float3 spec
         roughness = lerp(0.5,roughness,UVBorder(uv,uvRange));
         // reflectDir.z*=-1;
     #else
-        float3 reflectDir = CalcReflectDir(worldPos,normal,viewDir,reflectDirOffset);
+        float3 reflectDir = CalcReflectDir(worldPos,normal,viewDir,reflectDirOffset,isBoxProjection);
     #endif
 
     float3 iblColor = CalcIBL(reflectDir,cube,sampler_cube,roughness,cubeHDR) * reflectIntensity;
