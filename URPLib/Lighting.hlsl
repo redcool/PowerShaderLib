@@ -48,20 +48,34 @@ half3 CalcLight(Light light,half3 diffColor,half3 specColor,float nl,float nh,fl
     Calc directColor
 */
 half3 CalcLight(Light light,half3 diffColor,half3 specColor,float3 n,float3 v,float a,float a2){
-    // if(!light.distanceAttenuation)
-    //     return 0;
+    if(!light.distanceAttenuation)
+        return 0;
+    
     half nl,nh,lh;
     CalcBRDFWeights(nl/**/,nh/**/,lh/**/,light.direction,n,v);
     return CalcLight(light,diffColor,specColor,nl,nh,lh,a,a2);
 }
 
 
-float3 CalcAdditionalLights(float3 worldPos,float3 diffColor,float3 specColor,float3 n,float3 v,float a,float a2,float4 shadowMask,float softScale=1 ){
-    uint count = GetAdditionalLightsCount();
+float3 CalcAdditionalLights(
+    float3 worldPos,
+    float3 diffColor,
+    float3 specColor,
+    float3 n,
+    float3 v,
+    float a, 
+    float a2,
+    float4 shadowMask,
+    float softScale=1,
+    bool isCalcLights = true,
+    bool isCalcShadows = true
+    )
+    {
+    uint count = GetAdditionalLightsCount() * isCalcLights;
 
     float3 c = 0;
     for(uint i=0;i<count;i++){
-        Light l = GetAdditionalLight(i,worldPos,shadowMask,softScale);
+        Light l = GetAdditionalLight(i,worldPos,shadowMask,softScale,isCalcShadows);
         if(IsMatchRenderingLayer(l.layerMask))
             c += CalcLight(l,diffColor,specColor,n,v,a,a2);
     }

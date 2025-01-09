@@ -207,7 +207,7 @@ int GetPerObjectLightIndex(uint index)
 #endif
 }
 
-Light GetAdditionalLight(uint i, float3 positionWS,float softScale=1)
+Light GetAdditionalLight(uint i, float3 positionWS,float softScale=1,bool isCalcShadows=false)
 {
     #if USE_CLUSTERED_LIGHTING
         int lightIndex = i;
@@ -216,6 +216,7 @@ Light GetAdditionalLight(uint i, float3 positionWS,float softScale=1)
     #endif
     Light light = GetAdditionalPerObjectLight(lightIndex, positionWS);
     #if defined(ADDITIONAL_LIGHT_CALCULATE_SHADOWS)
+        branch_if(isCalcShadows)
         light.shadowAttenuation = AdditionalLightRealtimeShadow(lightIndex, positionWS,softScale);
     #endif
     return light;
@@ -223,7 +224,7 @@ Light GetAdditionalLight(uint i, float3 positionWS,float softScale=1)
 
 // Fills a light struct given a loop i index. This will convert the i
 // index to a perObjectLightIndex
-Light GetAdditionalLight(uint i, float3 positionWS,float4 shadowMask,float softScale=1)
+Light GetAdditionalLight(uint i, float3 positionWS,float4 shadowMask,float softScale=1,bool isCalcShadows=false)
 {
     int perObjectLightIndex = GetPerObjectLightIndex(i);
     Light light = GetAdditionalPerObjectLight(perObjectLightIndex, positionWS);
@@ -236,6 +237,7 @@ Light GetAdditionalLight(uint i, float3 positionWS,float4 shadowMask,float softS
 
     light.shadowAttenuation = 1;
     #if defined(ADDITIONAL_LIGHT_CALCULATE_SHADOWS)
+        branch_if(isCalcShadows)
         light.shadowAttenuation = AdditionalLightShadow(perObjectLightIndex, positionWS,shadowMask,occlusionProbeChannels,softScale,light.direction);
     #endif
 
