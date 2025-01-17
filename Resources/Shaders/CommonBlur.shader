@@ -78,6 +78,7 @@ ENDHLSL
         Cull off
         zwrite off
         ztest always
+        blend[_FinalSrcMode][_FinalDstMode]
 
         Pass
         {
