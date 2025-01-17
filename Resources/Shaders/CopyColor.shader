@@ -12,6 +12,7 @@ Shader "Hidden/Utils/CopyColor"
     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
     #include "../../Lib/BlitLib.hlsl"
     #include "../../Lib/Colors.hlsl"
+    #include "../../Lib/ColorSpace.hlsl"    
 
     struct v2f
     {
@@ -37,15 +38,8 @@ Shader "Hidden/Utils/CopyColor"
         if(_ApplyColorGrading)
             col.xyz = ApplyColorGradingLUT(col.xyz);
 
-        #if defined(_SRGB_TO_LINEAR_CONVERSION)
-        // return float4(1,0,0,1);
-        col.rgb = Gamma20ToLinear(col.rgb);
-        #endif
-
-        #if _LINEAR_TO_SRGB_CONVERSION
-        // return float4(0,1,0,1);
-        col.rgb = LinearToGamma20(col.rgb);
-        #endif
+        // change color space
+        LinearGammaAutoChange(col,false);
 
         return col;
     }

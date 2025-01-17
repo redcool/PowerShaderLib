@@ -94,7 +94,7 @@ void LinearToGamma(inout float4 color,out float alpha){
     alpha = lerp(color.w,gammaColor.w,color.w);
 }
 
-void LinearGammaAutoChange(inout float4 c){
+void LinearGammaAutoChange(inout float4 c,half isPremulAlpha=1){
     float alpha = c.a;
 
     #if defined(_SRGB_TO_LINEAR_CONVERSION)
@@ -105,7 +105,7 @@ void LinearGammaAutoChange(inout float4 c){
     LinearToGamma(c/**/,alpha/**/);
     #endif
 
-    c.xyz *= alpha;
+    c.xyz *= isPremulAlpha ? alpha : 1;
 }
 
 /*
