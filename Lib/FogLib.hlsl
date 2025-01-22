@@ -101,7 +101,7 @@ float2 CalcFogFactor(float3 worldPos,float clipZ_01=1,bool hasHeightFog=true,boo
 
         float2 fog=0;
         fog.x = height * hasHeightFog;
-        fog.y = -mul(UNITY_MATRIX_V,float4(worldPos,1)).z; // z negative in viewSpace
+        fog.y = clipZ_01;
 
         return fog;
     #else
@@ -115,7 +115,8 @@ void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHe
 
     #if defined(SIMPLE_FOG) // simple fog
         // calc fogFactor(viewPos.z in fog.y)
-        float zFactor = max(fog.y - _ProjectionParams.y,0);
+        // float zFactor = max(fog.y - _ProjectionParams.y,0);
+        float zFactor = fog.y;
         fog.x = ComputeFogFactor(zFactor) ;
         mainColor = lerp(_FogFarColor,mainColor,fog.x);
     #else   // sphere fog
