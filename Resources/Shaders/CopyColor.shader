@@ -6,6 +6,7 @@ Shader "Hidden/Utils/CopyColor"
     Properties
     {
         // _SourceTex ("Texture", 2D) = "white" {}
+        [GroupToggle()] _OffsetHalfPixelOn("_OffsetHalfPixelOn",float) = 0
     }
 
     HLSLINCLUDE
@@ -21,8 +22,10 @@ Shader "Hidden/Utils/CopyColor"
     };
 
     sampler2D _SourceTex;
+    float4 _SourceTex_TexelSize;
 
     bool _ApplyColorGrading;
+    half _OffsetHalfPixelOn;
 
     v2f vert (uint vid:SV_VERTEXID)
     {
@@ -34,7 +37,12 @@ Shader "Hidden/Utils/CopyColor"
 
     float4 frag (v2f i) : SV_Target
     {
-        float4 col = tex2D(_SourceTex, i.uv);
+        float2 uv = i.uv;
+        // #if defined(SHADER_API_D3D11)
+            uv += 0.5*_OffsetHalfPixelOn*_SourceTex_TexelSize.xy;
+        // #endif
+
+        float4 col = tex2D(_SourceTex, uv);
         if(_ApplyColorGrading)
             col.xyz = ApplyColorGradingLUT(col.xyz);
 
