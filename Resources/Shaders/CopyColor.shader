@@ -23,9 +23,12 @@ Shader "Hidden/Utils/CopyColor"
 
     sampler2D _SourceTex;
     float4 _SourceTex_TexelSize;
-
     bool _ApplyColorGrading;
+
+    CBUFFER_START(UnityPerMaterial)
     half _OffsetHalfPixelOn;
+    CBUFFER_END
+    
 
     v2f vert (uint vid:SV_VERTEXID)
     {
