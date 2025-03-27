@@ -34,6 +34,13 @@ float CalcBigShadowAtten(float3 bigShadowCoord,float softScale){
 
     return shadow;   
 }
+/**
+    Get min(lightShadowAtten ,bigShadowAtten)
+*/
+float CalcFinalShadowAtten(float3 bigShadowCoord,float softScale,float lightShadowAtten){
+    float atten = CalcBigShadowAtten(bigShadowCoord,softScale);
+    return min(lightShadowAtten,atten);
+}
 
 /**
     ApplyDistanceAtten(mainLight.shadowAttenuation,worldPos,_WorldSpaceCameraPos,10);
