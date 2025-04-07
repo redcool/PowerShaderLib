@@ -127,4 +127,22 @@ float2 rayBoxDst(float3 boundsMin, float3 boundsMax, float3 rayOrigin, float3 in
     return float2(dstToBox, dstInsideBox);
 }
 
+/**
+    2point fading ,like close to camera
+    https://www.desmos.com/calculator/xkcrud9p0i?lang=zh-CN
+
+    float viewDistFading = Dist2Fading(_WorldSpaceCameraPos.xyz ,worldPos.xyz,viewFadingDist);
+*/
+float Dist2Fading(float3 pos1,float3 pos2,float fadingDist){
+    float3 viewVec = pos1 - pos2;
+    float viewDist2 = dot(viewVec,viewVec);
+    float viewDistFade = 1 - fadingDist/viewDist2;
+    return viewDistFade;
+}
+
+float NDCWFading(float ndcW,float fadingDist){
+    float viewDistFading = abs(ndcW) - fadingDist;
+    return viewDistFading;
+}
+
 #endif //SDF_LIB_HLSL
