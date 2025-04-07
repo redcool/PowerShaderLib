@@ -141,7 +141,7 @@ float Dist2Fading(float3 pos1,float3 pos2,float fadingDist){
 }
 
 float NDCWFading(float ndcW,float fadingDist){
-    float viewDistFading = abs(ndcW) - fadingDist;
+    float viewDistFading = (ndcW) - fadingDist;
     return viewDistFading;
 }
 
