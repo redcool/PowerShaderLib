@@ -109,26 +109,42 @@ float4 funcName(TEXTURE2D_PARAM(tex,texState),float2 uv,float texelSizeScale,flo
 }
 
 
-
-// ====== kernels 3x3
+/**
+    ====== kernels 3x3
+*/
 #define rcp16 0.0625
+#define rcp10 0.1
 DEF_KERNELS_3X3(kernels_sharpen,-1,-1,-1,-1,9,-1,-1,-1,-1);
 DEF_KERNELS_3X3(kernels_blur,1*rcp16,2*rcp16,1*rcp16,2*rcp16,4*rcp16,2*rcp16,1*rcp16,2*rcp16,1*rcp16);
 DEF_KERNELS_3X3(kernels_edgeDetection,1,1,1,1,-8,1,1,1,1);
+DEF_KERNELS_3X3(kernels_edgeDetection_noCenter,1,-1,1,2,-8,2,1,-1,1);
 
-// ====== kernels 2x2
+/*
+    ====== kernels 2x2
+**/
 DEF_KERNELS_2X2(kernels_sharpen_2x2,-1,-1,5,-1,-1);
-DEF_KERNELS_2X2(kernels_blur_2x2,1.5*rcp16,1.5*rcp16,4*rcp16,1.5*rcp16,1.5*rcp16);
-DEF_KERNELS_2X2(kernels_edgeDetection_2x2,1,1,-8,1,1);
+DEF_KERNELS_2X2(kernels_blur_2x2,1.5*rcp10,1.5*rcp10,4*rcp10,1.5*rcp10,1.5*rcp10);
+DEF_KERNELS_2X2(kernels_edgeDetection_2x2,2,2,-8,2,2);
+DEF_KERNELS_2X2(kernels_edgeDetection_2x2_noCenter,1,2,-8,1,1);
 
-/* functions, call
-col = CalcKernel_3x3(_CameraOpaqueTexture, screenUV,_TexelSizeScale,offsets_3x3,kernels_edgeDetection);
-col = CalcKernel_2x2(_CameraOpaqueTexture,screenUV,_TexelSizeScale,offsets_2x2,kernels_sharpen_2x2);
+/* 
+    functions, call, 
+    check pbrTemplate/BoxKernel.shader
+    
+    this version use sampler2D ,not Texture2D
+
+    col = CalcKernel_3x3(_CameraOpaqueTexture, screenUV,_TexelSizeScale,offsets_3x3,kernels_edgeDetection);
+    col = CalcKernel_2x2(_CameraOpaqueTexture,screenUV,_TexelSizeScale,offsets_2x2,kernels_sharpen_2x2);
 */
 DEF_CALC_KERNELS(CalcKernel_3x3,tex,uv,texelSizeScale,9);
 DEF_CALC_KERNELS(CalcKernel_2x2,tex,uv,texelSizeScale,5);
 
+/* 
+    functions, call ,
+    check pbrTemplate/BoxKernel.shader
 
+    this version,use Texture2D not sampler2D
+*/
 DEF_CALC_KERNELS_TEXTURE(CalcKernelTexture_3x3,tex,texState,uv,texelSizeScale,9);
 DEF_CALC_KERNELS_TEXTURE(CalcKernelTexture_2x2,tex,texState,uv,texelSizeScale,5);
 
