@@ -1,6 +1,10 @@
 #if !defined(COLORS_HLSL)
 #define COLORS_HLSL
 
+/**
+    https://munsell.com/color-blog/difference-chroma-saturation/
+*/
+
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Filtering.hlsl"
 #include "NoiseLib.hlsl"

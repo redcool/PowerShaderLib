@@ -69,6 +69,25 @@ float2 UVOffset(float2 uv_t,float autoStop){
     return autoStop? uv_t : (uv_t*(1+_Time.xx));
     // return uv_t * ( 1+ _Time.xx *( 1 - autoStop) );
 }
+
+/**
+    Calc UV tiling(ScreenSize/TextureSize)
+
+    demo:
+    float2 uvTiling =UVTiling(_ScaledScreenParams.xy , _MainTex_TexelSize.xy,_Value);
+    uvTiling *= i.uv;
+    float4 tex = tex2D(_MainTex,uvTiling);
+    clip(tex.r - _Cutoff);
+
+    float3 screenCol = tex2D(_CameraOpaqueTexture,screenUV);
+    return screenCol.xyzx*half4(1,0,0,1);
+*/
+float2 UVTiling(float2 screenSize,float2 texSizeRevert,float scale){
+    float2 uv = screenSize * texSizeRevert;
+    uv *= scale;
+    return uv;
+}
+
 /*
     matrix : http://mathworld.wolfram.com/images/equations/MatrixInverse/NumberedEquation3.gif
     matrix3x3  : http://mathworld.wolfram.com/images/equations/MatrixInverse/NumberedEquation3.gif
