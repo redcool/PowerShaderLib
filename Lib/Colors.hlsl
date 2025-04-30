@@ -117,6 +117,7 @@ float3 ColorGradingLUT(float2 uv,bool useACES = false){
 // apply color grading lut
 SAMPLER(sampler_linear_clamp);
 TEXTURE2D(_ColorGradingLUT);
+float4 _ColorGradingLUT_TexelSize;
 // float4 _ColorGradingLUTParams; //{x:1/width,y:1/height,z:height-1} 
 
 real3 _ApplyLut2D(TEXTURE2D_PARAM(tex, samplerTex), float3 uvw, float3 scaleOffset)
@@ -145,6 +146,17 @@ float3 ApplyColorGradingLUT(float3 c){
     );
 }
 
+/**
+    _ColorGradingUseLogC : logC space
+    _ColorGradingLUTParams : //{x:1/width,y:1/height,z:height-1} 
+*/
+float3 ApplyColorGradingLUT(float3 c,bool _ColorGradingUseLogC,half3 _ColorGradingLUTParams){
+    return ApplyLut2D(
+        TEXTURE2D_ARGS(_ColorGradingLUT,sampler_linear_clamp),
+        saturate(_ColorGradingUseLogC ? LinearToLogC(c) : c),
+        _ColorGradingLUTParams.xyz
+    );
+}
 
 /**
 
