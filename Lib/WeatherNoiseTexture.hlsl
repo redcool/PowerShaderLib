@@ -23,6 +23,9 @@ float SampleWeatherNoise(TEXTURE2D_PARAM(tex,tex_Sampler),float2 uv,half4 ratio 
     return n.x;
 }
 
+/**
+    _WeatherNoiseTexture as normal 
+*/
 float SampleWeatherNoise(float2 uv,half4 ratio = DEFAULT_RATE ){
     float n = SampleWeatherNoise(TEXTURE2D_ARGS(_WeatherNoiseTexture,sampler_WeatherNoiseTexture),uv,ratio);
     return n*2-1;
@@ -31,6 +34,16 @@ float SampleWeatherNoise(float2 uv,half4 ratio = DEFAULT_RATE ){
 float SampleWeatherNoiseLOD(float2 uv,half lod,half4 ratio = DEFAULT_RATE ){
     float4 n = SAMPLE_TEXTURE2D_LOD(_WeatherNoiseTexture,sampler_WeatherNoiseTexture,uv*0.1,lod);
     return dot(n,ratio);
+}
+/**
+    a noised uv
+    screen uv,
+    noiseUVTexelSize , size of tiling block
+
+*/
+float2 CalcNoiseUV(float2 screenUV,float2 noiseUVTexelSize,half2 noiseDir,half speed){
+    float2 n1 = screenUV * noiseUVTexelSize + noiseDir * _Time.x*speed ;
+    return n1;
 }
 
 #endif //WEATHER_NOISE_TEX_HLSL

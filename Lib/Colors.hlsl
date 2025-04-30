@@ -211,4 +211,30 @@ float4 Glitch(
     return float4(c1.r,c2.g,c1.b,1);
 }
 
+/**
+    Calc vignette color
+
+    screenUV : screen space uv[0,1]
+    centerUV : screen space center ,default 0.5
+    isRound : round circle or oval shape
+    oval : blink eye
+    vignetteRange : smooth curve 
+
+    demo:
+    float2 screenUV = i.vertex.xy / _ScaledScreenParams.xy;
+    half4 col = CalcVignette(screenUV,_RoundOn,_Oval,_VignetRange,_Color1,_Color2,_Intensity);
+*/
+half4 CalcVignette(float2 screenUV,float2 centerUV,half isRound,half2 oval,half2 vignetteRange,half4 color1,half4 color2,half intensity){
+    float aspect = _ScaledScreenParams.x/_ScaledScreenParams.y;
+    float2 dir = (screenUV - centerUV) ;
+    dir.x *= isRound ? aspect : 1;
+    dir /= oval;
+
+    float dist = length(dir) ;
+    float atten = smoothstep(vignetteRange.x,vignetteRange.y,dist);
+    // return _Color1 * atten * _Intensity;
+
+    half4 col = lerp(color1,color2,atten)* intensity;
+    return col;
+}
 #endif //COLORS_HLSL

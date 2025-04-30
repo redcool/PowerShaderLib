@@ -18,6 +18,11 @@ TEXTURE2D(_CameraOpaqueTexture);
 SAMPLER(sampler_CameraOpaqueTexture);
 #endif
 
+#if !defined(SKIP_NORMAL)
+TEXTURE2D(_CameraNormalsTexture);
+SAMPLER(sampler_CameraNormalsTexture);
+#endif
+
 float GetScreenDepth(TEXTURE2D_PARAM(tex,state),float2 screenUV){
     float depth = SAMPLE_TEXTURE2D(tex,state,screenUV).x;
 
@@ -38,6 +43,10 @@ float3 GetScreenColor(float2 screenUV){
 
 float3 CalcWorldNormal(float3 worldPos){
     return normalize(cross(ddy(worldPos),ddx(worldPos)));
+}
+
+float3 GetScreenNormal(float2 screenUV){
+    return SAMPLE_TEXTURE2D(_CameraNormalsTexture,sampler_CameraNormalsTexture,screenUV)*2-1;
 }
 
 #endif //SCREEN_TEXTURES_HLSL
