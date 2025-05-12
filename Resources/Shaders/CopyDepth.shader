@@ -54,7 +54,7 @@ Shader "Hidden/Utils/CopyDepth"
         #define DEPTH_TEXTURE(name,samples) Texture2DMS<float,samples> name
         #define SAMPLE_DEPTH_TEXTURE(tex,texState,uv) SampleDepthMSAA(tex,uv,_SourceTex_TexelSize)
     #else
-        #define DEPTH_TEXTURE(name,samples) TEXTURE2D(name)
+        #define DEPTH_TEXTURE(name,samples) TEXTURE2D_FLOAT(name)
         #define SAMPLE_DEPTH_TEXTURE(tex,texState,uv) SAMPLE_TEXTURE2D(tex,texState,uv)
     #endif  //USE_MSAA
 
@@ -88,8 +88,8 @@ Shader "Hidden/Utils/CopyDepth"
     float frag (v2f i) : SV_TARGET
     #endif
     {
-        // return SAMPLE_TEXTURE2D(_SourceTex,sampler_SourceTex,i.uv).x;
-        return SampleDepth(i.uv);
+        return SAMPLE_DEPTH_TEXTURE(_SourceTex,sampler_SourceTex,i.uv);
+        // return SampleDepth(i.uv);
     }
     ENDHLSL
 
