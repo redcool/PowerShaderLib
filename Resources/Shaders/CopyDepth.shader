@@ -6,7 +6,7 @@ Shader "Hidden/Utils/CopyDepth"
 {
     Properties
     {
-        [GroupToggle(,_OUTPUT_DEPTH,output depth or color)]_OutputDepth("_OutputDepth",float) = 1
+        [GroupToggle(,_OUTPUT_DEPTH_ON,output depth or color)]_OutputDepth("_OutputDepth",float) = 1
     }
 
     HLSLINCLUDE
@@ -82,7 +82,7 @@ Shader "Hidden/Utils/CopyDepth"
         return o;
     }
 
-    #if defined(_OUTPUT_DEPTH)
+    #if defined(_OUTPUT_DEPTH_ON)
     float frag (v2f i) : SV_DEPTH
     #else
     float frag (v2f i) : SV_TARGET
@@ -107,7 +107,7 @@ Shader "Hidden/Utils/CopyDepth"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            #pragma shader_feature _OUTPUT_DEPTH
+            #pragma shader_feature _OUTPUT_DEPTH_ON
 
             #pragma multi_compile _ _DEPTH_MSAA_2 _DEPTH_MSAA_4 _DEPTH_MSAA_8
             
