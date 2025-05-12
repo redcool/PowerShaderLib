@@ -2,8 +2,8 @@
 #define TEXTURE_LIB_HLSL
 
 /**
-    USE_TEXTURE2D : Texture
     USE_SAMPLER2D : sampler2D
+    !USE_SAMPLER2D : Texture2D
 */
 
 #if defined(USE_SAMPLER2D)
@@ -14,7 +14,7 @@
     #define TEXTURE2D_ARGS(textureName,samplerName) textureName
 
     #undef SAMPLE_TEXTURE2D
-    #define SAMPLE_TEXTURE2D(depthTex,depthTexSampler,uv) tex2D(depthTex,(uv))
+    #define SAMPLE_TEXTURE2D(textureName,samplerName,uv) tex2D(textureName,(uv))
 
     #undef TEXTURE2D
     #define TEXTURE2D(textureName) sampler2D textureName

@@ -4,7 +4,7 @@
 #define NODE_LIB_HLSL
 
 #undef PI
-#define PI 3.14159
+#define PI 3.14159265
 
 // #include "NoiseLib.hlsl"
 #if !defined(NOISE_LIB_HLSL)
