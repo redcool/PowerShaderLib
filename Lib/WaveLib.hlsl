@@ -16,21 +16,24 @@ float3 GerstnerWave(inout float3 tangent,inout float3 binormal,float4 waveInfo,f
     float f = k * dot(d,worldPos.xz)  - c * _Time.y * waveScrollSpeed;
     float a = steepness/k;
 
+    float cosF,sinF;
+    sincos(f,sinF/**/,cosF/**/);
+
     tangent += float3(
-        -d.x * d.x * steepness * sin(f),
-        d.x * steepness * cos(f),
-        -d.x * d.y * steepness * sin(f)
+        -d.x * d.x * steepness * sinF,
+        d.x * steepness * cosF,
+        -d.x * d.y * steepness * sinF
     );
     binormal += float3(
-        -d.x * d.y * steepness * sin(f),
-        d.y * steepness * cos(f),
-        -d.y * d.y * steepness * sin(f)
+        -d.x * d.y * steepness * sinF,
+        d.y * steepness * cosF,
+        -d.y * d.y * steepness * sinF
     );
 
     return float3(
-        d.x * a * cos(f),
-        a * sin(f),
-        d.y * a*cos(f)
+        d.x * a * cosF,
+        a * sinF,
+        d.y * a*cosF
     );
 }
 

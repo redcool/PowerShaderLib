@@ -3,6 +3,7 @@
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
 #include "Colors.hlsl"
+#include "TangentLib.hlsl"
 
 #undef HALF_MIN
 #define HALF_MIN 6.103515625e-5  // 2^-14, the same value for 10, 11 and 16-bit: https://www.khronos.org/opengl/wiki/Small_Float_Formats
@@ -172,7 +173,18 @@ float3 BlendVertexNormal(float3 tn,float3 worldPos,float3 t,float3 b,float3 n){
     vn = float3(dot(t,vn),dot(b,vn),dot(n,vn));
     return BlendNormal(tn,vn);
 }
+/**
+    blend tangent space normals
+*/
+float3 Blend2NormalsLOD(sampler2D normalTex,float2 worldUV,float2 tiling,float2 speed,float normalScale,float lod){
+    // calc normal uv then 2 normal blend
+    float2 normalUV1 = worldUV * tiling + float2(1,0.2) * speed * _Time.x;
+    float2 normalUV2 = worldUV * tiling + float2(-1,-0.2) * speed * _Time.x;
 
+    float3 tn = UnpackNormalScale(tex2Dlod(normalTex,float4(normalUV1,0,lod)),normalScale);
+    float3 tn2 = UnpackNormalScale(tex2Dlod(normalTex,float4(normalUV2,0,lod)),normalScale);
+    return BlendNormal(tn,tn2);
+}
 /**
     blend tangent space normals
 */
@@ -191,11 +203,11 @@ float3 Blend2Normals(sampler2D normalTex,float2 worldUV,float2 tiling,float2 spe
 float3 Blend2Normals(sampler2D normalTex,float2 worldUV,float2 tiling,float2 speed,float normalScale,float3 tSpace0,float3 tSpace1,float3 tSpace2){
     float3 tn = Blend2Normals(normalTex,worldUV,tiling,speed,normalScale);
 
-    float3 n = normalize(float3(
-        dot(tSpace0.xyz,tn),
-        dot(tSpace1.xyz,tn),
-        dot(tSpace2.xyz,tn)
-    ));
-    return n;
+    // float3 n = normalize(float3(
+    //     dot(tSpace0.xyz,tn),
+    //     dot(tSpace1.xyz,tn),
+    //     dot(tSpace2.xyz,tn)
+    // ));
+    return TangentToWorld(tn,tSpace0,tSpace1,tSpace2);
 }
 #endif //MATERIAL_LIB_HLSL
