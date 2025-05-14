@@ -11,14 +11,7 @@
 // #define GetWorldSpaceViewDir(worldPos) (_WorldSpaceCameraPos - worldPos)
 // #define GetWorldSpaceLightDir(worldPos) _MainLightPosition.xyz
 
-/**
-    blend vertex normal and tangent noraml(texture)
-*/
-float3 BlendVertexNormal(float3 tn,float3 worldPos,float3 t,float3 b,float3 n){
-    float3 vn = cross(ddy(worldPos),ddx(worldPos));
-    vn = float3(dot(t,vn),dot(b,vn),dot(n,vn));
-    return BlendNormal(tn,vn);
-}
+
 
 /**
     screenPos : i.vertex.xy,[0,screenWidth,screenHeight]

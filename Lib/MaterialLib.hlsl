@@ -1,6 +1,7 @@
 #if !defined(MATERIAL_LIB_HLSL)
 #define MATERIAL_LIB_HLSL
 
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
 #include "Colors.hlsl"
 
 #undef HALF_MIN
@@ -162,4 +163,39 @@ void ApplyStoreyLineEmission(inout float3 emissionColor,half4 lineNoise,float3 w
     emissionColor = lerp(emissionColor,lineColor,vertexColor.x>0.1);
 }
 
+
+/**
+    blend vertex normal and tangent noraml(texture)
+*/
+float3 BlendVertexNormal(float3 tn,float3 worldPos,float3 t,float3 b,float3 n){
+    float3 vn = cross(ddy(worldPos),ddx(worldPos));
+    vn = float3(dot(t,vn),dot(b,vn),dot(n,vn));
+    return BlendNormal(tn,vn);
+}
+
+/**
+    blend tangent space normals
+*/
+float3 Blend2Normals(sampler2D normalTex,float2 worldUV,float2 tiling,float2 speed,float normalScale){
+    // calc normal uv then 2 normal blend
+    float2 normalUV1 = worldUV * tiling + float2(1,0.2) * speed * _Time.x;
+    float2 normalUV2 = worldUV * tiling + float2(-1,-0.2) * speed * _Time.x;
+
+    float3 tn = UnpackNormalScale(tex2D(normalTex,normalUV1),normalScale);
+    float3 tn2 = UnpackNormalScale(tex2D(normalTex,normalUV2),normalScale);
+    return BlendNormal(tn,tn2);
+}
+/**
+    blend tangent space normals to worldNormal
+*/
+float3 Blend2Normals(sampler2D normalTex,float2 worldUV,float2 tiling,float2 speed,float normalScale,float3 tSpace0,float3 tSpace1,float3 tSpace2){
+    float3 tn = Blend2Normals(normalTex,worldUV,tiling,speed,normalScale);
+
+    float3 n = normalize(float3(
+        dot(tSpace0.xyz,tn),
+        dot(tSpace1.xyz,tn),
+        dot(tSpace2.xyz,tn)
+    ));
+    return n;
+}
 #endif //MATERIAL_LIB_HLSL
