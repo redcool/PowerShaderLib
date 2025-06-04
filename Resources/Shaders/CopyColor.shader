@@ -27,17 +27,17 @@ Shader "Hidden/Utils/CopyColor"
 
         [DisableGroup(_ColorTintOn)]
         [GroupItem(ColorTint)] _Contrast("_Contrast",range(0,3)) = 1
-        //======================== PerChannelTint
-        [Group(PerChannelTint)]
-		[GroupToggle(PerChannelTint,_PER_CHANNEL_COLOR_ON)]_PerChannelColorOn("_PerChannelColorOn",float) = 0
-		[DisableGroup(_PerChannelColorOn)]
-		[GroupItem(PerChannelTint)][HDR]_ColorX("Color_X",Color) = (1,0,0,1)
+        //======================== ChannelMixer
+        [Group(ChannelMixer)]
+		[GroupToggle(ChannelMixer,_CHANNEL_MIXER_ON)]_ChannelMixerOn("_ChannelMixerOn",float) = 0
+		[DisableGroup(_ChannelMixerOn)]
+		[GroupItem(ChannelMixer)][HDR]_ColorX("Color_X",Color) = (1,0,0,1)
 
-		[DisableGroup(_PerChannelColorOn)]
-		[GroupItem(PerChannelTint)][HDR]_ColorY("Color_Y",Color) = (0,1,0,1)
+		[DisableGroup(_ChannelMixerOn)]
+		[GroupItem(ChannelMixer)][HDR]_ColorY("Color_Y",Color) = (0,1,0,1)
 
-		[DisableGroup(_PerChannelColorOn)]
-		[GroupItem(PerChannelTint)][HDR]_ColorZ("Color_Z",Color) = (0,0,1,1)
+		[DisableGroup(_ChannelMixerOn)]
+		[GroupItem(ChannelMixer)][HDR]_ColorZ("Color_Z",Color) = (0,0,1,1)
     }
 
     HLSLINCLUDE
@@ -46,8 +46,8 @@ Shader "Hidden/Utils/CopyColor"
     #include "../../Lib/Colors.hlsl"
     #include "../../Lib/ColorSpace.hlsl"    
 
-SamplerState point_clamp_sampler;
-SamplerState linear_clamp_sampler;
+    SamplerState point_clamp_sampler;
+    SamplerState linear_clamp_sampler;
 
     struct v2f
     {
@@ -88,14 +88,14 @@ SamplerState linear_clamp_sampler;
 
         //2 apply colorTint
         #if defined(_COLOR_TINT_ON)
-        col = lerp(dot(col,half3(.2,.7,.1)),col,_Saturate);
-        col = lerp(0,col,_Brighness);
-        col = lerp(.5,col,_Contrast);
+            col = lerp(dot(col,half3(.2,.7,.1)),col,_Saturate);
+            col = lerp(0,col,_Brighness);
+            col = lerp(.5,col,_Contrast);
         #endif
 
-        //3 apply colorTintPerChannel
-        #if defined(_PER_CHANNEL_COLOR_ON)
-            col.xyz = (col.x * _ColorX + col.y * _ColorY + col.z * _ColorZ).xyz;
+        //3 apply channelMixer
+        #if defined(_CHANNEL_MIXER_ON)
+            col.xyz = col.x * _ColorX.xyz + col.y * _ColorY.xyz + col.z * _ColorZ.xyz;
         #endif
 
         // change color space
@@ -119,7 +119,7 @@ SamplerState linear_clamp_sampler;
             #pragma fragment frag
             #pragma multi_compile_fragment _ _SRGB_TO_LINEAR_CONVERSION _LINEAR_TO_SRGB_CONVERSION
             #pragma shader_feature _APPLY_COLOR_GRADING
-            #pragma shader_feature _PER_CHANNEL_COLOR_ON
+            #pragma shader_feature _CHANNEL_MIXER_ON
             #pragma shader_feature _COLOR_TINT_ON
             ENDHLSL
         }
