@@ -8,7 +8,9 @@
     https://www.jeremyong.com/graphics/2023/08/26/dispatch-ids-and-you/
 */
 
-
+/**
+    DispatchKernel.Dispatchkernel, will set these vars
+*/
 float3 _DispatchGroupSize; // Dispatched groups
 float4 _NumThreads; // thread count in a box,(xSize,ySize,zSize,threads count)
 
@@ -34,6 +36,10 @@ uint GetDispatchThreadIndex(uint3 groupId/*SV_GroupID*/,uint groupThreadIndex/*S
 
 /**
     Call this get dispatched thread index(like SV_DispatchThreadID)
+
+    call DispatchKernel.Dispatchkernel
+    
+    uint dispatchThreadIndex = GetDispatchThreadIndex(groupId,groupThreadIndex);
 */
 uint GetDispatchThreadIndex(uint3 groupId/*SV_GroupID*/,uint groupThreadIndex/*SV_GroupIndex*/){
     uint3 groupSize = (uint3)_DispatchGroupSize;
