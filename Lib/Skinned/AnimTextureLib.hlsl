@@ -8,7 +8,7 @@
     2
     anim data sample from _AnimTex,
     can redefine _AnimTex when use other texture.
-    
+
     3 version
     BoneTexture : with pos
     AnimTexture : no pos
@@ -20,15 +20,6 @@
 
 sampler2D _AnimTex;
 
-#define USE_BUFFER
-#if !defined(USE_BUFFER)
-// CBUFFER_START(AnimTexture)
-    float _BoneCountPerVertex[487];
-    float _BoneStartPerVertex[487];
-    float _BoneWeights[790];
-    float _BoneIndices[790];
-// CBUFFER_END
-#endif
 
 struct AnimInfo {
     uint frameRate;
@@ -40,6 +31,13 @@ struct AnimInfo {
     half4 animTextureTexelSize;  // _AnimTex_TexelSize(1/w,1/h,w,h)
 };
 
+// array for debug
+// #if defined(USE_ARRAY)
+//     float _BoneCountPerVertex[487];
+//     float _BoneStartPerVertex[487];
+//     float _BoneWeights[790];
+//     float _BoneIndices[790];
+// #endif
 /**
     setup a animInfo
 */
@@ -85,21 +83,17 @@ half GetY(AnimInfo info) {
 }
 
 //============================================================================================ BoneTexture
+#if defined(USE_BUFFER)
 BoneInfoPerVertex GetBoneInfoPerVertex(uint vid){
-    #if defined(USE_BUFFER)
     BoneInfoPerVertex boneInfo = _BoneInfoPerVertexBuffer[vid];
-    #else
-    BoneInfoPerVertex boneInfo = {_BoneCountPerVertex[vid],_BoneStartPerVertex[vid]};
-    #endif
+    
+    // BoneInfoPerVertex boneInfo = {_BoneCountPerVertex[vid],_BoneStartPerVertex[vid]};
     return boneInfo;
 }
 
 BoneWeight1 GetBoneWeight1(float boneStart){
-    #if defined(USE_BUFFER)
-        BoneWeight1 bw = _BoneWeightBuffer[boneStart];
-    #else
-        BoneWeight1 bw = {_BoneWeights[boneStart],_BoneIndices[boneStart]};
-    #endif
+    BoneWeight1 bw = _BoneWeightBuffer[boneStart];
+    //     BoneWeight1 bw = {_BoneWeights[boneStart],_BoneIndices[boneStart]};
     return bw;
 }
 
@@ -129,6 +123,7 @@ float4 GetAnimPos(uint vid,float4 pos,AnimInfo info){
 
     return bonePos;
 }
+
 /**
     BoneTexture
     Play animation ,bakeBone use this
@@ -152,6 +147,42 @@ float4 GetBlendAnimPos(uint vid,float4 pos) {
     info.startFrame = _NextStartFrame;
     info.endFrame = _NextEndFrame;
     float4 nextPos = GetAnimPos(vid,pos,info);
+
+    return lerp(curPos, nextPos, crossLerp);
+}
+#endif // USE_BUFFER
+
+
+float4 GetAnimPos(uint vid,float4 pos,AnimInfo info,float4 weights,uint4 indices){
+    float4 bonePos = (float4)0;
+    half y = GetY(info);
+
+    float4x4 boneMat = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
+
+    UNITY_UNROLLX(4)
+    for(int i=0;i<4;i++){
+        float weight = weights[i];
+        float boneIndex = indices[i];
+        GetFloat3x4FromTexture(boneMat/**/,_AnimTex,info.animTextureTexelSize,boneIndex,y);
+
+        bonePos += mul(boneMat,pos) * weight;
+    }
+
+    return bonePos;
+}
+
+/**
+    Apply bones transform, skinnedMesh
+*/
+float4 GetBlendAnimPos(uint vid,float4 pos,float4 weights,uint4 indices) {
+    AnimInfo info = GetAnimInfo();
+    // SETUP_ANIM_INFO();
+    half crossLerp = _CrossLerp;
+    float4 curPos = GetAnimPos(vid,pos,info,weights,indices);
+
+    info.startFrame = _NextStartFrame;
+    info.endFrame = _NextEndFrame;
+    float4 nextPos = GetAnimPos(vid,pos,info,weights,indices);
 
     return lerp(curPos, nextPos, crossLerp);
 }

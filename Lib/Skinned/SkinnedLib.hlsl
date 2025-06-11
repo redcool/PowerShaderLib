@@ -10,6 +10,10 @@
 
 #define MAX_BONE_COUNT 4
 
+/**
+ sbuffer broken srp batch
+*/
+#if defined(USE_BUFFER)
 struct BoneInfoPerVertex{
     uint bonesCount;
     uint bonesStartIndex;
@@ -49,6 +53,7 @@ float4 GetSkinnedPos(uint vid,float4 pos){
 
     return bonePos;
 }
+#endif // USE_BUFFER
 
 /**
     Get float3x4 from boneTex(a bone matrix = 3 x float4)
