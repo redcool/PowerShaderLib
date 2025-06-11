@@ -1,18 +1,14 @@
 /**
-    
+    gpu skinned.
+    keywords:
+    MAX_BONE_COUNT 
 */
 
 #if !defined(SKINNED_LIB_HLSL)
 #define SKINNED_LIB_HLSL
+#include "../UnityLib.hlsl"
 
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-/** need these
-#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
-#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
-#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Version.hlsl"
-#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/GlobalSamplers.hlsl"
-#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/SpaceTransforms.hlsl"
-*/
+#define MAX_BONE_COUNT 4
 
 struct BoneInfoPerVertex{
     uint bonesCount;
@@ -41,7 +37,7 @@ float4 GetSkinnedPos(uint vid,float4 pos){
 
     float4x4 boneMat = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
 
-    UNITY_UNROLLX(4)
+    UNITY_UNROLLX(MAX_BONE_COUNT)
     for(int i=0;i<bonesCount;i++){
         BoneWeight1 bw = _BoneWeightBuffer[boneStart + i];
         float weight = bw.weight;
