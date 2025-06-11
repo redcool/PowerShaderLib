@@ -170,9 +170,9 @@ float4 GetAnimPos(uint vid,float4 pos,AnimInfo info,float4 weights,uint4 indices
 
     return bonePos;
 }
-
 /**
     Apply bones transform, skinnedMesh
+    if pos is direction, keep w =0
 */
 float4 GetBlendAnimPos(uint vid,float4 pos,float4 weights,uint4 indices) {
     AnimInfo info = GetAnimInfo();
@@ -186,6 +186,56 @@ float4 GetBlendAnimPos(uint vid,float4 pos,float4 weights,uint4 indices) {
 
     return lerp(curPos, nextPos, crossLerp);
 }
+
+/**
+    Apply bones transform, skinnedMesh
+    Calc skinned vertex position,normal, tangent
+*/
+void CalcAnimPos(uint vid,inout float4 pos,inout float4 normal,inout float4 tangent,AnimInfo info,float4 weights,uint4 indices){
+    float4 bonePos = (float4)0;
+    float4 boneNormal =(float4)0;
+    float4 boneTangent = {0,0,0,tangent.w}; // keep w
+    
+    half y = GetY(info);
+
+    float4x4 boneMat = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
+
+    UNITY_UNROLLX(4)
+    for(int i=0;i<4;i++){
+        float weight = weights[i];
+        float boneIndex = indices[i];
+        GetFloat3x4FromTexture(boneMat/**/,_AnimTex,info.animTextureTexelSize,boneIndex,y);
+
+        bonePos += mul(boneMat,pos) * weight;
+        boneNormal += mul(boneMat,float4(normal.xyz,0)) * weight;
+        boneTangent += mul(boneMat,float4(tangent.xyz,0)) * weight;
+    }
+    pos = bonePos;
+    normal = boneNormal;
+    tangent = boneTangent;
+}
+/**
+    Apply bones transform, skinnedMesh
+    CrossFade Calc skinned vertex position,normal, tangent
+*/
+void CalcBlendAnimPos(uint vid,inout float4 pos,inout float4 normal,inout float4 tangent,float4 weights,uint4 indices) {
+    AnimInfo info = GetAnimInfo();
+    // SETUP_ANIM_INFO();
+    half crossLerp = _CrossLerp;
+    float4 pos0 = pos,normal0=normal,tangent0=tangent;
+    CalcAnimPos(vid,pos0/**/,normal0/**/,tangent0/**/,info,weights,indices);
+    
+    //update anim info
+    info.startFrame = _NextStartFrame;
+    info.endFrame = _NextEndFrame;
+    float4 pos1 = pos,normal1=normal,tangent1=tangent;
+    CalcAnimPos(vid,pos1/**/,normal1/**/,tangent1/**/,info,weights,indices);
+
+    pos = lerp(pos0, pos1, crossLerp);
+    normal = lerp(normal0,normal1,crossLerp);
+    tangent = lerp(tangent0,tangent1,crossLerp);
+}
+
 //============================================================================================ AnimTexture
 /**  
     boneMesh use this

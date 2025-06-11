@@ -2,6 +2,10 @@
     gpu skinned.
     keywords:
     MAX_BONE_COUNT 
+
+    
+    USE_BUFFER //---- define this when use sbuffer
+    ENABLE_RW_BUFFER // use RW_XXX
 */
 
 #if !defined(SKINNED_LIB_HLSL)
@@ -25,8 +29,11 @@ struct BoneWeight1{
 
 StructuredBuffer<BoneInfoPerVertex> _BoneInfoPerVertexBuffer;
 StructuredBuffer<BoneWeight1> _BoneWeightBuffer;
+#if defined(ENABLE_RW_BUFFER)
 RWStructuredBuffer<float4x4> _Bones;
-
+#else
+StructuredBuffer<float4x4> _Bones;
+#endif
 /**
     Get vertex skinned local position from _Bones sbuffer
     vid : vertexId
