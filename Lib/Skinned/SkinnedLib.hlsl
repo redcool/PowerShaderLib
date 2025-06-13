@@ -14,10 +14,16 @@
 
 #define MAX_BONE_COUNT 4
 
+#if (UNITY_PLATFORM_WEBGL && !SHADER_API_WEBGPU)
+    #define BLEND_INDICES_TYPE float4
+#else
+    #define BLEND_INDICES_TYPE uint4
+#endif
+
 /**
  sbuffer broken srp batch
 */
-#if defined(USE_BUFFER)
+
 struct BoneInfoPerVertex{
     uint bonesCount;
     uint bonesStartIndex;
@@ -60,7 +66,32 @@ float4 GetSkinnedPos(uint vid,float4 pos){
 
     return bonePos;
 }
-#endif // USE_BUFFER
+/**
+    Get BoneWeight(indices) from vertex attribute(SV_BlendWeights,SV_BlendIndices)
+    Get boneMat from _Bones(sbuffer)
+*/
+void CalcSkinnedPos(uint vid,inout float4 pos,inout float4 normal,inout float4 tangent,float4 weights,uint4 indices){
+    float4 bonePos = (float4)0;
+    float4 boneNormal =(float4)0;
+    float4 boneTangent = {0,0,0,tangent.w}; // keep w
+    
+    float4x4 boneMat = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
+
+    UNITY_UNROLLX(4)
+    for(int i=0;i<4;i++){
+        float weight = weights[i];
+        float boneIndex = indices[i];
+        boneMat = _Bones[boneIndex];
+
+        bonePos += mul(boneMat,pos) * weight;
+        boneNormal += mul(boneMat,float4(normal.xyz,0)) * weight;
+        boneTangent += mul(boneMat,float4(tangent.xyz,0)) * weight;
+    }
+    pos = bonePos;
+    normal = boneNormal;
+    tangent = boneTangent;
+}
+
 
 /**
     Get float3x4 from boneTex(a bone matrix = 3 x float4)
