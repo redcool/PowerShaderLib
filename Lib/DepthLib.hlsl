@@ -94,8 +94,8 @@ float CalcLinearEyeDepth(float4 posHClip){
     float eyeDepth = far * near / ((near - far) * depthTex + far);
 */
 float CalcLinearEyeDepth(float rawDepth){
-    // return IsOrthographicCamera()? OrthographicDepthBufferToLinear(rawDepth) : LinearEyeDepth(rawDepth,_ZBufferParams);
-    return lerp(_ProjectionParams.y,_ProjectionParams.z,LinearizeDepth(rawDepth));
+    return IsOrthographicCamera()? OrthographicDepthBufferToLinear(rawDepth) : LinearEyeDepth(rawDepth,_ZBufferParams);
+    // return lerp(_ProjectionParams.y,_ProjectionParams.z,LinearizeDepth(rawDepth)); // error ortho camera
 }
 /**
     too far or to near
