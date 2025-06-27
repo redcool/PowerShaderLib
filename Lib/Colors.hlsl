@@ -249,4 +249,18 @@ half4 CalcVignette(float2 screenUV,float2 centerUV,half isRound,half2 oval,half2
     half4 col = lerp(color1,color2,atten)* intensity;
     return col;
 }
+/**
+    fisheye 
+*/
+void ApplyLensDistorionUVOffset(inout float2 screenUV,float2 screenParams,float intensity,float amplitude=0.02,float2 centerUV=0.5,float scaleuv=1,float moveSpeed=0){
+    // intensity = sin(intensity + _Time.x * moveSpeed);
+
+    float aspect = screenParams.x/screenParams.y;
+    float2 scale = float2(intensity,intensity* aspect)  * amplitude;
+    float2 uv= (screenUV - centerUV) * scaleuv;
+
+    float2 offset = uv * (1-uv.yx*uv.yx) * scale.yx;
+    screenUV += offset;
+}
+
 #endif //COLORS_HLSL
