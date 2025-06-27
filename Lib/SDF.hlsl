@@ -1,5 +1,7 @@
 #if !defined(SDF_LIB_HLSL)
 #define SDF_LIB_HLSL
+
+#include "DepthLib.hlsl"
 /**
     x: curve
     y:percent
@@ -140,9 +142,11 @@ float Dist2Fading(float3 pos1,float3 pos2,float fadingDist){
     return viewDistFade;
 }
 
-float NDCWFading(float ndcW,float fadingDist){
-    float viewDistFading = (ndcW) - fadingDist;
+float NDCWFading(float4 hclipPos,float fadingDist){
+    float z = CalcCurEyeDepth(hclipPos);
+    float viewDistFading = z - fadingDist;
     return viewDistFading;
 }
+
 
 #endif //SDF_LIB_HLSL
