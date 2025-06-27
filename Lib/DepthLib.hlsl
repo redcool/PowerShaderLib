@@ -11,14 +11,21 @@ float LinearizeDepth(float z)
 {
     float isOrtho = unity_OrthoParams.w;
     float isPers = 1 - unity_OrthoParams.w;
+    
+    // (UNITY_REVERSED_Z && isOrtho)
+    #if defined(UNITY_REVERSED_Z)
+    z *= lerp(_ZBufferParams.x,1,isOrtho);
+    #else
     z *= _ZBufferParams.x;
+    #endif
+
     return (1 - isOrtho * z) / (isPers * z + _ZBufferParams.y);
     /**
     z = (1-far/near) * z
          or UNITY_REVERSED_Z 
         z = (far/near - 1) * z
     
-    ortho: (1-z)/(far/near)
+    ortho: (1-z)/(far/near) , lerp(_ProjectionParams.y,_ProjectionParams.z,z)
     pers : 1/(z + far/near)
 
     */
@@ -77,7 +84,8 @@ float OrthographicDepthBufferToLinear(float rawDepth/*depth buffer [0,1]*/){
     #if UNITY_REVERSED_Z
         rawDepth = 1 - rawDepth;
     #endif
-    return (_ProjectionParams.z - _ProjectionParams.y) * rawDepth + _ProjectionParams.y;
+    return lerp(_ProjectionParams.y,_ProjectionParams.z,rawDepth);
+    // return (_ProjectionParams.z - _ProjectionParams.y) * rawDepth + _ProjectionParams.y;
 }
 
 
@@ -94,8 +102,8 @@ float CalcLinearEyeDepth(float4 posHClip){
     float eyeDepth = far * near / ((near - far) * depthTex + far);
 */
 float CalcLinearEyeDepth(float rawDepth){
-    return IsOrthographicCamera()? OrthographicDepthBufferToLinear(rawDepth) : LinearEyeDepth(rawDepth,_ZBufferParams);
-    // return lerp(_ProjectionParams.y,_ProjectionParams.z,LinearizeDepth(rawDepth)); // error ortho camera
+    // return IsOrthographicCamera()? OrthographicDepthBufferToLinear(rawDepth) : LinearEyeDepth(rawDepth,_ZBufferParams);
+    return lerp(_ProjectionParams.y,_ProjectionParams.z,LinearizeDepth(rawDepth));
 }
 /**
     too far or to near
