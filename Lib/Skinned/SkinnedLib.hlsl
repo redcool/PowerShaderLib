@@ -10,7 +10,11 @@
 
 #if !defined(SKINNED_LIB_HLSL)
 #define SKINNED_LIB_HLSL
-#include "../UnityLib.hlsl"
+// #include "../UnityLib.hlsl"
+
+#if !defined(UNITY_UNROLLX)
+    #define UNITY_UNROLLX(_x) [unroll(_x)]
+#endif
 
 #define MAX_BONE_COUNT 4
 
