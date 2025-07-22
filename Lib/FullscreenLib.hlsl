@@ -1,5 +1,16 @@
+/**
+    MATERIAL_VARIABLES : skip material variables define
+
+*/
+
 #if !defined(FULLSCREEN_LIB_HLSL)
 #define FULLSCREEN_LIB_HLSL
+
+
+#if !defined(MATERIAL_VARIABLES)
+half _FullScreenOn; // output to full rt
+float4 _FullScreenUVRange; // output rect,default (0,0,1,1)
+#endif
 
 /**
     remap ndc[-1,1] to new screen pos,default [0,0,1,1]
