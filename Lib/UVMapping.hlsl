@@ -41,5 +41,14 @@ float2 UVRepeat(float2 uv,float2 uvRange,float2 uvStart){
     uv += uvStart;
     return uv;
 }
-
+/**
+    get uv from {uv0,uv1,uv2,uv}.
+    uvId : (0,1,2,3)
+*/
+float2 GetUV(float4 uv_01,float4 uv_23,uint uvId){
+    // uint groupId = uvId / 2;
+    uint itemId = uvId % 2 * 2; //[0,1]*2
+    float4 uv = uvId>=2?uv_23:uv_01;
+    return float2(uv[itemId],uv[itemId+1]);
+}
 #endif //UV_MAPPING_HLSL            
