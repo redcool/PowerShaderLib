@@ -32,4 +32,10 @@ float4 TransformObjectToNdcHClip(float4 vertex,bool isNdc,float4 screenPosRange,
     ndcPos.xy = RemapNdcToScreenPos(ndcPos.xy,screenPosRange) ;
     return isNdc ? ndcPos : TransformObjectToHClip(vertex.xyz);
 }
+
+/**
+    Recalc local surface atten, like nl,nv,nh
+*/
+#define CalcLocalAtten(nl) _FullScreenOn? abs(nl) : saturate(nl)
+
 #endif //FULLSCREEN_LIB_HLSL
