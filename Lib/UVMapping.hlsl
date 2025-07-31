@@ -51,4 +51,9 @@ float2 GetUV(float4 uv_01,float4 uv_23,uint uvId){
     float4 uv = uvId>=2?uv_23:uv_01;
     return float2(uv[itemId],uv[itemId+1]);
 }
+
+float2 GetUV1(float2 uv1,float2 lightmapUV,bool is_UV1TransformToLightmapUV){
+    return is_UV1TransformToLightmapUV ? lightmapUV : uv1;
+}
+
 #endif //UV_MAPPING_HLSL            
