@@ -1,0 +1,28 @@
+/**
+    this file used for color convert
+
+*/
+#pragma kernel ConvertColorSpace
+// #pragma multi_compile_local _ TONE_MAPPING_GT6
+
+#include "../../Lib/CSLib.hlsl"
+#include "../../Lib/ToneMappers.hlsl"
+
+/**
+ Convert color space
+*/
+RWStructuredBuffer<float4> _ColorBuffer;
+float _Coefficient; // 2.2 or 1/2.2
+bool _ApplyGT6Tone;
+
+[numthreads(8,8,1)]
+void ConvertColorSpace(uint3 id : SV_DispatchThreadID,uint3 groupId : SV_GROUPID,uint groupThreadIndex:SV_GROUPINDEX)
+{
+    uint dispatchThreadIndex = GetDispatchThreadIndex(groupId,groupThreadIndex);
+    float4 c = _ColorBuffer[dispatchThreadIndex];
+    // apply gt6 tone
+    c.xyz = _ApplyGT6Tone ? GTTone(c.xyz) : c.xyz;
+
+    c.xyz = pow(c.xyz,_Coefficient);
+    _ColorBuffer[dispatchThreadIndex] = c;
+}

@@ -15,12 +15,22 @@ float3 _DispatchGroupSize; // Dispatched groups
 float4 _NumThreads; // thread count in a box,(xSize,ySize,zSize,threads count)
 
 /*
-    GetDispatchThreadIndex
+    GetDispatchThreadIndex, 
+        for 1 dimension buffer( 1d array)
+        2d is SWTexture, use SV_DispatchThreadID
 
     groupId : SV_GroupID
     groupThreadIndex : SV_GroupIndex
     groupSize : dispatched group(box) size
     groupThreadSizeCount = thread count in a group , = (groupThreadSize.x*groupThreadSize.y*groupThreadSize.z) 
+
+demo:
+[numthreads(8,8,1)]
+void CalcTest (uint3 id : SV_DispatchThreadID,uint3 groupId : SV_GROUPID,uint groupThreadIndex:SV_GROUPINDEX)
+{
+    uint dispatchThreadIndex = GetDispatchThreadIndex(groupId,groupThreadIndex);
+    // dispatchThreadIndex is sbuffer index
+}
 */
 uint GetDispatchThreadIndex(uint3 groupId/*SV_GroupID*/,uint groupThreadIndex/*SV_GroupIndex*/,uint3 groupSize/*Dispatched groups*/,uint groupThreadSizeCount/*thread count a groups*/){
     //SV_GroupId(2,1,0) = 0*5*3+1*5+2 = 7
