@@ -11,6 +11,10 @@
 // half _FullScreenOn; // output to full rt
 float4 _FullScreenUVRange; // output rect,default (0,0,1,1)
 half _FullScreenUVId; // material use uv id when bake
+
+half _UV1TransformToLightmapUV; // uv1 transform to lightmap uv
+half _OutputNormal01,_OutputPbrMask,_OutputEmission; // output types
+
 #endif
 
 /**
