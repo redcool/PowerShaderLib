@@ -1,6 +1,9 @@
 #if !defined(CS_LIB_HLSL)
 #define CS_LIB_HLSL
-
+#include "./UnityLib.hlsl"
+#if ! defined(POINT_LINEAR_SAMPLER)
+    SamplerState sampler_point_clamp,sampler_linear_clamp;
+#endif
 /**
     Compute shader tools
 
@@ -57,4 +60,34 @@ uint GetDispatchThreadIndex(uint3 groupId/*SV_GroupID*/,uint groupThreadIndex/*S
     return GetDispatchThreadIndex(groupId,groupThreadIndex,groupSize,groupThreadSizeCount);
 }
 
+/**
+    id.xy -> uv
+
+    id : SV_DispatchThreadID
+    tex : Texture2D
+    texSize : (width,height,1/width,1/height)
+*/
+float2 GetUV(uint3 id,TEXTURE2D(tex),float4 texelSize){
+    #if defined(MIP_COUNT_SUPPORTED) // defined  core/Common.hlsl
+        uint mipLevel=0, width=0, height=0, mipCount=0;
+        tex.GetDimensions(mipLevel, width, height, mipCount);
+        return id.xy/float2(width,height);
+    #endif
+    return id.xy * texelSize.zw;
+}
+/**
+    id.xy -> uv
+
+    id : SV_DispatchThreadID
+    tex : RWTexture2D , renderTexture(uav)
+    texSize : (width,height,1/width,1/height)
+*/
+float2 GetUV(uint3 id,RWTexture2D<float4> tex,float4 texelSize){
+    #if defined(MIP_COUNT_SUPPORTED) // defined  core/Common.hlsl
+        uint width=0, height=0;
+        tex.GetDimensions(width, height);
+        return id.xy/float2(width,height);
+    #endif
+    return id.xy * texelSize.zw;
+}
 #endif //CS_LIB_HLSL

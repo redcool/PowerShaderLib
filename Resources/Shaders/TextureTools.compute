@@ -1,0 +1,62 @@
+// =======================
+//  Kernels
+// =======================
+// clear rt
+#pragma kernel CSClear
+// copy 2d to rt
+#pragma kernel CopyTexture
+#pragma multi_compile _ _2DArr _3D
+
+// =======================
+//  Include 
+// =======================
+#include "../../Lib/CSLib.hlsl"
+#include "../../Lib/ToneMappers.hlsl"
+
+// =======================
+//  Variables
+// =======================
+RWTexture2D<float4> _ResultTex; // uav rt
+float4 _ResultTex_TexelSize;
+
+#if defined(_2DArr)
+    TEXTURE2D_ARRAY(_SourceTex);
+#elif defined(_3D)
+    TEXTURE3D(_SourceTex);
+#else
+    TEXTURE2D(_SourceTex); 
+#endif
+
+float4 _SourceTex_TexelSize;
+float _SourceTexId; // tex2d array index
+float _SourceTexLod; 
+
+float4 _ClearColor;
+
+
+// =======================
+//  ClearColor
+// =======================
+[numthreads(8,8,1)]
+void CSClear(uint3 id : SV_DispatchThreadID)
+{
+    _ResultTex[id.xy] = _ClearColor;
+}
+
+// =======================
+//  CopyTexture ,any size
+// =======================
+[numthreads(8,8,1)]
+void CopyTexture (uint3 id : SV_DispatchThreadID)
+{
+    float2 uv = id.xy * _ResultTex_TexelSize.zw;
+
+    #if defined(_2DArr)
+        _ResultTex[id.xy] = SAMPLE_TEXTURE2D_ARRAY_LOD(_SourceTex,sampler_point_clamp,uv,_SourceTexId,_SourceTexLod);
+    #elif defined(_3D)
+        _ResultTex[id.xy] = SAMPLE_TEXTURE3D_LOD(_SourceTex,sampler_point_clamp,uvw,_SourceTexLod);
+    #else
+        _ResultTex[id.xy] = SAMPLE_TEXTURE2D_LOD(_SourceTex,sampler_point_clamp,uv,_SourceTexLod);
+    #endif
+
+}
