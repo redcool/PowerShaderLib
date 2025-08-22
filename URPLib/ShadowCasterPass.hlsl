@@ -35,6 +35,10 @@
 #include "../../PowerShaderLib/Lib/TextureLib.hlsl"
 #include "../../PowerShaderLib/Lib/CurvedLib.hlsl"
 
+#if defined(_ANIM_TEX_ON) || defined(_GPU_SKINNED_ON)
+    #include "../../PowerShaderLib/Lib/Skinned/AnimTextureLib.hlsl"
+#endif
+
 // default values
 #if !defined(_MainTexChannel)
 #define _MainTexChannel 3
@@ -62,10 +66,16 @@
 struct shadow_appdata
 {
     float4 vertex : POSITION;
-    float3 normal : NORMAL;
+    float4 normal : NORMAL;
     float2 texcoord : TEXCOORD0;
     float3 color:COLOR;
+
     UNITY_VERTEX_INPUT_INSTANCE_ID
+    //AnimTextureLib
+    uint vertexId:SV_VertexID;
+    float4 weights:BLENDWEIGHTS;
+    uint indices:BLENDINDICES;
+    float4 tangent:TANGENT;
 };
 
 struct shadow_v2f{
@@ -112,11 +122,18 @@ void CaclWaveAnimationWorldPos(float3 vertex,float3 vertexColor,float3 normal,in
     worldPos.xy += CalcCurvedPos(_WorldSpaceCameraPos,worldPos,_CurvedSidewayScale,_CurvedBackwardScale);
 }
 
-shadow_v2f vert(shadow_appdata input){
+shadow_v2f vert(shadow_appdata v){
     shadow_v2f output = (shadow_v2f)0;
 
+    // AnimTextureLib
+    #if defined(_ANIM_TEX_ON)
+        CalcBlendAnimPos(v.vertexId,v.vertex/**/,v.normal/**/,v.tangent/**/,v.weights,v.indices);
+    #elif defined(_GPU_SKINNED_ON)
+        CalcSkinnedPos(v.vertexId,v.vertex/**/,v.normal/**/,v.tangent/**/,v.weights,v.indices);
+    #endif
+
     float3 worldPos,worldNormal;
-    CaclWaveAnimationWorldPos(input.vertex.xyz,input.color,input.normal,worldPos/**/,worldNormal/**/);
+    CaclWaveAnimationWorldPos(v.vertex.xyz,v.color,v.normal,worldPos/**/,worldNormal/**/);
 
     #if defined(SHADOW_PASS)
         output.pos = GetShadowPositionHClip(worldPos,worldNormal);
@@ -125,7 +142,7 @@ shadow_v2f vert(shadow_appdata input){
     #endif
 
     // #if defined(ALPHA_TEST) || defined(_ALPHATEST_ON)
-    output.uv = TRANSFORM_TEX(input.texcoord,_MainTex);
+    output.uv = TRANSFORM_TEX(v.texcoord,_MainTex);
     // #endif
     
     return output;
