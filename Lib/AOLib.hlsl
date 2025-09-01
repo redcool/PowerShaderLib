@@ -12,7 +12,7 @@ float3 WorldToViewNormal(float3 vec){
 /*
     Horizon Base Ambient Occlusion
     一句话总结: 根据周围像素在摄影机空间位置,当前像素的明度(可见度)
-    计算采样点方向与当前像素方向的夹角(水平角),若夹角<88度,表示当前像素违背周围遮挡
+    计算采样点方向与当前像素方向的夹角(水平角),若夹角<88度,表示当前像素未被周围遮挡
 
     算法大致过程: 
     360度切分dirCount,
@@ -23,6 +23,7 @@ float3 WorldToViewNormal(float3 vec){
     累计未被遮挡系数ao,并重置当前角度为水平角
         ao += (当前角的正弦 - 目标水平角正弦) * (1 - 采样方向长度一半的平方)
         目标水平角 = 当前角
+    最后输出,反向的未遮挡系统
 
     dirCount : part of 360 
     stepCount : calc time alone one direction
