@@ -87,6 +87,8 @@ float CalcOutline(inout float outer,inout float inner,float alpha,float2 outerRa
 
 /*
 Box intersection by IQ, modified for neighbourhood clamping
+Calcs intersection and exit distances
+
 https://www.iquilezles.org/www/articles/boxfunctions/boxfunctions.htm
 */
 float2 boxIntersection(in float3 ro, in float3 rd, in float3 rad)
@@ -103,9 +105,16 @@ float2 boxIntersection(in float3 ro, in float3 rd, in float3 rad)
     return float2(tN, tF);
 }
 
+/*
 
-// Returns (dstToBox, dstInsideBox). If ray misses box, dstInsideBox will be zero
-//float2 boxDst = rayBoxDst(_BoundsMin,_BoundsMax,rayPos,1/rayDir);
+
+Returns (dstToBox, dstInsideBox). If ray misses box, dstInsideBox will be zero
+
+float2 boxDst = rayBoxDst(_BoundsMin,_BoundsMax,rayPos,1/rayDir);
+
+float3 entryBoxPoint = rayPos + rayDir * dstToBox;
+float3 outBoxPoint = rayPos + rayDir * (dstToBox+dstInsideBox)
+*/
 float2 rayBoxDst(float3 boundsMin, float3 boundsMax, float3 rayOrigin, float3 invRaydir) {
     // Adapted from: http://jcgt.org/published/0007/03/04/
     float3 t0 = (boundsMin - rayOrigin) * invRaydir;
