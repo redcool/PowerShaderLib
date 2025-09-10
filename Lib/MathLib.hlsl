@@ -154,4 +154,14 @@ float3 ConstructVector(float2 xy){
     return float3(xy,sqrt(1 - dot(xy,xy)));
 }
 
+/**
+    set float4x4's column value
+*/
+void SetMatrixColumn(inout float4x4 m,int col,float4 xyzw){
+    m[0][col] = xyzw.x;
+    m[1][col] = xyzw.y;
+    m[2][col] = xyzw.z;
+    m[3][col] = xyzw.w;
+}
+
 #endif //MATH_LIB_HLSL
