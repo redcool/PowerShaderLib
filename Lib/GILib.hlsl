@@ -180,20 +180,20 @@ half3 CalcGISpec(float a2,float smoothness,float metallic,float fresnelTerm,half
 
 half3 CalcGISpec(
     TEXTURECUBE_PARAM(cube,sampler_cube),
-    float4 cubeHDR,
-    float3 specColor,
+    half4 cubeHDR,
+    half3 specColor,
     float3 worldPos,
     float3 normal,
     float3 viewDir,
-    float3 reflectDirOffset,
-    float reflectIntensity,
+    half3 reflectDirOffset,
+    half3 reflectIntensityColor, // center show more color than grazingTermColor
     float nv,
     float roughness,
     float a2,
     float smoothness,
     float metallic,
     half2 fresnelRange=half2(0,1),
-    half3 grazingTermColor=1,
+    half3 grazingTermColor=1,  // outline color (nv4) , center no color
     half4 planarReflectTex=0,// planar reflection tex,(xyz:color,w: ratio)
     half3 viewDirTS=0,
     half2 uv=0,
@@ -209,7 +209,7 @@ half3 CalcGISpec(
         float3 reflectDir = CalcReflectDir(worldPos,normal,viewDir,reflectDirOffset,isBoxProjection);
     #endif
 
-    float3 iblColor = CalcIBL(reflectDir,cube,sampler_cube,roughness,cubeHDR) * reflectIntensity;
+    float3 iblColor = CalcIBL(reflectDir,cube,sampler_cube,roughness,cubeHDR) * reflectIntensityColor;
 
     #if defined(_PLANAR_REFLECTION_ON)
         // blend planar reflection texture
