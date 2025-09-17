@@ -66,9 +66,9 @@
 struct shadow_appdata
 {
     float4 vertex : POSITION;
-    float4 normal : NORMAL;
+    float3 normal : NORMAL;
     float2 texcoord : TEXCOORD0;
-    float3 color:COLOR;
+    float4 color:COLOR;
 
     UNITY_VERTEX_INPUT_INSTANCE_ID
     //AnimTextureLib
@@ -133,7 +133,7 @@ shadow_v2f vert(shadow_appdata v){
     #endif
 
     float3 worldPos,worldNormal;
-    CaclWaveAnimationWorldPos(v.vertex.xyz,v.color,v.normal,worldPos/**/,worldNormal/**/);
+    CaclWaveAnimationWorldPos(v.vertex.xyz,v.color.xyz,v.normal,worldPos/**/,worldNormal/**/);
 
     #if defined(SHADOW_PASS)
         output.pos = GetShadowPositionHClip(worldPos,worldNormal);

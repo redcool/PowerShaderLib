@@ -5,6 +5,7 @@
 #if !defined(URP_LIGHTING_HLSL)
 #define URP_LIGHTING_HLSL
 
+#include "URP_Input.hlsl"
 #include "URP_AdditionalLightShadows.hlsl"
 #include "../Lib/RenderingLayer.hlsl"
 
