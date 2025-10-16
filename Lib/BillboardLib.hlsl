@@ -54,6 +54,9 @@ float3 CalcPosOffsetViewSpace(float3 vertex,bool isFullFaceCamera,half rotDegree
 
     float sx = unity_ObjectToWorld._11;
     float sy = unity_ObjectToWorld._22;
+    // exactly axis length
+    // sx = length(unity_ObjectToWorld._11_21_31);
+    // sy = length(unity_ObjectToWorld._12_22_32);
 
     float3 vertexOffset = float3(sx,sy,0) * vertex.xyz;
     float3 vertexRotate = mul(camRotMat,float3(0,vertex.y * sy,0));
@@ -69,7 +72,7 @@ float3 CalcPosOffsetViewSpace(float3 vertex,bool isFullFaceCamera,half rotDegree
 float4 TransformBillboardObjectToHClip(float3 vertex,bool isFullFaceCamera,half rotDegree=0){
     float3 vertexOffset = CalcPosOffsetViewSpace(vertex,isFullFaceCamera,rotDegree);
     return mul(UNITY_MATRIX_P,
-        mul(UNITY_MATRIX_MV,float4(0,0,0,1)) + float4(vertexOffset,1)
+        mul(UNITY_MATRIX_MV,float4(0,0,0,1)) + float4(vertexOffset,0)
     );
 }
 
