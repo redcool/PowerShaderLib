@@ -108,6 +108,8 @@ float4x4 unity_CameraToWorld;
 
 float4 _GlossyEnvironmentCubeMap_HDR;
 
+#ifndef DOTS_INSTANCING_ON // UnityPerDraw cbuffer doesn't exist with hybrid renderer
+
 CBUFFER_START(UnityPerDraw)
 // Space block Feature
 float4x4 unity_ObjectToWorld;
@@ -159,7 +161,7 @@ float4x4 unity_MatrixPreviousMI;
 //W : Camera only
 float4 unity_MotionVectorsParams;
 CBUFFER_END
-
+#endif // UNITY_DOTS_INSTANCING_ENABLED
 //==============================
 //  env paramaters ,fog
 //==============================
@@ -203,7 +205,7 @@ int unity_StereoEyeIndex;
 
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
-
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UniversalDOTSInstancing.hlsl"
 
 float3 TransformObjectToWorld(float3 objectPos){
     return mul(UNITY_MATRIX_M,float4(objectPos,1)).xyz;
