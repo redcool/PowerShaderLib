@@ -65,11 +65,30 @@ _BaseColor_DOTSInstancingOverrideMode == kDotsInstancedPropOverrideRequired ? Lo
     #define DOTS_CBUFFER_END }
     #define DEF_VAR(type,name) UNITY_DOTS_INSTANCED_PROP(type,name)
     #define GET_VAR(type,name) UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(type,name)
-    // #define CBUFFER_END }
-#else
-    // #define SRP_CBUFFER_START(name) CBUFFER_START(name)
-    // #define DEF_VAR(type,name) type name;
-    // #define GET_VAR(type,name) name
+
+
+    // complements for UnityDOTSInstancing.hlsl
+    #define DEFINE_DOTS_LOAD_INSTANCE_VECTOR(type, width, conv, sizeof_type) \
+    type##width LoadDOTSInstancedData_##type##width(uint metadata) \
+    { \
+        uint address = ComputeDOTSInstanceDataAddress(metadata, sizeof_type * width); \
+        return conv(DOTSInstanceData_Load##width(address)); \
+    } \
+    type##width LoadDOTSInstancedDataOverridden_##type##width(uint metadata) \
+    { \
+        uint address = ComputeDOTSInstanceDataAddressOverridden(metadata, sizeof_type * width); \
+        return conv(DOTSInstanceData_Load##width(address)); \
+    } \
+    type##width LoadDOTSInstancedData_##type##width(type##width default_value, uint metadata) \
+    { \
+        uint address = ComputeDOTSInstanceDataAddressOverridden(metadata, sizeof_type * width); \
+        return IsDOTSInstancedProperty(metadata) ? \
+            conv(DOTSInstanceData_Load##width(address)) : default_value; \
+    }    
+    //--------- min16floats
+    DEFINE_DOTS_LOAD_INSTANCE_VECTOR(min16float, 2, asfloat, 2)
+    DEFINE_DOTS_LOAD_INSTANCE_VECTOR(min16float, 3, asfloat, 2)
+
 #endif
 
 #endif //INSTANCING_LIB_HLSL

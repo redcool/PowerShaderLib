@@ -66,7 +66,7 @@
 struct shadow_appdata
 {
     float4 vertex : POSITION;
-    float3 normal : NORMAL;
+    float4 normal : NORMAL;
     float2 texcoord : TEXCOORD0;
     float4 color:COLOR;
 
@@ -133,7 +133,7 @@ shadow_v2f vert(shadow_appdata v){
     #endif
 
     float3 worldPos,worldNormal;
-    CaclWaveAnimationWorldPos(v.vertex.xyz,v.color.xyz,v.normal,worldPos/**/,worldNormal/**/);
+    CaclWaveAnimationWorldPos(v.vertex.xyz,v.color.xyz,v.normal.xyz,worldPos/**/,worldNormal/**/);
 
     #if defined(SHADOW_PASS)
         output.pos = GetShadowPositionHClip(worldPos,worldNormal);
