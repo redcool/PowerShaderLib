@@ -56,6 +56,10 @@ float2 ToCartesian(float2 uv){
 float4 ComputeNormalizedScreenPos(float4 posCS){
     float4 pos = posCS * rcp(posCS.w);
     pos.xy = pos.xy * 0.5 + 0.5;
+    // no gl
+    #if defined(UNITY_UV_STARTS_AT_TOP)
+        pos.y = 1- pos.y;
+    #endif
     return pos;
 }
 #endif //COORDINATE_SYSTEM_HLSL
