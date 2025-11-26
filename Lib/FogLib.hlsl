@@ -151,4 +151,25 @@ float CalcFogNoise(float3 worldPos,float3 windDir=1){
 void BlendFogSphereKeyword(inout half3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,float fogNoise,bool hasDepthFog=true,half fogAtten=1){
     BlendFogSphere(mainColor/**/,worldPos,fog,hasHeightFog,fogNoise,hasDepthFog,fogAtten);
 }
+
+/**
+    calc unity linear fog,
+    // f = (End - depth) / (End - Start)
+    // 使用 unity_FogParams.z = 1/(End - Start)
+    
+    // unity fog keywords
+    defined(FOG_LINEAR) || defined(FOG_EXP) || defined(FOG_EXP2)
+
+    vert(){
+        o.pos = UnityObjectToClipPos(v.vertex);
+        i.viewDepth = o.pos.w;
+    }
+    frag(){
+        float fogFactor = UnityLinearFog(i.viewDepth);
+    }
+*/
+float UnityLinearFog(float viewDepth){
+    return saturate( (unity_FogParams.y - viewDepth) * unity_FogParams.z);
+}
+
 #endif //FOG_LIB_HLSL
