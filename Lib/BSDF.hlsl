@@ -51,12 +51,13 @@ float NDFBlinnPhongTerm(float nh,float a){
     float specularTerm = pow(nh,a);
     return normTerm * specularTerm;
 }
-
+/*
+D_GGXNoPI
+*/
 float D_GGXTerm(float nh,float a2){
     float d = (nh*a2-nh)*nh + 1;
     return a2 / (d*d + 1e-7f);
 }
-
 
 float D_GGXAnisoNoPI(float TdotH, float BdotH, float NdotH, float roughnessT, float roughnessB)
 {

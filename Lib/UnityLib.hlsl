@@ -357,15 +357,6 @@ float3 DecodeHDREnvironment(float4 encodedIrradiance, float4 decodeInstructions)
 }
 #endif
 
-//==============================
-//  lighting
-//==============================
-float D_GGXNoPI(float NdotH, float rough)
-{
-    float s = (NdotH * rough - NdotH) * NdotH + 1.0;
-    return rough/ (s * s);
-}
-
 
 //==============================
 //  Unpack from normal map , references Packing.hlsl
