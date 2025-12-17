@@ -56,4 +56,27 @@ float2 GetUV1(float2 uv1,float2 lightmapUV,bool is_UV1TransformToLightmapUV){
     return is_UV1TransformToLightmapUV ? lightmapUV : uv1;
 }
 
+/**
+    Calculate UDIM texture coordinates and texture index
+
+    @param newUV Output parameter, calculated UV coordinates (0-1 range)
+    @param texId Output parameter, calculated texture ID
+    @param uv Input UV coordinates, containing integer and fractional parts
+    @param countInARow Number of UDIM textures per row
+
+    demo:
+
+    float2 newUV = 0;
+    half texId = 0;
+    CalcUDIM(newUV,texId,uv,_MainTexArrayId);
+
+    half4 tex = SAMPLE_TEXTURE2D_ARRAY(_MainTexArray,sampler_MainTexArray,newUV,texId);
+    return tex;
+*/
+void CalcUDIM(out float2 newUV,out half texId,float2 uv,half countInARow){
+    half2 uvId = trunc(uv.xy);
+    newUV = frac(uv.xy);
+    texId = uvId.x +  countInARow * uvId.y;
+}
+
 #endif //UV_MAPPING_HLSL            

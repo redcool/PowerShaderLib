@@ -31,6 +31,7 @@
     return float4(frac(puv),0,1);
 */
 float2 ToPolar(float2 uv){
+    uv = (uv-0.5)*2; //[0-1] -> [-1,1]
     float dist = length(uv);
     float angle = atan2(uv.y,uv.x);
     return float2(angle/PI2,dist);

@@ -12,12 +12,14 @@
 */
 
 /**
-    DispatchKernel.Dispatchkernel, will set these vars
+    ComputeShaderEx.Dispatchkernel, will set these vars
 */
 float3 _DispatchGroupSize; // Dispatched groups
 float4 _NumThreads; // thread count in a box,(xSize,ySize,zSize,threads count)
 
 /*
+    ComputeShaderEx.Dispatchkernel
+
     GetDispatchThreadIndex, 
         for 1 dimension buffer( 1d array)
         2d is SWTexture, use SV_DispatchThreadID
@@ -48,11 +50,15 @@ uint GetDispatchThreadIndex(uint3 groupId/*SV_GroupID*/,uint groupThreadIndex/*S
 // }
 
 /**
-    Call this get dispatched thread index(like SV_DispatchThreadID)
+    csharp ComputeShaderEx.Dispatchkernel
 
-    call DispatchKernel.Dispatchkernel
-    
+    Get dispatched thread index(SV_DispatchThreadID is 3d), like 3d array index to 1d array index
     uint dispatchThreadIndex = GetDispatchThreadIndex(groupId,groupThreadIndex);
+
+    @param groupId : (SV_GroupID)
+    @param groupThreadIndex : (SV_GroupIndex)
+    @return dispatchThreadIndex
+
 */
 uint GetDispatchThreadIndex(uint3 groupId/*SV_GroupID*/,uint groupThreadIndex/*SV_GroupIndex*/){
     uint3 groupSize = (uint3)_DispatchGroupSize;
@@ -61,7 +67,7 @@ uint GetDispatchThreadIndex(uint3 groupId/*SV_GroupID*/,uint groupThreadIndex/*S
 }
 
 /**
-    id.xy -> uv
+    id.xy(pixel coords) -> uv[0,1]
 
     id : SV_DispatchThreadID
     tex : Texture2D
@@ -76,7 +82,7 @@ float2 GetUV(uint3 id,TEXTURE2D(tex),float4 texelSize){
     return id.xy * texelSize.zw;
 }
 /**
-    id.xy -> uv
+    id.xy(pixel coords) -> uv[0,1]
 
     id : SV_DispatchThreadID
     tex : RWTexture2D , renderTexture(uav)
