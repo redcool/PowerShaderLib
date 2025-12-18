@@ -19,7 +19,7 @@
 // =======================
 //  Variables
 // =======================
-
+//------- write target
 #if defined(_RW2DArr)
     RW_TEXTURE2D_ARRAY(float4,_ResultTex);
 #elif defined(_RW3D)
@@ -28,10 +28,7 @@
     // RWTexture2D<float4> _ResultTex; // uav rt
     RW_TEXTURE2D(float4,_ResultTex); 
 #endif
-
-float4 _ResultTex_TexelSize;
-float _ResultTexId; // write tex2d array index
-
+//------- read target
 #if defined(_2DArr)
     TEXTURE2D_ARRAY(_SourceTex);
 #elif defined(_3D)
@@ -39,6 +36,9 @@ float _ResultTexId; // write tex2d array index
 #else
     TEXTURE2D(_SourceTex); 
 #endif
+
+float4 _ResultTex_TexelSize;
+float _ResultTexId; // write tex2d array index
 
 float4 _SourceTex_TexelSize;
 float _SourceTexId; // tex2d array index
@@ -56,6 +56,11 @@ void CSClear(uint3 id : SV_DispatchThreadID)
     _ResultTex[id.xy] = _ClearColor;
 }
 
+float4 ApplyGamma(float4 c){
+    c.xyz = pow(abs(c.xyz),_GammaValue ? _GammaValue : 1.0f);
+    return c;
+}
+
 // =======================
 //  CopyTexture ,any size
 // =======================
@@ -70,14 +75,14 @@ void CopyTexture (uint3 id : SV_DispatchThreadID)
         float2 writeCoord = id.xy;
     #endif
 
-    float2 uv = id.xy * _ResultTex_TexelSize.zw;
+    float3 uvw = float3(id.xy * _ResultTex_TexelSize.zw,_SourceTexId);
 
     #if defined(_2DArr)
-        _ResultTex[writeCoord] = SAMPLE_TEXTURE2D_ARRAY_LOD(_SourceTex,sampler_point_clamp,uv,_SourceTexId,_SourceTexLod);
+        _ResultTex[writeCoord] = ApplyGamma(SAMPLE_TEXTURE2D_ARRAY_LOD(_SourceTex,sampler_point_clamp,uvw.xy,_SourceTexId,_SourceTexLod));
     #elif defined(_3D)
-        _ResultTex[writeCoord] = SAMPLE_TEXTURE3D_LOD(_SourceTex,sampler_point_clamp,uvw,_SourceTexLod);
+        _ResultTex[writeCoord] = ApplyGamma(SAMPLE_TEXTURE3D_LOD(_SourceTex,sampler_point_clamp,uvw,_SourceTexLod));
     #else
-        _ResultTex[writeCoord] = SAMPLE_TEXTURE2D_LOD(_SourceTex,sampler_point_clamp,uv,_SourceTexLod);
+        _ResultTex[writeCoord] = ApplyGamma(SAMPLE_TEXTURE2D_LOD(_SourceTex,sampler_point_clamp,uvw.xy,_SourceTexLod));
     #endif
     // apply gamma convert
     // _ResultTex[writeCoord] = pow(_ResultTex[writeCoord],!_GammaValue?1:_GammaValue);

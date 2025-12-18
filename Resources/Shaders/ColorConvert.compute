@@ -1,4 +1,4 @@
-/**
+﻿/**
     this file used for color convert
 
 */
@@ -23,6 +23,6 @@ void ConvertColorSpace(uint3 id : SV_DispatchThreadID,uint3 groupId : SV_GROUPID
     // apply gt6 tone
     c.xyz = _ApplyGT6Tone ? GTTone(c.xyz) : c.xyz;
 
-    c.xyz = pow(c.xyz,_Coefficient);
+    c.xyz = pow(abs(c.xyz), _Coefficient);
     _ColorBuffer[dispatchThreadIndex] = c;
 }
