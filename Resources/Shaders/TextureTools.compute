@@ -84,6 +84,4 @@ void CopyTexture (uint3 id : SV_DispatchThreadID)
     #else
         _ResultTex[writeCoord] = ApplyGamma(SAMPLE_TEXTURE2D_LOD(_SourceTex,sampler_point_clamp,uvw.xy,_SourceTexLod));
     #endif
-    // apply gamma convert
-    // _ResultTex[writeCoord] = pow(_ResultTex[writeCoord],!_GammaValue?1:_GammaValue);
 }

@@ -8,6 +8,9 @@
 #include "../../Lib/CSLib.hlsl"
 #include "../../Lib/ToneMappers.hlsl"
 
+TEXTURE2D(_SourceTex);
+float4 _SourceTex_TexelSize;
+
 /**
  Convert color space
 */
@@ -18,8 +21,10 @@ bool _ApplyGT6Tone;
 [numthreads(8,8,1)]
 void ConvertColorSpace(uint3 id : SV_DispatchThreadID,uint3 groupId : SV_GROUPID,uint groupThreadIndex:SV_GROUPINDEX)
 {
-    uint dispatchThreadIndex = GetDispatchThreadIndex(groupId,groupThreadIndex);
-    float4 c = _ColorBuffer[dispatchThreadIndex];
+    uint dispatchThreadIndex = GetDispatchThreadIndex(groupId,id);
+    float2 uv = GetUV(id,_SourceTex,_SourceTex_TexelSize);
+    float4 c = SAMPLE_TEXTURE2D_LOD(_SourceTex,sampler_linear_clamp,uv,0);
+
     // apply gt6 tone
     c.xyz = _ApplyGT6Tone ? GTTone(c.xyz) : c.xyz;
 

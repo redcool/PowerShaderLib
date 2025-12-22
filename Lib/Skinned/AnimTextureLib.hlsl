@@ -25,8 +25,8 @@ struct AnimInfo {
     uint frameRate;
     uint startFrame;
     uint endFrame;
-    half loop;
-    half playTime;
+    float loop;
+    float playTime;
     uint offsetPlayTime;
     half4 animTextureTexelSize;  // _AnimTex_TexelSize(1/w,1/h,w,h)
 };
@@ -65,19 +65,22 @@ AnimInfo GetAnimInfo(){
 }
 
 /**
+    AnimTex
+        horizontal : bones matrix per frame
+        vertical : frames
     Get animation frame y position in _AnimTex
 
     x : per bone matrix(3 float4)
-    y : animation frames
+    y : animation frame
 */
-half GetY(AnimInfo info) {
+float GetY(AnimInfo info) {
     // length = fps/sampleRatio
     half4 texelSize = info.animTextureTexelSize;
-    half totalLen = texelSize.w / info.frameRate;
-    half start = info.startFrame / texelSize.w;
-    half end = info.endFrame / texelSize.w;
-    half len = end - start;
-    half y = start + (info.playTime + info.offsetPlayTime) / totalLen % len;
+    float totalLen = texelSize.w / info.frameRate;
+    float start = info.startFrame / texelSize.w;
+    float end = info.endFrame / texelSize.w;
+    float len = end - start;
+    float y = start + (info.playTime + info.offsetPlayTime) / totalLen % len;
     y = lerp(y, end, info.loop);
     return y;
 }
@@ -103,7 +106,7 @@ BoneWeight1 GetBoneWeight1(float boneStart){
 */
 float4 GetAnimPos(uint vid,float4 pos,AnimInfo info){
     float4 bonePos = (float4)0;
-    half y = GetY(info);
+    float y = GetY(info);
 
     BoneInfoPerVertex boneInfo = GetBoneInfoPerVertex(vid);
     float bonesCount = boneInfo.bonesCount;
@@ -141,7 +144,7 @@ float4 GetAnimPos(uint vid,float4 pos){
 float4 GetBlendAnimPos(uint vid,float4 pos) {
     AnimInfo info = GetAnimInfo();
     // SETUP_ANIM_INFO();
-    half crossLerp = _CrossLerp;
+    float crossLerp = _CrossLerp;
     float4 curPos = GetAnimPos(vid,pos,info);
 
     info.startFrame = _NextStartFrame;
@@ -155,7 +158,7 @@ float4 GetBlendAnimPos(uint vid,float4 pos) {
 
 float4 GetAnimPos(uint vid,float4 pos,AnimInfo info,float4 weights,uint4 indices){
     float4 bonePos = (float4)0;
-    half y = GetY(info);
+    float y = GetY(info);
 
     float4x4 boneMat = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
 
@@ -177,7 +180,7 @@ float4 GetAnimPos(uint vid,float4 pos,AnimInfo info,float4 weights,uint4 indices
 float4 GetBlendAnimPos(uint vid,float4 pos,float4 weights,uint4 indices) {
     AnimInfo info = GetAnimInfo();
     // SETUP_ANIM_INFO();
-    half crossLerp = _CrossLerp;
+    float crossLerp = _CrossLerp;
     float4 curPos = GetAnimPos(vid,pos,info,weights,indices);
 
     info.startFrame = _NextStartFrame;
@@ -196,7 +199,7 @@ void CalcAnimPos(uint vid,inout float4 pos,inout float4 normal,inout float4 tang
     float4 boneNormal =(float4)0;
     float4 boneTangent = {0,0,0,tangent.w}; // keep w
     
-    half y = GetY(info);
+    float y = GetY(info);
 
     float4x4 boneMat = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
 
@@ -221,7 +224,7 @@ void CalcAnimPos(uint vid,inout float4 pos,inout float4 normal,inout float4 tang
 void CalcBlendAnimPos(uint vid,inout float4 pos,inout float4 normal,inout float4 tangent,float4 weights,uint4 indices) {
     AnimInfo info = GetAnimInfo();
     // SETUP_ANIM_INFO();
-    half crossLerp = _CrossLerp;
+    float crossLerp = _CrossLerp;
     float4 pos0 = pos,normal0=normal,tangent0=tangent;
     CalcAnimPos(vid,pos0/**/,normal0/**/,tangent0/**/,info,weights,indices);
     
@@ -242,8 +245,8 @@ void CalcBlendAnimPos(uint vid,inout float4 pos,inout float4 normal,inout float4
     play animation
 */
 float4 GetAnimPos(uint vertexId, AnimInfo info) {
-    half y = GetY(info);
-    half x = (vertexId + 0.5) * _AnimTex_TexelSize.x;
+    float y = GetY(info);
+    float x = (vertexId + 0.5) * _AnimTex_TexelSize.x;
 
     float4 animPos = tex2Dlod(_AnimTex, half4(x, y, 0, 0));
     return animPos;
@@ -264,7 +267,7 @@ float4 GetBlendAnimPos(uint vertexId) {
     AnimInfo info = GetAnimInfo();
     // SETUP_ANIM_INFO();
     
-    half crossLerp = _CrossLerp;
+    float crossLerp = _CrossLerp;
     float4 curPos = GetAnimPos(vertexId, info);
 
     info.startFrame = _NextStartFrame;
