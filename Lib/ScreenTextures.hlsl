@@ -49,12 +49,7 @@ float4 GetScreenColor(float2 screenUV){
 }
 
 float3 CalcWorldNormal(float3 worldPos){
-    #if defined(UNITY_REVERSED_Z)
-        float3 n = cross(ddx(worldPos),ddy(worldPos));
-    #else
-        float3 n = cross(ddy(worldPos),ddx(worldPos));
-    #endif
-    return n;
+    return normalize(cross(ddy(worldPos),ddx(worldPos)));
 }
 
 float3 GetScreenNormal(float2 screenUV){

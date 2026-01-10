@@ -122,8 +122,9 @@ Light GetLight(float4 lightPos,float3 color,float shadowAtten,float3 worldPos,fl
 
     Light l = (Light)0;
     l.direction = lightDir;
-    l.distanceAttenuation = saturate(atten) + (1-lightPos.w);
     l.color = color;
+    // l.distanceAttenuation = saturate(atten) + (1-lightPos.w);
+    l.distanceAttenuation = lightPos.w ? saturate(atten) : 1;
     l.shadowAttenuation = shadowAtten;
     return l;
 }
