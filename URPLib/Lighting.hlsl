@@ -96,7 +96,7 @@ float3 CalcAdditionalLights(
     float3 color : light color
     float shadowAtten : light shadowMap attenuation
     float3 worldPos : vertex' world position
-    float4 distanceAndSpotAttenuation : {xy: distance(point,spot), zw:angle(spot)}
+    float4 distanceAndSpotAttenuation : {xy: distance(point,spot), zw:angle(spot)}, UNITY_ATTEN only
     float3 spotLightDir : spot light direction
     float radius : light's range
     float intensity : light 's intensity
