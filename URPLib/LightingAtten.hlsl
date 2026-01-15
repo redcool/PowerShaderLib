@@ -32,4 +32,16 @@ float AngleAtten(float3 spotDir,float3 lightDir,float outerAngle ,float innerAng
     return atten;
 }
 
+/**
+* Calculate spot light angles
+* @param spotLightAngle outer and inner spot angles in dot product form
+* @return normalized spot light angles
+
+original : cos(radians(spotLightAngle) * 0.5) , cos[0,1.57] = [1,0]
+simplify : 1 - (radians(spotLightAngle))/3.14 : [1,0]
+*/
+float2 CalcSpotLightAngle(float2 spotLightAngle){
+    return 1- radians(spotLightAngle)/3.14;
+    return cos(radians(spotLightAngle) * 0.5);
+}
 #endif //LIGHTING_ATTEN_HLSL
