@@ -26,9 +26,9 @@ float DistanceAtten(float distance2,float radius2,float maxIntensity,float fallO
     return atten * isInner;
 }
 
-float AngleAtten(float3 spotDir,float3 lightDir,float outerAngle ,float innerAngle){
+float AngleAtten(float3 spotDir,float3 lightDir,float outerAngleCos ,float innerAngleCos){
     float atten = (dot(spotDir,lightDir));
-    atten *= smoothstep(outerAngle,innerAngle,atten);
+    atten *= smoothstep(outerAngleCos,innerAngleCos,atten);
     return atten;
 }
 
@@ -37,11 +37,14 @@ float AngleAtten(float3 spotDir,float3 lightDir,float outerAngle ,float innerAng
 * @param spotLightAngle outer and inner spot angles in dot product form
 * @return normalized spot light angles
 
-original : cos(radians(spotLightAngle) * 0.5) , cos[0,1.57] = [1,0]
-simplify : 1 - (radians(spotLightAngle))/3.14 : [1,0]
+Curve show:
+https://www.desmos.com/calculator/wemfnwcskg?lang=zh-CN
+
+original : cos(radians(spotLightAngle) * 0.5) , cos[0,1.57] = [1,0] , cos atten curve
+simplify : 1 - (radians(spotLightAngle))/6.28 : [1,0] ,linear atten curve
 */
-float2 CalcSpotLightAngle(float2 spotLightAngle){
-    return 1- radians(spotLightAngle)/3.14;
+float2 CalcSpotLightAngleAtten(float2 spotLightAngle){
+    return 1- radians(spotLightAngle)/6.28;
     return cos(radians(spotLightAngle) * 0.5);
 }
 #endif //LIGHTING_ATTEN_HLSL

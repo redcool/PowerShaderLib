@@ -102,10 +102,10 @@ float3 CalcAdditionalLights(
     float intensity : light 's intensity
     float falloff : custom falloff
     bool isSpot : is spot
-    float2 spotLightAngle : spot light angle in radians(outer angle,inner angle)
+    float2 spotLightAngleCos : spot light angle cos(outer angle,inner angle)
 */
 Light GetLight(float4 lightPos,float3 color,float shadowAtten,float3 worldPos,float4 distanceAndSpotAttenuation,float3 spotLightDir
-,float radius,float intensity,float falloff,bool isSpot,float2 spotLightAngle
+,float radius,float intensity,float falloff,bool isSpot,float2 spotLightAngleCos
 ){
     float3 lightDir = lightPos.xyz - worldPos * lightPos.w;
     float distSqr = max(dot(lightDir,lightDir),HALF_MIN);
@@ -117,7 +117,7 @@ Light GetLight(float4 lightPos,float3 color,float shadowAtten,float3 worldPos,fl
         atten *= AngleAttenuation(spotLightDir,lightDir,distanceAndSpotAttenuation.zw);
     #else
         atten *= DistanceAtten(distSqr,radius*radius,intensity,falloff);
-        atten *= isSpot ? AngleAtten(spotLightDir,lightDir,spotLightAngle.x,spotLightAngle.y) : 1;
+        atten *= isSpot ? AngleAtten(spotLightDir,lightDir,spotLightAngleCos.x,spotLightAngleCos.y) : 1;
     #endif
 
     Light l = (Light)0;
