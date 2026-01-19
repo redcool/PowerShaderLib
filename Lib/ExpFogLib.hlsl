@@ -20,21 +20,19 @@ float ExpFog(float3 worldPos,float3 centerPos,float3 viewPos,float4 fogStartDist
     #define heightMin fogStartDist.z
 
     float3 viewDir = (worldPos - viewPos);
-    float viewDirDist = length(viewDir);
-    // dir = mul(unity_ObjectToWorld,float4(dir,0));
+    float viewDirDist = viewDir.z; //length(viewDir);
     // linear depth fog
     float depthRate = (viewDirDist - depthMin)/(depthMax-depthMin);
-    // depthRate = saturate(depthRate);
+    depthRate = saturate(depthRate);
     // exp depth fog
     float depthFog = 1 - exp(-(viewDirDist - depthMin) * fogDepthDensity/fogDepthFall);
-    // depthFog = max(0,depthFog);
     depthFog = saturate(depthFog);
 
     // exp height fog
     float3 centerDir = worldPos - centerPos;
-    // float heightRate = (centerDir.y - fogStartDist.z)/(fogStartDist.w - fogStartDist.z);
+    float heightFog = 1 - exp(-(heightMin - centerDir.y) * fogHeightDensity/fogHeightFall);
+    heightFog = saturate(heightFog);
 
-    float heightFog = exp(- (centerDir.y - heightMin) * fogHeightDensity/fogHeightFall);
     float fog = (heightFog + depthFog)*depthRate;
     return saturate(fog);
 }
