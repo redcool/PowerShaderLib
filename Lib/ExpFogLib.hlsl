@@ -11,24 +11,30 @@
  * @return float : fog atten
  */
 float ExpFog(float3 worldPos,float3 centerPos,float3 viewPos,float4 fogStartDist,float4 fogDensityFalloff){
-    #define fogDepthDensity fogDensityFalloff.x
-    #define fogDepthFall fogDensityFalloff.y
-    #define fogHeightDensity fogDensityFalloff.z
-    #define fogHeightFall fogDensityFalloff.w
+    #define fogHeightDensity fogDensityFalloff.x
+    #define fogHeightFall fogDensityFalloff.y
+    #define fogDepthDensity fogDensityFalloff.z
+    #define fogDepthFall fogDensityFalloff.w
+    #define depthMin fogStartDist.x
+    #define depthMax fogStartDist.y
+    #define heightMin fogStartDist.z
 
     float3 viewDir = (worldPos - viewPos);
     float viewDirDist = length(viewDir);
     // dir = mul(unity_ObjectToWorld,float4(dir,0));
     // linear depth fog
-    float depthRate = (viewDirDist - fogStartDist.x)/(fogStartDist.y - fogStartDist.x);
+    float depthRate = (viewDirDist - depthMin)/(depthMax-depthMin);
+    // depthRate = saturate(depthRate);
     // exp depth fog
-    float depthFog = 1 - exp(-(viewDirDist - fogStartDist.x) * fogDepthDensity/fogDepthFall);
+    float depthFog = 1 - exp(-(viewDirDist - depthMin) * fogDepthDensity/fogDepthFall);
+    // depthFog = max(0,depthFog);
+    depthFog = saturate(depthFog);
 
     // exp height fog
     float3 centerDir = worldPos - centerPos;
     // float heightRate = (centerDir.y - fogStartDist.z)/(fogStartDist.w - fogStartDist.z);
 
-    float heightFog = exp(- (centerDir.y - fogStartDist.z) * fogHeightDensity/fogHeightFall);
+    float heightFog = exp(- (centerDir.y - heightMin) * fogHeightDensity/fogHeightFall);
     float fog = (heightFog + depthFog)*depthRate;
     return saturate(fog);
 }
