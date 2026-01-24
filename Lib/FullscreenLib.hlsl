@@ -1,5 +1,5 @@
 /**
-    MATERIAL_VARIABLES : skip material variables define
+    SKIP_MATERIAL_VARIABLES : skip material variables define
 
 */
 
@@ -7,7 +7,7 @@
 #define FULLSCREEN_LIB_HLSL
 
 
-#if !defined(MATERIAL_VARIABLES)
+#if !defined(SKIP_MATERIAL_VARIABLES)
 // half _FullScreenOn; // output to full rt
 float4 _FullScreenUVRange; // output rect,default (0,0,1,1)
 half _FullScreenUVId; // material use uv id when bake

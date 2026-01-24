@@ -2,7 +2,7 @@
 #define UV_MAPPING_HLSL
 
 /**
-    Remap uv to rect uv
+    Remap uv to rect uv, rectUV is uv in texture atlas
 
     id : 1d serial num
     uv : [0,1]
@@ -44,6 +44,8 @@ float2 UVRepeat(float2 uv,float2 uvRange,float2 uvStart){
 /**
     get uv from {uv0,uv1,uv2,uv}.
     uvId : (0,1,2,3)
+    demo:
+        float2 uv = GetUV(float4(v.uv,uv1),float4(v.uv2,v.uv3),_FullScreenUVId);
 */
 float2 GetUV(float4 uv_01,float4 uv_23,uint uvId){
     // uint groupId = uvId / 2;
@@ -51,7 +53,12 @@ float2 GetUV(float4 uv_01,float4 uv_23,uint uvId){
     float4 uv = uvId>=2?uv_23:uv_01;
     return float2(uv[itemId],uv[itemId+1]);
 }
-
+/**
+    transform uv1 to lightmapUV if needed, uv1 is a rect in lightmap uv(baked scene)
+    demo:
+        float2 lightmapUV = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
+        float2 uv1 = GetUV1(v.uv1,lightmapUV,_UV1TransformToLightmapUV);
+*/
 float2 GetUV1(float2 uv1,float2 lightmapUV,bool is_UV1TransformToLightmapUV){
     return is_UV1TransformToLightmapUV ? lightmapUV : uv1;
 }
@@ -65,13 +72,12 @@ float2 GetUV1(float2 uv1,float2 lightmapUV,bool is_UV1TransformToLightmapUV){
     @param countInARow Number of UDIM textures per row
 
     demo:
+        float2 newUV = 0;
+        half texId = 0;
+        CalcUDIM(newUV,texId,uv,_MainTexArrayId);
 
-    float2 newUV = 0;
-    half texId = 0;
-    CalcUDIM(newUV,texId,uv,_MainTexArrayId);
-
-    half4 tex = SAMPLE_TEXTURE2D_ARRAY(_MainTexArray,sampler_MainTexArray,newUV,texId);
-    return tex;
+        half4 tex = SAMPLE_TEXTURE2D_ARRAY(_MainTexArray,sampler_MainTexArray,newUV,texId);
+        return tex;
 */
 void CalcUDIM(out float2 newUV,out half texId,float2 uv,half countInARow){
     half2 uvId = trunc(uv.xy);
