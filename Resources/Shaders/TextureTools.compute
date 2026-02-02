@@ -1,6 +1,8 @@
 // =======================
 //  Kernels
 // =======================
+#pragma target 5.0
+
 // clear rt
 #pragma kernel CSClear
 // copy 2d to rt
@@ -29,6 +31,7 @@
     RW_TEXTURE2D(float4,_ResultTex); 
 #endif
 //------- read target
+SAMPLER(sampler_SourceTex);
 #if defined(_2DArr)
     TEXTURE2D_ARRAY(_SourceTex);
 #elif defined(_3D)
@@ -78,10 +81,10 @@ void CopyTexture (uint3 id : SV_DispatchThreadID)
     float3 uvw = float3(id.xy * _ResultTex_TexelSize.zw,_SourceTexId);
 
     #if defined(_2DArr)
-        _ResultTex[writeCoord] = ApplyGamma(SAMPLE_TEXTURE2D_ARRAY_LOD(_SourceTex,sampler_point_clamp,uvw.xy,_SourceTexId,_SourceTexLod));
+        _ResultTex[writeCoord] = ApplyGamma(SAMPLE_TEXTURE2D_ARRAY_LOD(_SourceTex,sampler_SourceTex,uvw.xy,_SourceTexId,_SourceTexLod));
     #elif defined(_3D)
-        _ResultTex[writeCoord] = ApplyGamma(SAMPLE_TEXTURE3D_LOD(_SourceTex,sampler_point_clamp,uvw,_SourceTexLod));
+        _ResultTex[writeCoord] = ApplyGamma(SAMPLE_TEXTURE3D_LOD(_SourceTex,sampler_SourceTex,uvw,_SourceTexLod));
     #else
-        _ResultTex[writeCoord] = ApplyGamma(SAMPLE_TEXTURE2D_LOD(_SourceTex,sampler_point_clamp,uvw.xy,_SourceTexLod));
+        _ResultTex[writeCoord] = ApplyGamma(SAMPLE_TEXTURE2D_LOD(_SourceTex,sampler_SourceTex,uvw.xy,_SourceTexLod));
     #endif
 }

@@ -18,7 +18,7 @@ float3 _DispatchGroupSize; // Dispatched groups
 float4 _NumThreads; // thread count in a box,(xSize,ySize,zSize,threads count)
 
 /**
-    csharp ComputeShaderEx.Dispatchkernel
+    call ComputeShaderEx.Dispatchkernel
 
     Get dispatched thread index(SV_DispatchThreadID is 3d), like 3d array index to 1d array index
     uint dispatchThreadIndex = GetDispatchThreadIndex(groupId,dispatchThreadId);
@@ -27,11 +27,37 @@ float4 _NumThreads; // thread count in a box,(xSize,ySize,zSize,threads count)
     @param dispatchThreadId : (SV_DispatchThreadID)
     @return dispatchThreadIndex
 
+    formula:
+        index = z * width*height+y*width+x
 */
 uint GetDispatchThreadIndex(uint3 groupId/*SV_GroupID*/,uint3 dispatchThreadId/*SV_DispatchThreadID*/){
     uint3 groupSize = (uint3)_DispatchGroupSize;
     uint3 groupThreadSize = (uint3)_NumThreads.xyz * groupSize;
     return dispatchThreadId.x + dispatchThreadId.y * groupThreadSize.x + dispatchThreadId.z * groupThreadSize.x * groupThreadSize.y;
+}
+/**
+    dp thread index to id(1d -> 3d)
+    x = index % width
+    y = (index/w) % height
+    z = index / (width * height)
+
+    demo:
+    1 threadSize(10,10,10),index=253 ,result=(3,5,2)
+    -1 remain = 53,x =53%10 = 3 ,y = 53/10=5 ,z = 2
+    -2 x=253%10=3,y=253/10%10=5
+    test : 2 * 10*10 + 5 * 10 + 3 = 253
+*/
+uint3 GetDispatchThreadId(uint index){
+    uint3 groupSize = (uint3)_DispatchGroupSize;
+    uint3 groupThreadSize = (uint3)_NumThreads.xyz * groupSize;
+    uint width = groupThreadSize.x;
+    uint area = groupThreadSize.x*groupThreadSize.y;
+
+    uint remain = index % area;
+    uint x = remain %width;
+    uint y = remain /width;
+    uint z = index / area;
+    return uint3(x,y,z);
 }
 /**
     id.xy(pixel coords) -> uv[0,1]
