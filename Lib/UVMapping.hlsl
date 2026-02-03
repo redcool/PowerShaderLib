@@ -34,12 +34,32 @@ float2 RectUV(float id,float2 uv,half2 sheet,bool invertY,bool playOnce){
 
 /**
     repeat uv in uvRange,used for Sprite in atlas
+
+    uv = UVRepeat(uv,float2(.9,.9),float2(0,0));
 */
 float2 UVRepeat(float2 uv,float2 uvRange,float2 uvStart){
     uv %= uvRange;
     uv += sign(uv) < 0 ? uvRange : 0;
     uv += uvStart;
     return uv;
+}
+/**
+    uv mirror tiling
+
+    uv = UVPingPong(uv,float2(1,1));
+    uv *= rcp(length); // full uv
+*/
+float2 UVPingPong(float2 uv,float2 length=float2(1,1)){
+    float2 value = uv %(length*2);
+    return length - abs(value - length);
+}
+/**
+    clamp uv in rect
+
+    uv = UVClamp(uv,_Rect);
+*/
+float2 UVClamp(float2 uv,float4 uvRect){
+    return clamp(uv,uvRect.xy,uvRect.zw);
 }
 /**
     get uv from {uv0,uv1,uv2,uv}.
@@ -66,7 +86,7 @@ float2 GetUV1(float2 uv1,float2 lightmapUV,bool is_UV1TransformToLightmapUV){
 /**
     Calculate UDIM texture coordinates and texture index
 
-    @param newUV Output parameter, calculated UV coordinates (0-1 range)
+    @param newUV Output parameter, calculated UV coordinates (0-1 uvRect)
     @param texId Output parameter, calculated texture ID
     @param uv Input UV coordinates, containing integer and fractional parts
     @param countInARow Number of UDIM textures per row
