@@ -109,7 +109,7 @@ float2 CalcFogFactor(float3 worldPos,float clipZ_01=1,bool hasHeightFog=true,boo
     #endif
 }
 
-void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,float fogNoise,bool hasDepthFog=true,half fogAtten=1,float3 viewPos=0){
+void BlendFogSphere1(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,float fogNoise,bool hasDepthFog=true,half fogAtten=1,float3 viewPos=0){
     branch_if(!IsFogOn())
         return;
 
@@ -142,7 +142,42 @@ void BlendFogSphere(inout float3 mainColor,float3 worldPos,float2 fog,bool hasHe
         // mainColor = depthFactor;
     #endif //SIMPLE_FOG
 }
+void BlendFogSphere(inout half3 mainColor,float3 worldPos,float2 fog,bool hasHeightFog,float fogNoise,bool hasDepthFog=true,half fogAtten=1,float3 viewPos=0){
+    branch_if(!IsFogOn())
+        return;
 
+    #if defined(SIMPLE_FOG) // simple fog
+        // calc fogFactor(viewPos.z in fog.y)
+        // float zFactor = max(fog.y - _ProjectionParams.y,0);
+        float zFactor = fog.y;
+        fog.x = ComputeFogFactor(zFactor) ;
+        mainColor = lerp(_FogFarColor,mainColor,fog.x);
+    #else   // 
+        /**
+            sphere fog - 1 height fog
+        */
+        half3 heightFogColor = lerp(_HeightFogMinColor,_HeightFogMaxColor,fog.y).xyz;
+        float heightFactor = smoothstep(0,0.1,fog.x)* (1-fog.y);
+        heightFactor = saturate(heightFactor *hasHeightFog * _GlobalFogIntensity);
+        // mainColor = heightFactor;
+        // return ;
+
+        // mainColor = lerp(mainColor,heightFogColor,heightFactor);
+        /**
+            sphere fog - 2 depth fog
+        */
+        float depthFactor = fog.x+ fogNoise * _FogNoiseIntensity * (fog.x > _FogNoiseStartRate);
+
+        fogAtten = _HeightFogFilterUpFace? fogAtten : 1;
+        depthFactor = saturate(depthFactor * fogAtten * hasDepthFog * _GlobalFogIntensity);
+        // mainColor = depthFactor;
+
+        half3 fogColor = lerp(_FogNearColor.rgb,_FogFarColor.rgb,fog.x);
+        // mainColor = lerp(mainColor,fogColor,depthFactor);
+
+        mainColor = lerp(lerp(mainColor,heightFogColor,heightFactor),fogColor,depthFactor);
+    #endif //SIMPLE_FOG
+}
 float CalcFogNoise(float3 worldPos,float3 windDir=1){
     float fogNoise = unity_gradientNoise( (worldPos.xz+worldPos.yz) * _FogNoiseTilingOffset.xy + _FogNoiseTilingOffset.zw * windDir.xz * _Time.y );
     return fogNoise;

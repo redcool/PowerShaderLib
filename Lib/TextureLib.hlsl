@@ -19,6 +19,9 @@
     #undef TEXTURE2D
     #define TEXTURE2D(textureName) sampler2D textureName
 
+    #undef TEXTURE2D_FLOAT
+    #define TEXTURE2D_FLOAT(textureName) sampler2D textureName
+
     #undef SAMPLE_TEXTURE2D_LOD
     #define SAMPLE_TEXTURE2D_LOD(tex,sampler_Tex,uv,lod) tex2Dlod(tex,float4(uv,0,lod))
 #endif

@@ -9,7 +9,7 @@
 */
 // check urp DeclareDepthTexture.hlsl collision
 #if !defined(SKIP_DEPTH)
-TEXTURE2D(_CameraDepthTexture);
+TEXTURE2D_FLOAT(_CameraDepthTexture);
 SAMPLER(sampler_CameraDepthTexture);
 #endif
 
