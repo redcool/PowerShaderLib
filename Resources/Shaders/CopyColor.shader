@@ -6,7 +6,7 @@ Shader "Hidden/Utils/CopyColor"
     Properties
     {
         [Group(AntiAlias)]
-        [GroupToggle(AntiAlias)] _OffsetHalfPixelOn("_OffsetHalfPixelOn",float) = 0
+        [GroupToggle(AntiAlias,,Apply AA)] _OffsetHalfPixelOn("_OffsetHalfPixelOn",float) = 0
         [GroupToggle(AntiAlias,_LUMA_AA_ON,Apply AA on edge)] _LumaAAOn("_LumaAAOn",float) = 0
         [DisableGroup(_LumaAAOn)]
         [GroupItem(AntiAlias)]_EdgeThreshold("_EdgeThreshold",range(0,1)) = 0.5
