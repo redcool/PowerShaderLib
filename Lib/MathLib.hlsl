@@ -1,6 +1,8 @@
 #if !defined(MATH_LIB_HLSL)
 #define MATH_LIB_HLSL
 
+#include "Macros.hlsl"
+
 void FastSinCos (float4 val, out float4 s, out float4 c) {
     val = val * 6.408849 - 3.1415927;
     // powers for taylor series
@@ -164,4 +166,7 @@ void SetMatrixColumn(inout float4x4 m,int col,float4 xyzw){
     m[3][col] = xyzw.w;
 }
 
+float GetLuma(float3 c){
+    return dot(float3(0.21,0.71,0.8),c);
+}
 #endif //MATH_LIB_HLSL

@@ -5,8 +5,11 @@ Shader "Hidden/Utils/CopyColor"
 {
     Properties
     {
-        [GroupHeader(AntiAlias)]
-        [GroupToggle()] _OffsetHalfPixelOn("_OffsetHalfPixelOn",float) = 0
+        [Group(AntiAlias)]
+        [GroupToggle(AntiAlias)] _OffsetHalfPixelOn("_OffsetHalfPixelOn",float) = 0
+        [GroupToggle(AntiAlias,_LUMA_AA_ON,Apply AA on edge)] _LumaAAOn("_LumaAAOn",float) = 0
+        [DisableGroup(_LumaAAOn)]
+        [GroupItem(AntiAlias)]_EdgeThreshold("_EdgeThreshold",range(0,1)) = 0.5
         //======================== ColorGrading
         [Group(ColorGrading)]
         [GroupToggle(ColorGrading,_APPLY_COLOR_GRADING)] _ApplyColorGrading("_ApplyColorGrading",float) = 0
@@ -44,7 +47,9 @@ Shader "Hidden/Utils/CopyColor"
     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
     #include "../../Lib/BlitLib.hlsl"
     #include "../../Lib/Colors.hlsl"
-    #include "../../Lib/ColorSpace.hlsl"    
+    #include "../../Lib/ColorSpace.hlsl"
+    
+    #include "../../Lib/AALib.hlsl"
 
     SamplerState point_clamp_sampler;
     SamplerState linear_clamp_sampler;
@@ -64,6 +69,7 @@ Shader "Hidden/Utils/CopyColor"
     half _OffsetHalfPixelOn;
     half _Saturate,_Contrast,_Brighness;
     half4 _ColorX,_ColorY,_ColorZ;
+    half _EdgeThreshold;
     CBUFFER_END
     
     v2f vert (uint vid:SV_VERTEXID)
@@ -76,9 +82,13 @@ Shader "Hidden/Utils/CopyColor"
 
     float4 frag (v2f i) : SV_Target
     {
-        float2 uv = i.uv;
-        uv += 0.5*_OffsetHalfPixelOn*_SourceTex_TexelSize.xy;
+        half isEdge = 1;
+        #if defined(_LUMA_AA_ON)
+            isEdge = CalcEdgeLuma(_SourceTex,linear_clamp_sampler, i.uv,_SourceTex_TexelSize,_EdgeThreshold);
+        #endif
 
+        float2 uv = i.uv;
+        uv += 0.5*_OffsetHalfPixelOn*_SourceTex_TexelSize.xy * isEdge;
         float4 col = SAMPLE_TEXTURE2D(_SourceTex,linear_clamp_sampler, uv);
         
         //1 apply grading lut
@@ -121,6 +131,7 @@ Shader "Hidden/Utils/CopyColor"
             #pragma shader_feature _APPLY_COLOR_GRADING
             #pragma shader_feature _CHANNEL_MIXER_ON
             #pragma shader_feature _COLOR_TINT_ON
+            #pragma shader_feature _LUMA_AA_ON
             ENDHLSL
         }
     }

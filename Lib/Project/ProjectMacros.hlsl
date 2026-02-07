@@ -25,3 +25,5 @@
 #define MAX_LOD 600
 #define MIDDLE_LOD 300
 #define LOW_LOD 100
+
+#include "../Macros.hlsl"
