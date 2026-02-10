@@ -16,6 +16,7 @@
 */
 float3 _DispatchGroupSize; // Dispatched groups
 float4 _NumThreads; // thread count in a box,(xSize,ySize,zSize,threads count)
+float4 _UpdateRect; //pixel position, {startX,startY,sizeX,sizeY)
 
 /**
     call ComputeShaderEx.Dispatchkernel
@@ -88,5 +89,17 @@ float2 GetUV(uint3 id,RWTexture2D<float4> tex,float4 texelSize){
         return id.xy/float2(width,height);
     #endif
     return id.xy * texelSize.zw;
+}
+/**
+    Apply _UpdateRect
+    DispatchThreadIndex
+*/
+uint3 ApplyRect(uint3 dpId){
+    dpId.xy += _UpdateRect.xy;
+    // wrap mode
+    // dpId %= _UpdateRect.zw;
+    // clamp mode
+    dpId.xy = clamp(dpId.xy,0,_UpdateRect + _UpdateRect.zw);
+    return dpId;
 }
 #endif //CS_LIB_HLSL

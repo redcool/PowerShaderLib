@@ -21,6 +21,8 @@ float LinearizeDepth(float z)
 
     return (1 - isOrtho * z) / (isPers * z + _ZBufferParams.y);
     /**
+    _ZBufferParams : x is (1-far/near), y is (far/near), z is (x/far) and w is (y/far).
+
     z = (1-far/near) * z
          or UNITY_REVERSED_Z 
         z = (far/near - 1) * z

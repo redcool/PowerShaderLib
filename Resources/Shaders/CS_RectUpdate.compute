@@ -1,0 +1,31 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSClear
+#pragma kernel CSMain
+
+#include "../../Lib/CSLib.hlsl"
+#pragma multi_compile _ DOUBLE_RT
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> _ResultTex;
+RWTexture2D<float4> _ResultTex1;
+
+[numthreads(8,8,1)]
+void CSClear (uint3 id : SV_DispatchThreadID)
+{
+    _ResultTex[id.xy] = 0;
+    #if defined(DOUBLE_RT)
+        _ResultTex1[id.xy] = 0;
+    #endif
+}
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    // _ResultTex[id.xy] = 1;//float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+    // TODO: insert actual code here!
+    uint3 rectId = ApplyRect(id);
+    rectId = uint3(id.xy + _UpdateRect.xy,id.z);
+
+    _ResultTex[rectId.xy] = float4(1,0,0,1);
+}
