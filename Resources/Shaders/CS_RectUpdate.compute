@@ -1,14 +1,24 @@
-// Each #kernel tells which function to compile; you can have many kernels
+﻿// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSClear
 #pragma kernel CSMain
 
 #include "../../Lib/CSLib.hlsl"
 #pragma multi_compile _ DOUBLE_RT
+#pragma multi_compile _ RESULT_BUFFER
 
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 RWTexture2D<float4> _ResultTex;
 RWTexture2D<float4> _ResultTex1;
+float4 _ResultTex_TexelSize;
+
+float4 _Color;
+TEXTURE2D(_SourceTex);SAMPLER(sampler_SourceTex);
+float4 _SourceTex_TexelSize;
+
+#if defined(RESULT_BUFFER)
+RWStructuredBuffer<float4> _ResultBuffer;
+#endif
 
 [numthreads(8,8,1)]
 void CSClear (uint3 id : SV_DispatchThreadID)
@@ -22,10 +32,15 @@ void CSClear (uint3 id : SV_DispatchThreadID)
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    // _ResultTex[id.xy] = 1;//float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
-    // TODO: insert actual code here!
     uint3 rectId = ApplyRect(id);
-    rectId = uint3(id.xy + _UpdateRect.xy,id.z);
-
-    _ResultTex[rectId.xy] = float4(1,0,0,1);
+    
+    #if defined(RESULT_BUFFER)
+        float2 uv = GetUV(rectId,_SourceTex,_SourceTex_TexelSize);
+        uint index = GetDispatchThreadIndex(id);
+        _ResultBuffer[index] = SAMPLE_TEXTURE2D_LOD(_SourceTex,sampler_SourceTex,uv,0);
+        _ResultBuffer[index] = index;
+    #else
+        float2 uv = GetUV(rectId,_ResultTex,_ResultTex_TexelSize);
+        _ResultTex[rectId.xy] = SAMPLE_TEXTURE2D_LOD(_SourceTex,sampler_SourceTex,uv,0);
+    #endif
 }

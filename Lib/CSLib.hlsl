@@ -1,6 +1,8 @@
 #if !defined(CS_LIB_HLSL)
 #define CS_LIB_HLSL
+
 #include "./UnityLib.hlsl"
+
 #if ! defined(POINT_LINEAR_SAMPLER)
     SamplerState sampler_point_clamp,sampler_linear_clamp;
 #endif
@@ -31,10 +33,13 @@ float4 _UpdateRect; //pixel position, {startX,startY,sizeX,sizeY)
     formula:
         index = z * width*height+y*width+x
 */
-uint GetDispatchThreadIndex(uint3 groupId/*SV_GroupID*/,uint3 dispatchThreadId/*SV_DispatchThreadID*/){
+uint GetDispatchThreadIndex(uint3 dispatchThreadId/*SV_DispatchThreadID*/){
     uint3 groupSize = (uint3)_DispatchGroupSize;
     uint3 groupThreadSize = (uint3)_NumThreads.xyz * groupSize;
     return dispatchThreadId.x + dispatchThreadId.y * groupThreadSize.x + dispatchThreadId.z * groupThreadSize.x * groupThreadSize.y;
+}
+uint GetDispatchThreadIndex(uint3 groupId/*SV_GroupID*/,uint3 dispatchThreadId/*SV_DispatchThreadID*/){
+    return GetDispatchThreadIndex(dispatchThreadId);
 }
 /**
     dp thread index to id(1d -> 3d)
