@@ -151,9 +151,30 @@ float4x4 inverse(float4x4 m) {
 
     return ret;
 }
-
+/**
+    NormalConstruct for (TangentSpace,ViewSpace)
+    no WorldSpace normal
+*/
 float3 ConstructVector(float2 xy){
-    return float3(xy,sqrt(1 - dot(xy,xy)));
+    return float3(xy,sqrt(saturate(1 - dot(xy,xy))));
+}
+
+/** 
+    NormalConstruct for WorldSpace(八面体法线压缩)
+*/
+float2 EncodeNormalOct(float3 n){
+    n.xy /= dot(abs(n),1);
+    n.xy = (n.z>0)?n.xy : (1 - abs(n.yx)) * sign(n.xy);
+    return n.yx *0.5+0.5;
+}
+
+float3 DecodeNormalOct(float2 f){
+    f = f*2-1;
+    float2 absF = abs(f);
+    float3 n = float3(f.xy,1-absF.x-absF.y);
+    float t = saturate(-n.z);
+    n.xy += (n.xy>=0) ? -t : t;
+    return normalize(n);
 }
 
 /**
@@ -167,6 +188,19 @@ void SetMatrixColumn(inout float4x4 m,int col,float4 xyzw){
 }
 
 float GetLuma(float3 c){
-    return dot(float3(0.21,0.71,0.8),c);
+    return dot(half3(0.21,0.71,0.08),c);
 }
+
+/**
+    revert lerp
+
+    v : value in range
+    return : new value in newRange
+*/
+float Remap(float v, float2 range=float2(0,1),float2 newRange=float2(0,1)){
+    float rate = (v-range.x)/(range.y-range.x);
+    return rate * (newRange.y-newRange.x) + newRange.x;
+}
+
+
 #endif //MATH_LIB_HLSL
