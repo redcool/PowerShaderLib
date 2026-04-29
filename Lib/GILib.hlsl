@@ -40,6 +40,17 @@
     #define LIGHTMAP_HDR_EXPONENT float(1.0)
 #endif
 
+//--- custom ibl
+#if defined(_IBL_ON)
+    #define IBL_CUBE _IBLCube
+    #define IBL_CUBE_SAMPLER sampler_IBLCube
+    #define IBL_HDR _IBLCube_HDR    
+#else
+    #define IBL_CUBE unity_SpecCube0
+    #define IBL_CUBE_SAMPLER samplerunity_SpecCube0
+    #define IBL_HDR unity_SpecCube0_HDR
+#endif
+
 
 float3 UnpackLightmapRGBM(float4 rgbmInput, float4 decodeInstructions)
 {

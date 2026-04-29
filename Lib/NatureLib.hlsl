@@ -83,7 +83,7 @@ inline float4 AnimateVertex(float4 pos, float3 normal, float4 animParams,float4 
     float fBranchAmp = 0.3f;
 
     // Phases (object, vertex, branch)
-    float fObjPhase = dot(unity_ObjectToWorld._14_24_34, 1);
+    float fObjPhase = dot(UNITY_MATRIX_M._14_24_34, 1);
     float fBranchPhase = fObjPhase + animParams.x;
 
     float fVtxPhase = dot(pos.xyz, animParams.y + fBranchPhase);
