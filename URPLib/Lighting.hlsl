@@ -81,7 +81,22 @@ float3 CalcAdditionalLights(
     }
     return c;
 }
-
+/**
+    Get light info from Box(mesh), use in BoxLighting
+*/
+void CalcLightInfo(half lightType/*0: dir,1: point,2: spot*/, float2 spotLightAngle,
+    out bool isPoint/**/,
+    out bool isSpot/**/,
+    out float3 lightDir/*Box mesh objectToWorld matrix 's z-axis*/,
+    out float4 lightPos/*dir : (lightDir,0), others: (objectToWorld._14_24_34,IsPoint)*/,
+    out float2 spotLightAngleCos/*outer,inner angle cos*/
+    ){
+    isPoint = lightType >=1;
+    isSpot= lightType >= 2;
+    spotLightAngleCos = CalcSpotLightAngleAtten(spotLightAngle);
+    lightDir = - normalize(unity_ObjectToWorld._13_23_33);
+    lightPos = float4(isPoint ? unity_ObjectToWorld._14_24_34 : lightDir,isPoint);
+}
 
 /**
     Get Light for(dir,spot,point)
